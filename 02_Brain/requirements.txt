@@ -1,0 +1,14 @@
+# FlashEASuite V2 - Program B (The Brain)
+# Python Dependencies
+
+# Core dependencies
+pyzmq>=25.1.0          # ZeroMQ Python bindings for high-performance messaging
+msgpack>=1.0.5         # MessagePack serialization (binary, compact)
+
+# Future dependencies (for AI components)
+# numpy>=1.24.0
+# pandas>=2.0.0
+# scikit-learn>=1.3.0
+# tensorflow>=2.13.0
+# fastapi>=0.100.0
+# uvicorn>=0.23.0

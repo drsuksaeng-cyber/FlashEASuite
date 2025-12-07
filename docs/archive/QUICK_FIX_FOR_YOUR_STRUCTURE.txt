@@ -1,0 +1,178 @@
+╔══════════════════════════════════════════════════════════════════╗
+║           SETUP FOR YOUR DIRECTORY STRUCTURE                      ║
+║                     Quick Fix Guide                               ║
+╚══════════════════════════════════════════════════════════════════╝
+
+I can see your current structure:
+FlashEASuite_V2/03_ProgramC_Trader_MQL/Network/
+
+══════════════════════════════════════════════════════════════════
+ STEP-BY-STEP FIX (5 minutes)
+══════════════════════════════════════════════════════════════════
+
+✓ STEP 1: Files are already in place
+  Your Network folder is at:
+  FlashEASuite_V2/03_ProgramC_Trader_MQL/Network/
+  ├── Protocol.mqh
+  └── ZmqHub.mqh
+
+✓ STEP 2: Copy the EA file
+  Place TestNetworkingLayer.mq5 at:
+  FlashEASuite_V2/03_ProgramC_Trader_MQL/TestNetworkingLayer.mq5
+  
+  (Same level as Network folder)
+
+✓ STEP 3: Verify structure
+  Your final structure should be:
+  
+  FlashEASuite_V2/
+  └── 03_ProgramC_Trader_MQL/
+      ├── TestNetworkingLayer.mq5    ← EA here
+      └── Network/
+          ├── Protocol.mqh
+          └── ZmqHub.mqh
+
+✓ STEP 4: Check prerequisites
+
+  A) Verify Zmq library exists:
+     Open MetaEditor → File → Open Data Folder
+     Navigate to: MQL5/Include/Zmq/
+     Confirm Zmq.mqh exists
+     
+     If missing:
+     - Install from: https://github.com/dingmaotu/mql-zmq
+     - Or MetaEditor Market: Search "ZeroMQ"
+
+  B) Verify libzmq.dll exists:
+     In same Data Folder:
+     Navigate to: MQL5/Library/
+     Confirm libzmq.dll exists
+     
+     If missing:
+     - Download from: https://github.com/zeromq/libzmq/releases
+     - Get Windows x64 version
+     - Rename to libzmq.dll
+     - Place in MQL5/Library/
+
+✓ STEP 5: Compile
+  
+  Option A: Compile EA directly
+  1. Open MetaEditor
+  2. File → Open → Navigate to your TestNetworkingLayer.mq5
+  3. Press F7 (Compile)
+  4. Expected: 0 errors, 0-5 warnings
+  
+  Option B: Copy to MT5 Experts folder first
+  1. Copy entire "03_ProgramC_Trader_MQL" folder to:
+     [MetaTrader5]/MQL5/Experts/FlashEASuite_V2/03_ProgramC_Trader_MQL/
+  2. Open MetaEditor
+  3. Navigate to Experts/FlashEASuite_V2/03_ProgramC_Trader_MQL/
+  4. Open TestNetworkingLayer.mq5
+  5. Press F7 (Compile)
+
+══════════════════════════════════════════════════════════════════
+ EXPECTED COMPILATION RESULT
+══════════════════════════════════════════════════════════════════
+
+✅ SUCCESS:
+   0 error(s), 0 warning(s)
+   TestNetworkingLayer.ex5 generated
+
+⚠️ ACCEPTABLE:
+   0 error(s), 2-5 warning(s)
+   Warnings about type conversion are OK
+   TestNetworkingLayer.ex5 generated
+
+❌ FAILURE:
+   100 error(s)
+   → Files not found
+   → Check structure again
+
+══════════════════════════════════════════════════════════════════
+ THE KEY DIFFERENCE
+══════════════════════════════════════════════════════════════════
+
+Your previous errors were because:
+
+❌ OLD (Wrong):
+   Include path in EA: #include <Network/ZmqHub.mqh>
+   This looks in: MQL5/Include/Network/
+   But your files are in: 03_ProgramC_Trader_MQL/Network/
+
+✅ NEW (Correct):
+   Include path in EA: #include "Network/ZmqHub.mqh"
+   This looks in: Same directory as EA / Network/
+   Which matches your structure!
+
+Key difference:
+- Angle brackets < > → Look in MQL5/Include/
+- Quotes " " → Look relative to current file
+
+══════════════════════════════════════════════════════════════════
+ TESTING
+══════════════════════════════════════════════════════════════════
+
+After successful compilation:
+
+1. Open MetaTrader 5
+2. Open any chart (e.g., EURUSD M1)
+3. Drag TestNetworkingLayer.ex5 onto the chart
+4. Check "Experts" tab in Terminal window
+
+Expected output:
+========================================
+FlashEASuite V2 - Network Layer Test
+========================================
+Connecting to Brain SUB endpoint: tcp://localhost:5556
+Connecting to Brain PUSH endpoint: tcp://localhost:5557
+Network Layer initialized successfully
+Waiting for messages from Brain...
+========================================
+
+Note: You'll see connection warnings because Python Brain isn't 
+running yet. This is NORMAL and expected!
+
+══════════════════════════════════════════════════════════════════
+ IF YOU STILL GET ERRORS
+══════════════════════════════════════════════════════════════════
+
+Error: "file 'Network/ZmqHub.mqh' not found"
+→ TestNetworkingLayer.mq5 is not in the same directory as Network/
+→ Move EA file to correct location
+
+Error: "file 'Zmq/Zmq.mqh' not found"
+→ MQL-ZMQ library not installed
+→ This is a separate library you must install first
+
+Error: "'CZmqContext' - undeclared identifier"
+→ Zmq.mqh exists but is incomplete
+→ Reinstall MQL-ZMQ library
+
+══════════════════════════════════════════════════════════════════
+ SUMMARY
+══════════════════════════════════════════════════════════════════
+
+What you have:
+✓ Network/Protocol.mqh
+✓ Network/ZmqHub.mqh
+
+What you need to do:
+1. Copy TestNetworkingLayer.mq5 (from this package)
+2. Place it at: 03_ProgramC_Trader_MQL/TestNetworkingLayer.mq5
+3. Ensure MQL-ZMQ library is installed
+4. Ensure libzmq.dll exists
+5. Compile with F7
+6. Should work!
+
+The EA uses: #include "Network/ZmqHub.mqh"
+This matches your directory structure perfectly!
+
+══════════════════════════════════════════════════════════════════
+
+Need help? Check if:
+[ ] TestNetworkingLayer.mq5 is in same folder as Network/
+[ ] MQL5/Include/Zmq/Zmq.mqh exists
+[ ] MQL5/Library/libzmq.dll exists
+[ ] Using the NEW TestNetworkingLayer.mq5 from this package
+
+Good luck!
