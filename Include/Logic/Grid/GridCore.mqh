@@ -41,13 +41,13 @@ public:
         }
       
       // Safety Check 2: Low Confidence
-      if(m_confidence_score < 0.3)
+      if(m_python_confidence < 0.3)
         {
          return 0.0;
         }
       
       // Safety Check 3: CSM Data Required
-      if(!m_csm_data_received || m_grid_direction == GRID_DIR_NONE)
+      if(!m_csm_data_received || m_current_direction == GRID_DIR_NONE)
         {
          return 0.0;
         }
@@ -134,23 +134,23 @@ private:
       if(CopyBuffer(m_atr_handle, 0, 0, 1, atr_buffer) <= 0)
         {
          Print("[Grid] ERROR: Failed to copy ATR buffer!");
-         m_current_atr = m_atr_reference; // Use reference value
-         m_elastic_step = m_base_step_points;
+         m_atr_current = m_atr_reference; // Use reference value
+         m_current_elastic_step = m_base_step_points;
          return;
         }
       
-      m_current_atr = atr_buffer[0] / _Point; // Convert to points
+      m_atr_current = atr_buffer[0] / _Point; // Convert to points
       
       // Calculate elastic step: Base step * (Current ATR / Reference ATR)
-      double atr_ratio = m_current_atr / m_atr_reference;
-      m_elastic_step = m_base_step_points * atr_ratio;
+      double atr_ratio = m_atr_current / m_atr_reference;
+      m_current_elastic_step = m_base_step_points * atr_ratio;
       
       // Safety: Limit elastic step to prevent too wide/narrow grids
       double min_step = m_base_step_points * 0.5;  // Min 50% of base
       double max_step = m_base_step_points * 2.0;  // Max 200% of base
       
-      if(m_elastic_step < min_step) m_elastic_step = min_step;
-      if(m_elastic_step > max_step) m_elastic_step = max_step;
+      if(m_current_elastic_step < min_step) m_current_elastic_step = min_step;
+      if(m_current_elastic_step > max_step) m_current_elastic_step = max_step;
      }
    
    //+------------------------------------------------------------------+
@@ -162,10 +162,10 @@ private:
       double score = 1.0;
       
       // Adjust by confidence (0.3 - 1.0)
-      score *= m_confidence_score;
+      score *= m_python_confidence;
       
       // Adjust by risk multiplier (0.5 - 1.5)
-      score *= m_risk_multiplier;
+      score *= m_python_risk_multiplier;
       
       // Higher score for first grid level
       if(m_active_grid_count == 0)

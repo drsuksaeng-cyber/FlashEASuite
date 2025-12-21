@@ -6,7 +6,6 @@
 #property strict
 
 #include <Trade/Trade.mqh>
-#include "../StrategyBase.mqh"
 
 //+------------------------------------------------------------------+
 //| Enumerations                                                      |
@@ -71,14 +70,9 @@ struct PolicyUpdate
 //+------------------------------------------------------------------+
 //| Base Configuration Class                                          |
 //+------------------------------------------------------------------+
-class CGridConfig : public CStrategyBase
+class CGridConfig
 {
 protected:
-    // --- StrategyBase Interface Members ---
-    string            m_strategy_name;
-    bool              m_strategy_active;
-    double            m_strategy_weight;
-    
     // --- Trading Instruments ---
     CTrade            m_trade;
     
@@ -138,20 +132,6 @@ protected:
     double            m_python_confidence;
     bool              m_python_connected;
     
-    // --- Currency Strength Meter (CSM) ---
-    double            m_csm_usd;
-    double            m_csm_eur;
-    double            m_csm_gbp;
-    double            m_csm_jpy;
-    bool              m_csm_data_received;
-    
-    // --- Policy Data (from Python) ---
-    bool              m_is_in_cooldown;
-    
-    // --- TP/SL in Points ---
-    double            m_tp_points;
-    double            m_sl_points;
-    
 protected:
     // Made protected so derived classes can access
     
@@ -159,13 +139,8 @@ public:
     //+------------------------------------------------------------------+
     //| Constructor                                                      |
     //+------------------------------------------------------------------+
-    CGridConfig() : CStrategyBase()
+    CGridConfig()
     {
-        // Initialize StrategyBase members
-        m_strategy_name = "GridStrategy";
-        m_strategy_active = true;
-        m_strategy_weight = 1.0;
-        
         // Default Parameters
         m_max_grid_levels = 5;
         m_base_step_points = 200.0;        // 20 pips for XAUUSD
@@ -185,7 +160,7 @@ public:
         
         // Exit
         m_profit_target_mult = 1.5;
-        m_trailing_threshold = 0.7;
+        m_trailing_threshold = 0.5;  // Changed from 0.7 - Allow 50% retracement instead of 30%
         m_max_duration_hours = 72;
         
         // Risk Limits
@@ -209,20 +184,6 @@ public:
         m_python_risk_multiplier = 1.0;
         m_python_confidence = 0.5;
         m_python_connected = false;
-        
-        // CSM (Currency Strength Meter)
-        m_csm_usd = 0.0;
-        m_csm_eur = 0.0;
-        m_csm_gbp = 0.0;
-        m_csm_jpy = 0.0;
-        m_csm_data_received = false;
-        
-        // Policy Data
-        m_is_in_cooldown = false;
-        
-        // TP/SL Points
-        m_tp_points = 0.0;
-        m_sl_points = 0.0;
         
         // Initialize grid orders array
         for(int i = 0; i < 10; i++)
@@ -394,39 +355,6 @@ public:
                           _Symbol,
                           TimeToString(TimeCurrent(), TIME_DATE),
                           GetTickCount());
-    }
-    
-    //+------------------------------------------------------------------+
-    //| StrategyBase Interface Implementation                            |
-    //+------------------------------------------------------------------+
-    virtual double GetScore()
-    {
-        return 0.0;  // Override in GridCore
-    }
-    
-    virtual string GetName()
-    {
-        return m_strategy_name;
-    }
-    
-    virtual bool IsActive()
-    {
-        return m_strategy_active;
-    }
-    
-    virtual double GetWeight()
-    {
-        return m_strategy_weight;
-    }
-    
-    void Activate() 
-    { 
-        m_strategy_active = true; 
-    }
-    
-    void Deactivate() 
-    { 
-        m_strategy_active = false; 
     }
 };
 //+------------------------------------------------------------------+

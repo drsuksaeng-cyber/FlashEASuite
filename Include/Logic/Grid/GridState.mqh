@@ -69,15 +69,15 @@ protected:
       
       if(strength_diff > 0.1)
         {
-         m_grid_direction = GRID_DIR_SELL;  // USD strong -> SELL EURUSD
+         m_current_direction = GRID_DIR_SELL;  // USD strong -> SELL EURUSD
         }
       else if(strength_diff < -0.1)
         {
-         m_grid_direction = GRID_DIR_BUY;   // EUR strong -> BUY EURUSD
+         m_current_direction = GRID_DIR_BUY;   // EUR strong -> BUY EURUSD
         }
       else
         {
-         m_grid_direction = GRID_DIR_NONE;  // Neutral - no grid
+         m_current_direction = GRID_DIR_NONE;  // Neutral - no grid
         }
      }
    
@@ -87,22 +87,22 @@ protected:
    bool ShouldOpenNewGridLevel()
      {
       // Safety: Max grid levels reached
-      if(m_active_grid_count >= m_grid_max_orders)
+      if(m_active_grid_count >= m_max_grid_levels)
          return false;
       
       // Safety: No grid direction set
-      if(m_grid_direction == GRID_DIR_NONE)
+      if(m_current_direction == GRID_DIR_NONE)
          return false;
       
       // Safety: No elastic step calculated
-      if(m_elastic_step <= 0.0)
+      if(m_current_elastic_step <= 0.0)
          return false;
       
       // Get current price
       MqlTick tick;
       if(!SymbolInfoTick(_Symbol, tick)) return false;
       
-      double current_price = (m_grid_direction == GRID_DIR_BUY) ? tick.ask : tick.bid;
+      double current_price = (m_current_direction == GRID_DIR_BUY) ? tick.ask : tick.bid;
       
       // First grid level (no previous grid)
       if(m_active_grid_count == 0)
@@ -115,7 +115,7 @@ protected:
       double price_diff_points = price_diff / _Point;
       
       // Trigger new grid if price moved >= elastic step
-      if(price_diff_points >= m_elastic_step)
+      if(price_diff_points >= m_current_elastic_step)
         {
          return true;
         }
@@ -130,14 +130,18 @@ protected:
      {
       double lot = m_base_lot;
       
-      // Apply lot multiplier for each level
-      for(int i = 0; i < level; i++)
+      // Apply lot progression for this level
+      if(level < 5)
         {
-         lot *= m_lot_multiplier;
+         lot *= m_lot_progression[level];
+        }
+      else
+        {
+         lot *= m_lot_progression[4]; // Use last multiplier for higher levels
         }
       
       // Apply risk multiplier from Python policy
-      lot *= m_risk_multiplier;
+      lot *= m_python_risk_multiplier;
       
       // Normalize to broker's lot step
       double lot_step = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP);
