@@ -5,11 +5,8 @@
 //+------------------------------------------------------------------+
 #property strict
 
-//+------------------------------------------------------------------+
-//| Market State Enum - Use from GridConfig.mqh                     |
-//+------------------------------------------------------------------+
 // ENUM_MARKET_STATE is defined in GridConfig.mqh
-// Do not redefine here to avoid conflicts
+// This file assumes GridConfig.mqh is included before this file
 
 //+------------------------------------------------------------------+
 //| Market Analysis Structure                                        |
@@ -101,43 +98,43 @@ public:
         double adx_value = GetADXValue();
         double ma_distance = GetMADistance();
         
-        if(adx_value > m_trend_threshold)
-        {
-            // Trending market
-            if(ma_distance > 0)
-            {
-                condition.state = MARKET_STATE_TRENDING_UP;
-                condition.trend_strength = MathMin(adx_value / 50.0, 1.0);
-            }
-            else
-            {
-                condition.state = MARKET_STATE_TRENDING_DOWN;
-                condition.trend_strength = MathMin(adx_value / 50.0, 1.0);
-            }
-        }
-        else
-        {
-            // Ranging market
-            condition.state = MARKET_STATE_RANGING;
-            condition.trend_strength = 0.0;
-        }
-        
         // 3. Check volatility
         double atr_ratio = GetATRRatio();
         condition.volatility = atr_ratio;
         
-        if(atr_ratio > m_volatile_threshold)
+        // Determine market state based on ADX and ATR
+        if(adx_value < 20.0)
         {
-            condition.state = MARKET_STATE_VOLATILE;
-            condition.is_tradeable = false;
-            condition.reason = "Too volatile";
+            // Ranging market
+            if(atr_ratio > m_volatile_threshold)
+            {
+                condition.state = MARKET_STATE_RANGING_HIGH_VOL;
+                condition.is_tradeable = false;
+                condition.reason = "High volatility ranging";
+            }
+            else
+            {
+                condition.state = MARKET_STATE_RANGING_NORMAL;
+                condition.is_tradeable = true;
+                condition.reason = "Ideal ranging market";
+            }
+            condition.trend_strength = 0.0;
         }
-        
-        // 4. Grid works best in ranging markets
-        if(condition.state == MARKET_STATE_RANGING)
+        else if(adx_value < 30.0)
         {
+            // Weak trend - OK for grid
+            condition.state = MARKET_STATE_TRENDING_WEAK;
+            condition.trend_strength = adx_value / 30.0;
             condition.is_tradeable = true;
-            condition.reason = "Ideal ranging market";
+            condition.reason = "Weak trend - acceptable";
+        }
+        else
+        {
+            // Strong trend - avoid grid
+            condition.state = MARKET_STATE_TRENDING_STRONG;
+            condition.trend_strength = MathMin(adx_value / 50.0, 1.0);
+            condition.is_tradeable = false;
+            condition.reason = "Strong trend - avoid grid";
         }
         
         return condition;
@@ -150,12 +147,12 @@ public:
     {
         MarketCondition condition = AnalyzeMarket();
         
-        // Grid works best in ranging markets
-        if(condition.state == MARKET_STATE_RANGING && condition.is_tradeable)
+        // Grid works best in ranging normal markets
+        if(condition.state == MARKET_STATE_RANGING_NORMAL && condition.is_tradeable)
             return true;
             
         // Can also work in weak trends
-        if(condition.trend_strength < 0.5 && condition.is_tradeable)
+        if(condition.state == MARKET_STATE_TRENDING_WEAK && condition.is_tradeable)
             return true;
             
         return false;

@@ -1,0 +1,218 @@
+# ⚡ เริ่มต้นที่นี่! - FlashEASuite V2 Restructure
+
+**Version:** 2.1 (Clean Structure)
+**Date:** December 24, 2025
+
+================================================================
+  คำแนะนำการใช้งาน (3 ขั้นตอนง่าย ๆ)
+================================================================
+
+## 📦 ขั้นตอนที่ 1: แตก ZIP
+
+1. คุณได้ไฟล์: FlashEASuite_V2_Restructure.zip
+
+2. แตกไฟล์ใน FlashEASuite_V2\ (โฟลเดอร์ปัจจุบัน)
+   
+   หรือ
+   
+   แตกข้างนอก แล้ว copy โฟลเดอร์ Restructure_Package 
+   เข้าไปใน FlashEASuite_V2\
+
+ผลลัพธ์:
+```
+FlashEASuite_V2\
+├── Restructure_Package\    ← ต้องมีโฟลเดอร์นี้
+│   ├── RESTRUCTURE.bat
+│   ├── Include\
+│   ├── Tester\
+│   └── ...
+├── Include\               ← ของเดิม
+├── 01_Feeder\            ← ของเดิม
+└── ...
+```
+
+================================================================
+
+## 🚀 ขั้นตอนที่ 2: Run RESTRUCTURE.bat
+
+1. ไปที่โฟลเดอร์ FlashEASuite_V2\
+
+2. Double-click: RESTRUCTURE.bat
+
+   หรือ
+
+   CMD: cd FlashEASuite_V2
+        RESTRUCTURE.bat
+
+3. รอให้ script ทำงาน (~10 วินาที)
+
+================================================================
+
+## ✅ ขั้นตอนที่ 3: Verify
+
+1. ตรวจสอบว่ามีโฟลเดอร์ Tester\ แล้ว
+
+2. ตรวจสอบว่าไฟล์ test ย้ายไปใน Tester\ แล้ว
+
+3. ตรวจสอบว่า .zip files ถูกลบแล้ว
+
+4. อ่านไฟล์ RESTRUCTURE_LOG.txt
+
+================================================================
+
+## 🎯 สิ่งที่ Script จะทำ:
+
+1. สร้างโฟลเดอร์ Tester\
+
+2. ย้าย test files → Tester\
+   - test_position_sizing.mq5
+   - test_daily_loss_limit.mq5
+   - test_integration_day1.mq5
+
+3. Copy ไฟล์ Day 1 ที่แก้แล้ว (ทับของเดิม)
+   - Include\Risk\*.mqh
+   - Tester\*.mq5
+   - 02_Brain\core\risk_management\*.py
+
+4. ลบ .zip files ทั้งหมด
+
+5. ลบ .bat files ซ้ำซ้อน (v2, v3, FIXED)
+
+6. Copy เอกสารใหม่
+   - README.md
+   - CHANGELOG.md
+   - PROJECT_STRUCTURE.md
+   - .gitignore
+   - Tester\README.md
+
+7. สร้าง log file: RESTRUCTURE_LOG.txt
+
+================================================================
+
+## 🧪 ทดสอบหลังจาก Restructure:
+
+1. เปิด MetaEditor (F4)
+
+2. Open: FlashEASuite_V2\Tester\test_integration_day1.mq5
+
+3. กด F7 (Compile)
+
+   Expected: "0 error(s), 0 warning(s)" ✅
+
+4. ลาก test_integration_day1 ไปวางบน chart
+
+5. ดูผล:
+   Total Tests: 6
+   ✅ Passed: 6
+   ❌ Failed: 0
+   Success Rate: 100.0%
+
+================================================================
+
+## 📁 โครงสร้างหลัง Restructure:
+
+```
+FlashEASuite_V2\
+├── Tester\                  ← ใหม่!
+│   ├── test_*.mq5
+│   └── README.md
+│
+├── Include\
+│   └── Risk\               ← อัปเดตแล้ว
+│       ├── PositionSizingManager.mqh
+│       ├── DailyLossLimit.mqh
+│       └── RiskGuardian.mqh
+│
+├── 02_Brain\
+│   └── core\
+│       └── risk_management\  ← อัปเดตแล้ว
+│           ├── __init__.py
+│           ├── position_sizing.py
+│           └── daily_loss_limit.py
+│
+├── docs\                   ← อัปเดตแล้ว
+│
+├── .gitignore             ← ใหม่!
+├── README.md              ← อัปเดตแล้ว
+├── CHANGELOG.md           ← ใหม่!
+├── PROJECT_STRUCTURE.md   ← ใหม่!
+└── RESTRUCTURE_LOG.txt    ← สร้างโดย script
+```
+
+================================================================
+
+## 🐛 Troubleshooting:
+
+### ปัญหา: "Please run this script from FlashEASuite_V2 root directory"
+
+สาเหตุ: รัน script ไม่ใช่ที่ root directory
+
+แก้ไข:
+- ต้อง cd ไปที่ FlashEASuite_V2\ ก่อน
+- ต้องมีโฟลเดอร์ Include\ ใน directory เดียวกัน
+
+---
+
+### ปัญหา: ไม่มีโฟลเดอร์ Restructure_Package\
+
+สาเหตุ: แตก ZIP ผิดที่
+
+แก้ไข:
+- แตก ZIP ใน FlashEASuite_V2\
+- หรือ copy Restructure_Package\ เข้าไปใน FlashEASuite_V2\
+
+---
+
+### ปัญหา: Test ไม่ compile
+
+สาเหตุ: ไฟล์ไม่ครบ
+
+แก้ไข:
+- ตรวจสอบ Include\Risk\*.mqh มีครบ 3 files
+- ตรวจสอบ Tester\*.mq5 มีครบ 3 files
+
+================================================================
+
+## 📚 อ่านต่อ:
+
+- README.md                  → ภาพรวมระบบ
+- Tester\README.md           → วิธีการทดสอบ
+- CHANGELOG.md               → การเปลี่ยนแปลง
+- PROJECT_STRUCTURE.md       → โครงสร้างโปรเจค
+- docs\installation\QUICK_START.md  → เริ่มต้นใช้งาน
+
+================================================================
+
+## ✅ Success Criteria:
+
+เมื่อเสร็จแล้วจะได้:
+
+☑ โฟลเดอร์ Tester\ ถูกสร้าง
+☑ Test files อยู่ใน Tester\
+☑ Day 1 files อัปเดตแล้ว
+☑ .zip files ถูกลบ
+☑ เอกสารใหม่ครบถ้วน
+☑ RESTRUCTURE_LOG.txt ถูกสร้าง
+☑ Test ผ่าน 100%
+
+================================================================
+
+## 🎉 เสร็จแล้ว!
+
+หลังจาก restructure:
+
+1. โครงสร้างเป็นระเบียบ
+2. Test files รวมอยู่ที่เดียว
+3. เอกสารครบถ้วน
+4. พร้อม Git
+5. พร้อมใช้งาน!
+
+================================================================
+
+**Questions?** → อ่าน README.md
+
+**Problems?** → อ่าน RESTRUCTURE_LOG.txt
+
+**Success!** → Run tests และเริ่มเทรด! 🚀
+
+================================================================

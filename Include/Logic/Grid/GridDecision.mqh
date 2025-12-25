@@ -5,11 +5,8 @@
 //+------------------------------------------------------------------+
 #property strict
 
-//+------------------------------------------------------------------+
-//| Grid Direction Enum - Use from GridConfig.mqh                   |
-//+------------------------------------------------------------------+
 // ENUM_GRID_DIRECTION is defined in GridConfig.mqh
-// Do not redefine here to avoid conflicts
+// This file assumes GridConfig.mqh is included before this file
 
 #include "MarketAnalysis.mqh"
 
@@ -246,28 +243,36 @@ public:
             
         MarketCondition condition = m_market_analysis.AnalyzeMarket();
         
-        // In trending market: Reduce confidence
-        if(condition.state == MARKET_STATE_TRENDING_UP || 
-           condition.state == MARKET_STATE_TRENDING_DOWN)
+        // In strong trending market: Don't trade
+        if(condition.state == MARKET_STATE_TRENDING_STRONG)
+        {
+            result.should_open = false;
+            result.reason = "Strong trend - avoid grid";
+            return;
+        }
+        
+        // In weak trending market: Reduce confidence
+        if(condition.state == MARKET_STATE_TRENDING_WEAK)
         {
             result.confidence *= 0.7; // Reduce by 30%
             
             if(result.confidence < m_min_confidence)
             {
                 result.should_open = false;
-                result.reason = "Trending market - confidence reduced";
+                result.reason = "Weak trend - confidence reduced";
             }
         }
         
-        // In volatile market: Don't trade
-        if(condition.state == MARKET_STATE_VOLATILE)
+        // In high volatility ranging: Don't trade
+        if(condition.state == MARKET_STATE_RANGING_HIGH_VOL)
         {
             result.should_open = false;
-            result.reason = "Market too volatile";
+            result.reason = "High volatility - avoid grid";
+            return;
         }
         
-        // In ranging market: Boost confidence
-        if(condition.state == MARKET_STATE_RANGING)
+        // In normal ranging market: Boost confidence
+        if(condition.state == MARKET_STATE_RANGING_NORMAL)
         {
             result.confidence *= 1.2; // Boost by 20%
             if(result.confidence > 1.0) result.confidence = 1.0;

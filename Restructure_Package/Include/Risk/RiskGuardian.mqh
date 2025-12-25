@@ -8,8 +8,8 @@
 #property version   "2.10"
 #property strict
 
-#include "PositionSizingManager.mqh"
-#include "DailyLossLimit.mqh"
+#include <Risk/PositionSizingManager.mqh>
+#include <Risk/DailyLossLimit.mqh>
 
 //+------------------------------------------------------------------+
 //| Risk Guardian - Central Risk Management                          |

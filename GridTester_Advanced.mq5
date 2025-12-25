@@ -69,7 +69,8 @@ int OnInit()
         return INIT_FAILED;
     }
     
-    g_Grid.Activate();
+    // Grid is automatically active after creation
+    // No need to call Activate() - it's private
     Print("✅ Grid Strategy initialized");
     
     // Initialize enhancement modules if enabled
