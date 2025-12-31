@@ -29,7 +29,7 @@ protected:
          if(ticket == 0) continue;
          
          // Check if position belongs to this symbol and magic
-         if(PositionGetString(POSITION_SYMBOL) != _Symbol) continue;
+         if(PositionGetString(POSITION_SYMBOL) != GetSymbol()) continue;
          if(PositionGetInteger(POSITION_MAGIC) != 999000) continue;
          
          // Check comment to identify grid level
@@ -100,7 +100,7 @@ protected:
       
       // Get current price
       MqlTick tick;
-      if(!SymbolInfoTick(_Symbol, tick)) return false;
+      if(!SymbolInfoTick(GetSymbol(), tick)) return false;
       
       double current_price = (m_current_direction == GRID_DIR_BUY) ? tick.ask : tick.bid;
       
@@ -144,12 +144,12 @@ protected:
       lot *= m_python_risk_multiplier;
       
       // Normalize to broker's lot step
-      double lot_step = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP);
+      double lot_step = SymbolInfoDouble(GetSymbol(), SYMBOL_VOLUME_STEP);
       lot = MathFloor(lot / lot_step) * lot_step;
       
       // Safety: Check min/max lot
-      double min_lot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
-      double max_lot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX);
+      double min_lot = SymbolInfoDouble(GetSymbol(), SYMBOL_VOLUME_MIN);
+      double max_lot = SymbolInfoDouble(GetSymbol(), SYMBOL_VOLUME_MAX);
       
       if(lot < min_lot) lot = min_lot;
       if(lot > max_lot) lot = max_lot;

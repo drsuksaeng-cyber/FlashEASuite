@@ -123,20 +123,5 @@ public:
            }
         }
      }
-   
-   //+------------------------------------------------------------------+
-   //| Get Grid Strategy Instance (NEW - for Policy updates)           |
-   //+------------------------------------------------------------------+
-   CStrategyGrid* GetGridStrategy()
-     {
-      for(int i=0; i<ArraySize(m_strategies); i++)
-        {
-         if(m_strategies[i].GetName() == "ElasticGrid")
-           {
-            return dynamic_cast<CStrategyGrid*>(m_strategies[i]);
-           }
-        }
-      return NULL;  // Grid strategy not found
-     }
   };
 //+------------------------------------------------------------------+

@@ -186,12 +186,8 @@ class StrategyEngineThreaded(threading.Thread):
                 # Step 3: Publish Grid policy periodically
                 current_time = time.time()
                 if current_time - last_grid_policy_time >= GRID_POLICY_INTERVAL:
-                    from .policy import publish_grid_policy
-                    publish_grid_policy(
-                        'XAUUSD',
-                        self.pub_socket,
-                        self.feedback_processor
-                    )
+                    from .policy import publish_policy_custom
+                    publish_policy_custom('XAUUSD', self.pub_socket)
                     self.policy_count += 1
                     last_grid_policy_time = current_time
                 

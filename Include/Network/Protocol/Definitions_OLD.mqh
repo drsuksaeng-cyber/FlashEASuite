@@ -2,7 +2,6 @@
 //|                                           Protocol/Definitions.mqh |
 //|                                    FlashEASuite V2 - Program C   |
 //|                            Message Protocol - Type Definitions   |
-//|                                  EXTENDED FOR GRID STRATEGY V2   |
 //+------------------------------------------------------------------+
 #property copyright "Dr. Suksaeng Kukanok"
 #property link      "https://www.mql5.com"
@@ -17,16 +16,6 @@ enum ENUM_MESSAGE_TYPE
    MSG_TYPE_POLICY = 2,
    MSG_TYPE_HEARTBEAT = 3,
    MSG_TYPE_UNKNOWN = 0
-  };
-
-//+------------------------------------------------------------------+
-//| Grid Direction Enumeration (for CSM-based direction)            |
-//+------------------------------------------------------------------+
-enum ENUM_GRID_DIRECTION
-  {
-   GRID_DIR_NONE = 0,      // No grid direction (neutral CSM)
-   GRID_DIR_BUY = 1,       // Long grid (buy direction)
-   GRID_DIR_SELL = 2       // Short grid (sell direction)
   };
 
 //+------------------------------------------------------------------+
@@ -56,11 +45,10 @@ struct TickMessage
   };
 
 //+------------------------------------------------------------------+
-//| Policy Message Structure (AI Decision) - EXTENDED FOR GRID      |
+//| Policy Message Structure (AI Decision)                           |
 //+------------------------------------------------------------------+
 struct PolicyMessage
   {
-   // ===== ORIGINAL FIELDS =====
    string            symbol;           // Symbol name
    int               action;           // Action: 0=HOLD, 1=BUY, 2=SELL
    double            confidence;       // Confidence score (0.0-1.0)
@@ -71,30 +59,9 @@ struct PolicyMessage
    long              timestamp_ms;     // Policy generation timestamp
    string            model_version;    // AI model version identifier
    
-   // ===== EXTENDED FIELDS FOR GRID STRATEGY =====
-   
-   // Risk Management (from Python FeedbackProcessor)
-   double            risk_multiplier;  // Risk adjustment (0.5-1.5) based on performance
-   bool              is_in_cooldown;   // Trading pause flag (after consecutive losses)
-   
-   // Currency Strength Meter (CSM) Data
-   // Values typically range from -10 (very weak) to +10 (very strong)
-   double            csm_usd;          // USD strength
-   double            csm_eur;          // EUR strength
-   double            csm_gbp;          // GBP strength
-   double            csm_jpy;          // JPY strength
-   double            csm_aud;          // AUD strength (optional)
-   double            csm_cad;          // CAD strength (optional)
-   double            csm_chf;          // CHF strength (optional)
-   double            csm_nzd;          // NZD strength (optional)
-   
-   // Grid Strategy Control
-   int               grid_direction;   // 0=NONE, 1=BUY, 2=SELL (from CSM analysis)
-   
    // Constructor
    void PolicyMessage()
      {
-      // Original fields
       symbol = "";
       action = 0;
       confidence = 0.0;
@@ -104,22 +71,6 @@ struct PolicyMessage
       position_size = 0.0;
       timestamp_ms = 0;
       model_version = "";
-      
-      // Extended fields - Default values
-      risk_multiplier = 1.0;      // Default: No risk adjustment
-      is_in_cooldown = false;     // Default: Trading active
-      
-      // CSM data - Default: Neutral strength
-      csm_usd = 0.0;
-      csm_eur = 0.0;
-      csm_gbp = 0.0;
-      csm_jpy = 0.0;
-      csm_aud = 0.0;
-      csm_cad = 0.0;
-      csm_chf = 0.0;
-      csm_nzd = 0.0;
-      
-      grid_direction = 0;         // Default: No direction (GRID_DIR_NONE)
      }
   };
 
@@ -142,22 +93,4 @@ struct Heartbeat
       is_alive = true;
      }
   };
-
-//+------------------------------------------------------------------+
-//| CHANGE LOG                                                        |
-//+------------------------------------------------------------------+
-// Version 2.0 (2025-12-28):
-// - Added ENUM_GRID_DIRECTION enumeration
-// - Extended PolicyMessage with 11 new fields:
-//   1. risk_multiplier (double)
-//   2. is_in_cooldown (bool)
-//   3-10. csm_usd/eur/gbp/jpy/aud/cad/chf/nzd (8 doubles)
-//   11. grid_direction (int)
-// - Purpose: Enable Grid strategy to receive feedback-based risk
-//   adjustment and CSM-based direction from Python Brain
-//
-// Compatibility:
-// - Requires updated Serialization.mqh to handle new fields
-// - Requires Python policy.py to send extended data
-// - Message size increased from ~50 bytes to ~205 bytes
 //+------------------------------------------------------------------+

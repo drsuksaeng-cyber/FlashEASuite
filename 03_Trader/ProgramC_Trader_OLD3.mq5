@@ -16,14 +16,6 @@
 // Note: StrategyManager.mqh includes Strategy_Grid.mqh
 #include "../Include/Risk/RiskGuardian.mqh"
 // Note: RiskGuardian.mqh includes PositionSizingManager.mqh and DailyLossLimit.mqh
-#include "../Include/Utils/SymbolScanner.mqh"  // Multi-symbol scanner
-
-// ========== INPUT PARAMETERS ==========
-//+------------------------------------------------------------------+
-//| Symbol Formatting (Broker-specific)                              |
-//+------------------------------------------------------------------+
-input string   SYMBOL_PREFIX = "";           // Symbol Prefix (e.g., "f" for FXPro, empty for most)
-input string   SYMBOL_SUFFIX = "";           // Symbol Suffix (e.g., ".tp", "m", "_i", empty for ICMarkets)
 
 // ========== GLOBAL VARIABLES ==========
 // ZMQ Components
@@ -34,7 +26,6 @@ Socket  g_pub_socket(ZMQ_PUB);  // Send feedback to Python (port 7779)
 // Strategy & Risk Components
 CStrategyManager    g_council;
 CRiskGuardian       g_risk_guardian;
-CSymbolScanner      g_scanner;  // Multi-symbol scanner
 // Note: PositionSizingManager and DailyLossLimit are managed by RiskGuardian
 
 // Operational State
@@ -42,10 +33,6 @@ bool g_is_connected = false;
 int  g_policies_received = 0;
 int  g_trades_executed = 0;
 datetime g_last_policy_time = 0;
-
-// Scanner state
-datetime g_last_scan_time = 0;
-int      g_scan_interval = 300;  // Rescan every 5 minutes
 
 // DEBUG: Counters
 int  g_timer_calls = 0;
@@ -116,38 +103,10 @@ int OnInit()
    g_council.AddStrategy(grid);
    Print("✅ Grid Strategy added to Council");
    
-   // 6. Initialize Symbol Scanner
-   g_scanner.SetMaxSpreadPercent(0.15);  // Max 0.15% spread
-   g_scanner.SetMinVolatility(0.0001);   // Min ATR
-   g_scanner.SetForexOnly(true);         // Forex pairs only
-   g_scanner.SetMajorPairsOnly(false);   // All forex pairs
-   
-   Print("🔍 Scanning Market Watch for tradeable symbols...");
-   if(g_scanner.ScanMarketWatch())
-   {
-      Print("✅ Symbol Scanner initialized: ", g_scanner.GetSymbolCount(), " symbols found");
-      g_scanner.PrintScanResults();
-      g_last_scan_time = TimeCurrent();
-   }
-   else
-   {
-      Print("⚠️  No tradeable symbols found in Market Watch");
-   }
-   
-   // 7. Start Timer (check for policies every 100ms)
+   // 6. Start Timer (check for policies every 100ms)
    EventSetMillisecondTimer(100);
    
    g_is_connected = true;
-   
-   // Display Symbol Formatting Configuration
-   Print("╔════════════════════════════════════════════════╗");
-   Print("║  Symbol Formatting Configuration             ║");
-   Print("╚════════════════════════════════════════════════╝");
-   Print("📋 Symbol Formatting:");
-   Print("   Prefix: '", SYMBOL_PREFIX, "'", (SYMBOL_PREFIX == "" ? " (none)" : ""));
-   Print("   Suffix: '", SYMBOL_SUFFIX, "'", (SYMBOL_SUFFIX == "" ? " (none)" : ""));
-   Print("   Example: XAUUSD → ", FormatSymbol("XAUUSD"));
-   Print("");
    
    Print("╔════════════════════════════════════════════════╗");
    Print("║  ✅ SYSTEM READY - Waiting for Brain Policy  ║");
@@ -162,36 +121,6 @@ int OnInit()
    
    return INIT_SUCCEEDED;
 }
-
-//+------------------------------------------------------------------+
-//| Format Symbol with Prefix/Suffix                                 |
-//+------------------------------------------------------------------+
-string FormatSymbol(string base_symbol)
-  {
-   return SYMBOL_PREFIX + base_symbol + SYMBOL_SUFFIX;
-  }
-
-//+------------------------------------------------------------------+
-//| Strip Symbol to Base (remove prefix/suffix)                      |
-//+------------------------------------------------------------------+
-string StripSymbol(string formatted_symbol)
-  {
-   string result = formatted_symbol;
-   
-   // Remove prefix
-   if(SYMBOL_PREFIX != "" && StringFind(result, SYMBOL_PREFIX) == 0)
-      result = StringSubstr(result, StringLen(SYMBOL_PREFIX));
-   
-   // Remove suffix
-   if(SYMBOL_SUFFIX != "" && StringFind(result, SYMBOL_SUFFIX) >= 0)
-     {
-      int pos = StringFind(result, SYMBOL_SUFFIX);
-      if(pos >= 0)
-         result = StringSubstr(result, 0, pos);
-     }
-   
-   return result;
-  }
 
 // ========== DEINITIALIZATION ==========
 void OnDeinit(const int reason)
@@ -225,14 +154,6 @@ void OnTimer()
       Print("   Policies received: ", g_policies_received);
       Print("   Success rate: ", g_poll_attempts > 0 ? DoubleToString(100.0 * g_poll_success / g_poll_attempts, 2) : "0.00", "%");
       Print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-   }
-   
-   // Periodic symbol scanner rescan (every 5 minutes)
-   if(TimeCurrent() - g_last_scan_time >= g_scan_interval)
-   {
-      Print("🔍 Rescanning symbols...");
-      g_scanner.ScanMarketWatch();
-      g_last_scan_time = TimeCurrent();
    }
    
    // Check for incoming policies from Python Brain
@@ -297,26 +218,26 @@ void CheckForPolicies()
    Print("   Take Profit: ", DoubleToString(policy.take_profit, _Digits));
    Print("   Position Size: ", DoubleToString(policy.position_size, 2));
    
-   // Validate symbol is tradeable using scanner
+   // Validate policy matches current symbol
+   // CRITICAL FIX: Strip broker suffix (.tp, .m, etc.) before comparison
+   string chart_symbol = _Symbol;
    string policy_symbol = policy.symbol;
    
-   // Format symbol with broker-specific prefix/suffix
-   string formatted_symbol = FormatSymbol(policy_symbol);
+   // Remove common broker suffixes
+   StringReplace(chart_symbol, ".tp", "");
+   StringReplace(chart_symbol, ".m", "");
+   StringReplace(chart_symbol, ".i", "");
+   StringReplace(policy_symbol, ".tp", "");
+   StringReplace(policy_symbol, ".m", "");
+   StringReplace(policy_symbol, ".i", "");
    
-   Print("   Symbol (base): ", policy_symbol);
-   Print("   Symbol (formatted): ", formatted_symbol);
-   
-   // Check if symbol is in scanner's tradeable list
-   if(!g_scanner.IsSymbolTradeable(formatted_symbol))
+   if(policy_symbol != chart_symbol)
    {
-      Print("⚠️  Symbol ", formatted_symbol, " not tradeable (not found in scanner)");
-      Print("   Base symbol: ", policy_symbol);
-      Print("   Prefix: '", SYMBOL_PREFIX, "' | Suffix: '", SYMBOL_SUFFIX, "'");
-      Print("   Tip: Check SYMBOL_SUFFIX input parameter and Market Watch");
+      Print("⚠️  Policy symbol mismatch: ", policy.symbol, " (cleaned: ", policy_symbol, ") != ", _Symbol, " (cleaned: ", chart_symbol, ")");
       return;
    }
    
-   Print("✅ Symbol validated: ", formatted_symbol, " is tradeable");
+   Print("✅ Symbol match: ", policy.symbol, " → ", chart_symbol);
    
    // Check daily loss limit
    if(!g_risk_guardian.CheckDailyLimit())
@@ -383,22 +304,6 @@ void ExecutePolicy(PolicyMessage &policy)
    }
    
    Print("   Validated lot size: ", DoubleToString(lot_size, 2));
-   
-   // ===== NEW: Update Grid state with policy data =====
-   CStrategyGrid* grid = g_council.GetGridStrategy();
-   if(grid != NULL)
-   {
-      // Create modified policy with formatted symbol
-      PolicyMessage formatted_policy = policy;
-      formatted_policy.symbol = FormatSymbol(policy.symbol);
-      
-      grid.UpdateFromPolicy(formatted_policy);
-      Print("✅ Grid state updated with policy data");
-   }
-   else
-   {
-      Print("⚠️  Grid strategy not found in Council");
-   }
    
    // Execute via Council (uses Grid strategy if applicable)
    Print("🎯 Sending to Council for execution...");

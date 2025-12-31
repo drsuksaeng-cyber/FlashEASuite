@@ -1,4 +1,4 @@
-﻿//+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
 //|                                                   MqlMsgPack.mqh |
 //|                        FlashEASuite V2 - MessagePack Serializer  |
 //|                                      Binary Protocol Implementation |

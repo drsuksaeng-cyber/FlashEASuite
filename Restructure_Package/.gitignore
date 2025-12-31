@@ -93,3 +93,7 @@ folder_structure.txt
 
 # Keep structure
 !.gitkeep
+
+__pycache__/
+*.bat
+backup/

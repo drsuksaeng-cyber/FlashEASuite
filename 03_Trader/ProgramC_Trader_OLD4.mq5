@@ -18,13 +18,6 @@
 // Note: RiskGuardian.mqh includes PositionSizingManager.mqh and DailyLossLimit.mqh
 #include "../Include/Utils/SymbolScanner.mqh"  // Multi-symbol scanner
 
-// ========== INPUT PARAMETERS ==========
-//+------------------------------------------------------------------+
-//| Symbol Formatting (Broker-specific)                              |
-//+------------------------------------------------------------------+
-input string   SYMBOL_PREFIX = "";           // Symbol Prefix (e.g., "f" for FXPro, empty for most)
-input string   SYMBOL_SUFFIX = "";           // Symbol Suffix (e.g., ".tp", "m", "_i", empty for ICMarkets)
-
 // ========== GLOBAL VARIABLES ==========
 // ZMQ Components
 CZmqHub g_zmq_hub;              // Handles SUB socket (receive policies)
@@ -139,16 +132,6 @@ int OnInit()
    
    g_is_connected = true;
    
-   // Display Symbol Formatting Configuration
-   Print("╔════════════════════════════════════════════════╗");
-   Print("║  Symbol Formatting Configuration             ║");
-   Print("╚════════════════════════════════════════════════╝");
-   Print("📋 Symbol Formatting:");
-   Print("   Prefix: '", SYMBOL_PREFIX, "'", (SYMBOL_PREFIX == "" ? " (none)" : ""));
-   Print("   Suffix: '", SYMBOL_SUFFIX, "'", (SYMBOL_SUFFIX == "" ? " (none)" : ""));
-   Print("   Example: XAUUSD → ", FormatSymbol("XAUUSD"));
-   Print("");
-   
    Print("╔════════════════════════════════════════════════╗");
    Print("║  ✅ SYSTEM READY - Waiting for Brain Policy  ║");
    Print("╚════════════════════════════════════════════════╝");
@@ -162,36 +145,6 @@ int OnInit()
    
    return INIT_SUCCEEDED;
 }
-
-//+------------------------------------------------------------------+
-//| Format Symbol with Prefix/Suffix                                 |
-//+------------------------------------------------------------------+
-string FormatSymbol(string base_symbol)
-  {
-   return SYMBOL_PREFIX + base_symbol + SYMBOL_SUFFIX;
-  }
-
-//+------------------------------------------------------------------+
-//| Strip Symbol to Base (remove prefix/suffix)                      |
-//+------------------------------------------------------------------+
-string StripSymbol(string formatted_symbol)
-  {
-   string result = formatted_symbol;
-   
-   // Remove prefix
-   if(SYMBOL_PREFIX != "" && StringFind(result, SYMBOL_PREFIX) == 0)
-      result = StringSubstr(result, StringLen(SYMBOL_PREFIX));
-   
-   // Remove suffix
-   if(SYMBOL_SUFFIX != "" && StringFind(result, SYMBOL_SUFFIX) >= 0)
-     {
-      int pos = StringFind(result, SYMBOL_SUFFIX);
-      if(pos >= 0)
-         result = StringSubstr(result, 0, pos);
-     }
-   
-   return result;
-  }
 
 // ========== DEINITIALIZATION ==========
 void OnDeinit(const int reason)
@@ -300,23 +253,22 @@ void CheckForPolicies()
    // Validate symbol is tradeable using scanner
    string policy_symbol = policy.symbol;
    
-   // Format symbol with broker-specific prefix/suffix
-   string formatted_symbol = FormatSymbol(policy_symbol);
-   
-   Print("   Symbol (base): ", policy_symbol);
-   Print("   Symbol (formatted): ", formatted_symbol);
+   // Remove common broker suffixes for matching
+   string clean_symbol = policy_symbol;
+   StringReplace(clean_symbol, ".tp", "");
+   StringReplace(clean_symbol, ".m", "");
+   StringReplace(clean_symbol, ".i", "");
+   StringReplace(clean_symbol, ".ecn", "");
    
    // Check if symbol is in scanner's tradeable list
-   if(!g_scanner.IsSymbolTradeable(formatted_symbol))
+   if(!g_scanner.IsSymbolTradeable(policy_symbol) && !g_scanner.IsSymbolTradeable(clean_symbol))
    {
-      Print("⚠️  Symbol ", formatted_symbol, " not tradeable (not found in scanner)");
-      Print("   Base symbol: ", policy_symbol);
-      Print("   Prefix: '", SYMBOL_PREFIX, "' | Suffix: '", SYMBOL_SUFFIX, "'");
-      Print("   Tip: Check SYMBOL_SUFFIX input parameter and Market Watch");
+      Print("⚠️  Symbol ", policy.symbol, " not tradeable (not found in scanner)");
+      Print("   Run symbol scanner to add this symbol to Market Watch");
       return;
    }
    
-   Print("✅ Symbol validated: ", formatted_symbol, " is tradeable");
+   Print("✅ Symbol validated: ", policy.symbol, " is tradeable");
    
    // Check daily loss limit
    if(!g_risk_guardian.CheckDailyLimit())
@@ -388,11 +340,7 @@ void ExecutePolicy(PolicyMessage &policy)
    CStrategyGrid* grid = g_council.GetGridStrategy();
    if(grid != NULL)
    {
-      // Create modified policy with formatted symbol
-      PolicyMessage formatted_policy = policy;
-      formatted_policy.symbol = FormatSymbol(policy.symbol);
-      
-      grid.UpdateFromPolicy(formatted_policy);
+      grid.UpdateFromPolicy(policy);
       Print("✅ Grid state updated with policy data");
    }
    else

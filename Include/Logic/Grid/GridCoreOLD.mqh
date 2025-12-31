@@ -6,7 +6,6 @@
 #property strict
 
 #include "GridState.mqh"
-#include "../../Network/Protocol/Definitions.mqh"
 
 //+------------------------------------------------------------------+
 //| Class: CStrategyGrid                                             |
@@ -15,13 +14,8 @@
 class CStrategyGrid : public CGridState
   {
 private:
-   // Trading (no Trade.mqh needed - will use built-in functions)
-   int               m_atr_handle;
-   double            m_atr_current;
-   double            m_atr_reference;
-   double            m_base_step_points;
-   double            m_sl_points;
-   double            m_tp_points;
+   string            m_name;
+   bool              m_is_active;
 
 public:
    //+------------------------------------------------------------------+
@@ -29,13 +23,8 @@ public:
    //+------------------------------------------------------------------+
    CStrategyGrid() : CGridState()
      {
-      // Initialize ATR for elastic step calculation
-      m_atr_handle = iATR(_Symbol, PERIOD_H1, 14);
-      m_atr_reference = 100.0;
-      m_atr_current = m_atr_reference;
-      m_base_step_points = 100.0;
-      m_sl_points = 0;
-      m_tp_points = 0;
+      m_name = "ElasticGrid";
+      m_is_active = true;
      }
    
    //+------------------------------------------------------------------+
@@ -43,19 +32,27 @@ public:
    //+------------------------------------------------------------------+
    double GetScore()
      {
+      if(!m_is_active) return 0.0;
+      
       // Safety Check 1: Cooldown from Python
       if(m_is_in_cooldown)
+        {
          return 0.0;
+        }
       
       // Safety Check 2: Low Confidence
       if(m_python_confidence < 0.3)
+        {
          return 0.0;
+        }
       
       // Safety Check 3: CSM Data Required
       if(!m_csm_data_received || m_current_direction == GRID_DIR_NONE)
+        {
          return 0.0;
+        }
       
-      // Update ATR and elastic step
+      // Update ATR and calculate elastic step
       UpdateATRAndElasticStep();
       
       // Update grid state (track active positions)
@@ -66,7 +63,9 @@ public:
       
       // Check if we need to open new grid level
       if(ShouldOpenNewGridLevel())
+        {
          return CalculateGridScore();
+        }
       
       return 0.0; // No action needed
      }
@@ -76,14 +75,19 @@ public:
    //+------------------------------------------------------------------+
    void ExecuteGridOrder(ENUM_ORDER_TYPE type)
      {
+      // Calculate lot size with risk multiplier
       int next_level = m_active_grid_count;
       double lot_size = CalculateGridLotSize(next_level);
       
+      // Get current price
       MqlTick tick;
-      if(!SymbolInfoTick(GetSymbol(), tick)) return;
+      if(!SymbolInfoTick(_Symbol, tick)) return;
       
       double price = (type == ORDER_TYPE_BUY) ? tick.ask : tick.bid;
-      double sl = 0, tp = 0;
+      
+      // Calculate SL/TP
+      double sl = 0.0;
+      double tp = 0.0;
       
       if(m_sl_points > 0)
         {
@@ -99,24 +103,13 @@ public:
               price - m_tp_points * _Point;
         }
       
+      // Create comment with level info
       string comment = StringFormat("Grid_L%d", next_level);
       
-      // Use built-in OrderSend
-      MqlTradeRequest request = {};
-      MqlTradeResult result = {};
+      // Execute order
+      m_trade.SetExpertMagicNumber(999000); // Use same magic as system
       
-      request.action = TRADE_ACTION_DEAL;
-      request.symbol = GetSymbol();
-      request.volume = lot_size;
-      request.type = type;
-      request.price = price;
-      request.sl = sl;
-      request.tp = tp;
-      request.deviation = 10;
-      request.magic = 999000;
-      request.comment = comment;
-      
-      if(OrderSend(request, result))
+      if(m_trade.PositionOpen(_Symbol, type, lot_size, price, sl, tp, comment))
         {
          string type_str = (type == ORDER_TYPE_BUY) ? "BUY" : "SELL";
          Print("[Grid] ✅ Opened Grid Level ", next_level, 
@@ -129,52 +122,6 @@ public:
          Print("[Grid] ❌ Failed to open grid! Error: ", GetLastError());
         }
      }
-   
-   //+------------------------------------------------------------------+
-   //| Update Grid State from Policy Message (PUBLIC)                  |
-   //+------------------------------------------------------------------+
-   void UpdateFromPolicy(const PolicyMessage &policy)
-     {
-      // Set target symbol
-      m_target_symbol = policy.symbol;
-      
-      // Update risk parameters
-      m_python_risk_multiplier = policy.risk_multiplier;
-      m_python_confidence = policy.confidence;
-      m_is_in_cooldown = policy.is_in_cooldown;
-      
-      // Update CSM data
-      m_csm_usd = policy.csm_usd;
-      m_csm_eur = policy.csm_eur;
-      m_csm_gbp = policy.csm_gbp;
-      m_csm_jpy = policy.csm_jpy;
-      m_csm_aud = policy.csm_aud;
-      m_csm_cad = policy.csm_cad;
-      m_csm_chf = policy.csm_chf;
-      m_csm_nzd = policy.csm_nzd;
-      m_csm_data_received = true;
-      
-      // Update grid direction
-      if(policy.grid_direction == 1)
-         m_current_direction = GRID_DIR_BUY;
-      else if(policy.grid_direction == 2)
-         m_current_direction = GRID_DIR_SELL;
-      else
-         m_current_direction = GRID_DIR_NONE;
-      
-      // Log update
-      Print("[Grid] ✅ Updated from Policy:");
-      Print("   Symbol: ", policy.symbol);
-      Print("   Risk Multiplier: ", DoubleToString(m_python_risk_multiplier, 2), "x");
-      Print("   Confidence: ", DoubleToString(m_python_confidence, 2));
-      Print("   Cooldown: ", m_is_in_cooldown ? "YES (paused)" : "NO (active)");
-      Print("   Direction: ", m_current_direction == GRID_DIR_BUY ? "BUY" : 
-                              m_current_direction == GRID_DIR_SELL ? "SELL" : "NONE");
-      Print("   CSM: USD=", DoubleToString(m_csm_usd, 2), 
-            " EUR=", DoubleToString(m_csm_eur, 2),
-            " GBP=", DoubleToString(m_csm_gbp, 2),
-            " JPY=", DoubleToString(m_csm_jpy, 2));
-     }
 
 private:
    //+------------------------------------------------------------------+
@@ -186,17 +133,21 @@ private:
       
       if(CopyBuffer(m_atr_handle, 0, 0, 1, atr_buffer) <= 0)
         {
-         m_atr_current = m_atr_reference;
+         Print("[Grid] ERROR: Failed to copy ATR buffer!");
+         m_atr_current = m_atr_reference; // Use reference value
          m_current_elastic_step = m_base_step_points;
          return;
         }
       
-      m_atr_current = atr_buffer[0] / _Point;
+      m_atr_current = atr_buffer[0] / _Point; // Convert to points
+      
+      // Calculate elastic step: Base step * (Current ATR / Reference ATR)
       double atr_ratio = m_atr_current / m_atr_reference;
       m_current_elastic_step = m_base_step_points * atr_ratio;
       
-      double min_step = m_base_step_points * 0.5;
-      double max_step = m_base_step_points * 2.0;
+      // Safety: Limit elastic step to prevent too wide/narrow grids
+      double min_step = m_base_step_points * 0.5;  // Min 50% of base
+      double max_step = m_base_step_points * 2.0;  // Max 200% of base
       
       if(m_current_elastic_step < min_step) m_current_elastic_step = min_step;
       if(m_current_elastic_step > max_step) m_current_elastic_step = max_step;
@@ -207,17 +158,43 @@ private:
    //+------------------------------------------------------------------+
    double CalculateGridScore()
      {
+      // Base score
       double score = 1.0;
+      
+      // Adjust by confidence (0.3 - 1.0)
       score *= m_python_confidence;
+      
+      // Adjust by risk multiplier (0.5 - 1.5)
       score *= m_python_risk_multiplier;
       
+      // Higher score for first grid level
       if(m_active_grid_count == 0)
+        {
          score *= 1.5;
+        }
       
+      // Lower score for higher grid levels
       if(m_active_grid_count >= 3)
+        {
          score *= 0.7;
+        }
       
       return score;
      }
+   
+   //+------------------------------------------------------------------+
+   //| Get Strategy Name                                                |
+   //+------------------------------------------------------------------+
+   string GetName()
+     {
+      return m_name;
+     }
+   
+   //+------------------------------------------------------------------+
+   //| Activate/Deactivate Strategy                                     |
+   //+------------------------------------------------------------------+
+   void Activate() { m_is_active = true; }
+   void Deactivate() { m_is_active = false; }
+   bool IsActive() { return m_is_active; }
   };
 //+------------------------------------------------------------------+

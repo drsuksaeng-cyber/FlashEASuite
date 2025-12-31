@@ -85,7 +85,7 @@ class MarketAnalyzer:
         if self.has_modules and len(tick_buffer) > 10:
             # Use TickAnalyzer
             if self.tick_analyzer:
-                self.tick_analyzer.on_tick(bid, ask)
+                self.tick_analyzer.add_tick(bid)
             
             # Use CSM (simplified - actual implementation is more complex)
             # This is just a placeholder

@@ -1,5 +1,6 @@
 //+------------------------------------------------------------------+
 //|                                                          Zmq.mqh |
+//|                                       CORRECTED: Fixed setSubscribe() |
 //+------------------------------------------------------------------+
 #property strict
 #define ZMQ_PUB 1
@@ -8,6 +9,7 @@
 #define ZMQ_PULL 7
 #define ZMQ_LINGER 17
 #define ZMQ_SNDHWM 23
+#define ZMQ_SUBSCRIBE 6      // ✅ ADDED: For subscription
 
 #import "libzmq.dll"
    long zmq_ctx_new();
@@ -18,8 +20,8 @@
    int  zmq_bind(long socket, uchar &addr[]);
    int  zmq_send(long socket, uchar &data[], int size, int flags);
    int  zmq_recv(long socket, uchar &data[], int size, int flags);
-   // ✅ เหลือแค่นี้พอ
    int  zmq_setsockopt(long socket, int option_name, int &option_value, int option_len);
+   int  zmq_setsockopt(long socket, int option_name, uchar &option_value[], int option_len);  // ✅ ADDED: Overload for uchar[]
 #import
 
 class Context {
@@ -64,6 +66,30 @@ public:
    void setSendHighWaterMark(int hwm) {
       if(m_socket<=0) return;
       zmq_setsockopt(m_socket, ZMQ_SNDHWM, hwm, 4);
+   }
+
+   // ✅ CORRECTED: setSubscribe() method for SUB sockets
+   // CRITICAL FIX: StringToCharArray("", t) creates t=[0] (size=1 with null terminator)
+   // but ZMQ needs empty array (size=0) to subscribe to ALL messages
+   void setSubscribe(string topic="") {
+      if(m_socket<=0) return;
+      
+      if(topic == "") {
+         // Subscribe to ALL messages (no topic filter)
+         // MUST use empty array with size=0, NOT [0] with size=1!
+         uchar empty[];
+         ArrayResize(empty, 0);  // Create empty array (size=0)
+         zmq_setsockopt(m_socket, ZMQ_SUBSCRIBE, empty, 0);
+      } else {
+         // Subscribe to specific topic
+         uchar t[];
+         StringToCharArray(topic, t);
+         // StringToCharArray adds null terminator, we must remove it!
+         // Example: "ABC" → t = [65, 66, 67, 0] (size=4)
+         // We want: [65, 66, 67] (size=3)
+         ArrayResize(t, ArraySize(t) - 1);  // Remove null terminator
+         zmq_setsockopt(m_socket, ZMQ_SUBSCRIBE, t, ArraySize(t));
+      }
    }
 
    int send_bin(uchar &data[], bool nowait=true) {

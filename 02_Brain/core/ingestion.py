@@ -84,17 +84,20 @@ class IngestionWorkerThreaded(threading.Thread):
         try:
             data = msgpack.unpackb(raw_data, raw=False)
             
-            # Validate format
-            if not isinstance(data, list) or len(data) < 5:
+            # Validate format (FeederEA sends 7 elements)
+            if not isinstance(data, list) or len(data) < 7:
                 raise ValueError("Invalid data format")
             
-            # Extract fields
+            # Extract fields (FIXED to match FeederEA protocol)
+            # FeederEA sends: [Type, SeqID, Timestamp, Symbol, Bid, Ask, Flags]
             tick = {
                 'msg_type': data[0],      # 1 = TICK_DATA
-                'timestamp': data[1],      # milliseconds
-                'symbol': data[2],         # "XAUUSD"
-                'bid': data[3],           # bid price
-                'ask': data[4],           # ask price
+                'seq_id': data[1],        # Sequence ID
+                'timestamp': data[2],     # Timestamp (milliseconds)
+                'symbol': data[3],        # Symbol name (e.g., "XAUUSD.tp")
+                'bid': data[4],           # Bid price (float)
+                'ask': data[5],           # Ask price (float)
+                'flags': data[6]          # Tick flags
             }
             
             return tick
