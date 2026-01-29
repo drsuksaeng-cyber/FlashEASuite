@@ -1,0 +1,5 @@
+client_name,client_email,client_phone,account_number,broker_name,license_type,product,hwid,max_slots,issued_date,expiry_date,strategies,hidden_tpsl,trailing_stop,multi_symbol,max_symbols,notes
+Somchai Jaidee,somchai@example.com,081-234-5678,12345678,Exness,reporting,FlashEASuite-Pro,,5,2026-01-22,2027-01-22,"Grid,Spike,Trend,Range",true,true,true,10,VIP Customer - Full Features
+Suda Tanaka,suda@example.com,082-345-6789,87654321,ICMarkets,premium,FlashEASuite-Pro,,3,2026-01-22,2027-01-22,"Grid,Spike",true,true,false,5,Premium - Grid+Spike only
+Test User,test@example.com,083-456-7890,11111111,Demo,trial,FlashEASuite-Pro,,1,2026-01-22,2026-02-22,Grid,false,false,false,1,Trial 30 days - Grid only
+Standalone Client,standalone@example.com,,,Local,standalone,FlashEASuite-Pro,,1,2026-01-22,2030-12-31,"Grid,Spike,Trend,Range",true,true,true,10,Standalone - No expiry check

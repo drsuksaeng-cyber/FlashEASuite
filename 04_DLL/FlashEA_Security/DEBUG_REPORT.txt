@@ -1,0 +1,75 @@
+================================================= 
+DEEP DEBUG REPORT 
+================================================= 
+ 
+[1] Current Directory 
+C:\Users\drsuk\AppData\Roaming\MetaQuotes\Terminal\B2C22A9C2EA0D03B7096C9AF7E852052\MQL5\Experts\FlashEASuite_V2\04_DLL\FlashEA_Security 
+ 
+[2] Key Check in Security_Real.cpp 
+Searching for NEW key (29mdr5kc): 
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA29mdr5kcSS3HuUWJEso6
+ 
+[3] Lines 20-30 of Security_Real.cpp 
+// Embedded Public Key (Generated: 2026-01-26)
+const char* g_PublicKeyPEM = R"(-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA29mdr5kcSS3HuUWJEso6
+3nxeHpnxN72oS6oFeWQGzQEcOFNxyCMa9JMPlEKmhcc411VjhaNUO7s3p9zEyXxD
+i4uqdJ6PyM7SHGd/Xo0PP3wjJL6LVR+8pOh5l14xdPF/ZTgKBEDvpYw89GjBqJYi
+xo7+LzYxAMlmEohjT+Q9b0+soO2z96rNfYPezHQ4sVZ4OBeQG7FUKJ5H0sOOOOrO
+nv7l12pMOXEGxaxQmbkj7COeaaL9fDi6pddYIUqHqCi4RW0acJeY1fY6SxDrVp3E
+rV3RGkexcA9ZsGS7H7/VFnyb8DtSuS49g+y00iQ+9RZ2l+abYl31gmbTmNQg9PFq
+bwIDAQAB
+-----END PUBLIC KEY-----)";
+
+ 
+[4] Source DLL 
+ Volume in drive C is OS
+ Volume Serial Number is E211-5DF4
+
+ Directory of C:\Users\drsuk\AppData\Roaming\MetaQuotes\Terminal\B2C22A9C2EA0D03B7096C9AF7E852052\MQL5\Experts\FlashEASuite_V2\04_DLL\FlashEA_Security
+
+01/27/2026  09:59 AM           101,888 FlashEA_Security.dll
+               1 File(s)        101,888 bytes
+               0 Dir(s)  766,081,576,960 bytes free
+ 
+[5] MT5 DLL 
+ Volume in drive C is OS
+ Volume Serial Number is E211-5DF4
+
+ Directory of C:\Users\drsuk\AppData\Roaming\MetaQuotes\Terminal\B2C22A9C2EA0D03B7096C9AF7E852052\MQL5\Libraries
+
+01/27/2026  09:59 AM           101,888 FlashEA_Security.dll
+               1 File(s)        101,888 bytes
+               0 Dir(s)  766,081,576,960 bytes free
+ 
+[6] OpenSSL DLLs 
+ Volume in drive C is OS
+ Volume Serial Number is E211-5DF4
+
+ Directory of C:\Users\drsuk\AppData\Roaming\MetaQuotes\Terminal\B2C22A9C2EA0D03B7096C9AF7E852052\MQL5\Libraries
+
+01/26/2026  03:52 PM         5,325,824 libcrypto-3-x64.dll
+01/26/2026  03:52 PM         5,325,824 libcrypto-3-x6402.dll
+01/26/2026  03:52 PM         5,325,824 libcrypto-3-x6403.dll
+12/02/2025  12:36 PM           401,408 libsodium.dll
+01/26/2026  03:52 PM           868,352 libssl-3-x64.dll
+11/26/2025  09:40 AM           453,632 libzmq.dll
+               6 File(s)     17,700,864 bytes
+               0 Dir(s)  766,081,576,960 bytes free
+ 
+[7] License File 
+ Volume in drive C is OS
+ Volume Serial Number is E211-5DF4
+
+ Directory of C:\Users\drsuk\AppData\Roaming\MetaQuotes\Terminal\B2C22A9C2EA0D03B7096C9AF7E852052\MQL5\Files
+
+01/26/2026  05:01 PM             1,046 License.key
+               1 File(s)          1,046 bytes
+               0 Dir(s)  766,081,576,960 bytes free
+ 
+[8] Debug Log 
+No debug log found 
+ 
+================================================= 
+END OF REPORT 
+================================================= 

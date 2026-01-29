@@ -1,0 +1,634 @@
+# 🎯 Handoff Prompts for Chat Sessions
+
+**Use these prompts to start new chat sessions for each phase.**
+
+---
+
+## 🐍 **CHAT_PYTHON_1: License Generator**
+
+### **Prompt:**
+
+```
+I'm working on FlashEASuite V2 - Phase 1: Python License Generator
+
+CONTEXT:
+I need to create a License Generator system for FlashEASuite V2 (HFT trading system).
+The system uses RSA 2048-bit signatures for license validation.
+
+ATTACHED FILES (please read):
+1. SECURITY_MASTER_SPEC.md - Complete security specification
+2. PHASE_BREAKDOWN.md - My specific tasks
+
+MY TASKS (Phase 1 Track A):
+1. Generate RSA 2048-bit key pair
+   - Private key: server_private.pem (SECRET - for server only)
+   - Public key: server_public.pem (embed in EA)
+
+2. Create License Generator (generate_license.py)
+   - Input: client info (name, email, desired HWID)
+   - Output: License.key (JSON + RSA signature)
+   - Follow JSON structure in SECURITY_MASTER_SPEC.md
+
+3. Create License Signer (sign_license.py)
+   - Sign JSON with Private Key
+   - Output Base64 signature
+
+4. Create License Verifier (verify_license.py)
+   - Verify signature with Public Key
+   - For testing only
+
+5. Create CLI tool for admin
+   - Interactive license generation
+   - Support batch generation
+
+OUTPUT DELIVERABLES:
+- 02_Brain/tools/license_generator/generate_license.py
+- 02_Brain/tools/license_generator/sign_license.py
+- 02_Brain/tools/license_generator/verify_license.py
+- 02_Brain/tools/license_generator/keys/server_private.pem
+- 02_Brain/tools/license_generator/keys/server_public.pem
+- example_license.key (for testing)
+
+HANDOFF TO OTHERS:
+- server_public.pem → CHAT_MQL5_1
+- example_license.key → All (for testing)
+
+REQUIREMENTS:
+- Python 3.8+
+- cryptography library
+- json, base64
+
+Let's start with Step 1: Generate RSA key pair.
+```
+
+---
+
+## 🔧 **CHAT_MQL5_1: License Verification**
+
+### **Prompt:**
+
+```
+I'm working on FlashEASuite V2 - Phase 1: MQL5 License Verification
+
+CONTEXT:
+I need to create License Verification system in MQL5 for FlashEASuite V2 (HFT EA).
+The EA must verify License.key (JSON + RSA signature) on startup.
+
+ATTACHED FILES (please read):
+1. SECURITY_MASTER_SPEC.md - Complete security specification
+2. PHASE_BREAKDOWN.md - My specific tasks
+3. server_public.pem - RSA public key (from CHAT_PYTHON_1)
+4. example_license.key - Example license for testing
+
+MY TASKS (Phase 1 Track B):
+1. Create HWID Generator (Include/Security/HWIDGenerator.mqh)
+   - Get CPU Serial (Win32 API / WMI)
+   - Get Disk Volume Serial
+   - Get Machine GUID (Registry)
+   - Hash MT5 installation path
+   - Return SHA256(all components)
+
+2. Create Fingerprint Generator
+   - Combine: HWID + Account + Server + MT5Path
+   - Return SHA256
+
+3. Create License Reader & Parser
+   - Read License.key (JSON file)
+   - Parse JSON
+   - Extract signature
+
+4. Create RSA Signature Verifier
+   - Verify signature using server_public.pem
+   - Use MQL5 CryptEncode() or external library
+
+5. Create Slot Manager (Include/Security/SlotManager.mqh)
+   - Track used_slots
+   - Check if Fingerprint exists
+   - Add new Fingerprint to available slot
+   - Save to local encrypted file
+
+6. Integrate into ProgramC_Trader.mq5
+   - Call verification on OnInit()
+   - Display status
+
+CRITICAL - INCLUDE PATHS:
+Use relative paths with quotes:
+  #include "../Include/Security/ClientAuth.mqh"
+NOT system syntax:
+  #include <Security/ClientAuth.mqh>
+
+OUTPUT DELIVERABLES:
+- Include/Security/ClientAuth.mqh
+- Include/Security/HWIDGenerator.mqh
+- Include/Security/LicenseVerifier.mqh
+- Include/Security/SlotManager.mqh
+
+HANDOFF FROM:
+- server_public.pem (from CHAT_PYTHON_1)
+
+Let's start with HWID generation.
+```
+
+---
+
+## 🐍 **CHAT_PYTHON_2: Policy Security**
+
+### **Prompt:**
+
+```
+I'm working on FlashEASuite V2 - Phase 2: Policy Security (Anti-Replay)
+
+CONTEXT:
+I need to add security features to Policy generation to prevent Replay Attacks.
+
+ATTACHED FILES (please read):
+1. SECURITY_MASTER_SPEC.md - Security specification
+2. PHASE_BREAKDOWN.md - My specific tasks
+3. Existing: 02_Brain/core/strategy/policy.py
+
+MY TASKS (Phase 2 Track A):
+1. Modify PolicyGenerator to add:
+   - sequence (incrementing number per client)
+   - nonce (UUID v4 - one-time use)
+   - timestamp (Unix time)
+
+2. Create Sequence Tracker
+   - Track last sequence per client_id
+   - Increment on each policy generation
+   - Store in file/database
+
+3. Create Nonce Manager
+   - Generate UUID v4
+   - Ensure uniqueness
+
+4. Sign Policy with Private Key (server_private.pem)
+   - Sign entire policy JSON
+   - Add signature field
+
+5. Update Policy structure to match SECURITY_MASTER_SPEC.md
+
+REQUIREMENTS:
+- Python 3.8+
+- cryptography library
+- uuid library
+
+OUTPUT DELIVERABLES:
+- 02_Brain/core/policy/policy_generator.py (updated)
+- 02_Brain/core/policy/nonce_manager.py
+- 02_Brain/core/policy/sequence_tracker.py
+
+Let's start with adding sequence tracking.
+```
+
+---
+
+## 🔧 **CHAT_MQL5_2: Policy Verification**
+
+### **Prompt:**
+
+```
+I'm working on FlashEASuite V2 - Phase 2: MQL5 Policy Verification
+
+CONTEXT:
+I need to add security checks to Policy verification in MQL5 to prevent Replay Attacks.
+
+ATTACHED FILES (please read):
+1. SECURITY_MASTER_SPEC.md - Security specification
+2. PHASE_BREAKDOWN.md - My specific tasks
+3. Existing: Include/Logic/PolicyManager.mqh
+
+MY TASKS (Phase 2 Track B):
+1. Create Nonce Manager (Include/Network/NonceManager.mqh)
+   - Store used nonces (array size 1000)
+   - Check if nonce already used
+   - Add new nonce
+   - Clean old nonces (>1 hour)
+
+2. Create Sequence Tracker (Include/Network/SequenceTracker.mqh)
+   - Track last_sequence per symbol
+   - Verify new policy.sequence > last_sequence
+   - Update last_sequence
+
+3. Modify PolicyManager::VerifyPolicy()
+   - Check timestamp (< 5 minutes old)
+   - Check timestamp (not from future > 1 minute)
+   - Check nonce (not used)
+   - Check sequence (must increment)
+   - Verify RSA signature
+
+CRITICAL - INCLUDE PATHS:
+Use relative paths with quotes:
+  #include "../Include/Network/NonceManager.mqh"
+
+OUTPUT DELIVERABLES:
+- Include/Network/NonceManager.mqh
+- Include/Network/SequenceTracker.mqh
+- Include/Logic/PolicyManager.mqh (updated)
+
+Let's start with Nonce Manager.
+```
+
+---
+
+## 💻 **CHAT_DLL_1: DLL Development**
+
+### **Prompt:**
+
+```
+I'm working on FlashEASuite V2 - Phase 3: DLL Protection Layer
+
+CONTEXT:
+I need to create FlashEA_Security.dll in C++ to protect critical functions from cracking.
+
+ATTACHED FILES (please read):
+1. SECURITY_MASTER_SPEC.md - Complete specification
+2. PHASE_BREAKDOWN.md - My specific tasks
+3. DLL_TOOLS_GUIDE.md - Protection tools info
+
+MY TASKS (Phase 3 Track C):
+Create DLL with these exported functions:
+
+1. CheckLicense(wchar_t* license_path)
+   - Read License.key
+   - Parse JSON
+   - Verify RSA signature (OpenSSL)
+   - Check HWID
+   - Check expiry date
+   - Return: 1 (valid) or 0 (invalid)
+
+2. GetHWID(wchar_t* output, int max_len)
+   - Get CPU Serial (WMI)
+   - Get Disk Volume Serial
+   - Get Machine GUID (Registry)
+   - Hash MT5 path
+   - Compute SHA256
+   - Return HWID string
+
+3. CalculateTradingParams(...)
+   - CRITICAL FUNCTION
+   - Input: license_path, symbol, balance
+   - Output: TradingParams struct
+   - Calculate: lot_size, grid_step, max_orders, tp, sl
+   - Encrypt output
+   - Return: 1 (success) or 0 (invalid license)
+
+4. VerifyPolicy(char* policy_json, char* public_key)
+   - Parse JSON policy
+   - Extract signature
+   - Verify RSA signature
+   - Return: 1 (valid) or 0 (invalid)
+
+5. VerifyChallenge(Challenge* challenge, Response* response)
+   - Anti-Mock protection
+   - Compute: HASH(random + license_secret + timestamp)
+   - Compare with response
+   - Return: 1 (valid) or 0 (fake DLL)
+
+6. VerifyDLLIntegrity()
+   - Calculate self-checksum
+   - Compare with hardcoded hash
+   - Return: 1 (intact) or 0 (modified)
+
+REQUIREMENTS:
+- C++ (Visual Studio 2019+)
+- OpenSSL (for RSA)
+- RapidJSON (for JSON)
+- Windows API
+
+OUTPUT DELIVERABLES:
+- FlashEA_Security/Security.cpp
+- FlashEA_Security/TradingParams.h
+- FlashEA_Security.dll (unprotected)
+- FlashEA_Security_protected.dll (protected with Enigma)
+
+HANDOFF TO:
+- FlashEA_Security.dll → CHAT_MQL5_3
+- TradingParams.h → CHAT_MQL5_3
+
+Let's start with project setup and CheckLicense().
+```
+
+---
+
+## 🔧 **CHAT_MQL5_3: DLL Wrapper**
+
+### **Prompt:**
+
+```
+I'm working on FlashEASuite V2 - Phase 3: MQL5 DLL Wrapper
+
+CONTEXT:
+I need to create wrapper functions in MQL5 to call FlashEA_Security.dll safely.
+
+ATTACHED FILES (please read):
+1. SECURITY_MASTER_SPEC.md - Security specification
+2. PHASE_BREAKDOWN.md - My specific tasks
+3. FlashEA_Security.dll (from CHAT_DLL_1)
+4. TradingParams.h (from CHAT_DLL_1)
+
+MY TASKS (Phase 3 Track B):
+1. Create TradingParams struct in MQL5
+   - Match C++ struct exactly
+   - double lot_size
+   - double grid_step
+   - int max_orders
+   - double tp_points
+   - double sl_points
+   - uint checksum
+
+2. Create DLL import declarations
+   #import "FlashEA_Security.dll"
+      int CheckLicense(string license_path);
+      void GetHWID(string &output);
+      int CalculateTradingParams(...);
+      int VerifyPolicy(...);
+      int VerifyChallenge(...);
+   #import
+
+3. Create wrapper functions
+   - ValidateLicense() → CheckLicense()
+   - GetSystemHWID() → GetHWID()
+   - GetTradingParams() → CalculateTradingParams()
+   - VerifyPolicySignature() → VerifyPolicy()
+
+4. Add periodic DLL verification
+   - Call VerifyChallenge() every 5 minutes
+   - Random challenge generation
+   - Log if DLL fake detected
+
+5. Integrate into ProgramC_Trader.mq5
+
+CRITICAL - INCLUDE PATHS:
+  #include "../Include/Security/DLLWrapper.mqh"
+
+OUTPUT DELIVERABLES:
+- Include/Security/DLLWrapper.mqh
+- Include/Security/TradingParamsStruct.mqh
+
+HANDOFF FROM:
+- FlashEA_Security.dll (CHAT_DLL_1)
+- TradingParams.h (CHAT_DLL_1)
+
+Let's start with struct definition.
+```
+
+---
+
+## 🔧 **CHAT_MQL5_4: Hidden TP/SL Module**
+
+### **Prompt:**
+
+```
+I'm working on FlashEASuite V2 - Phase 4: Hidden TP/SL Universal Module
+
+CONTEXT:
+I need to extract Hidden TP/SL logic and make it universal for all strategies.
+
+ATTACHED FILES (please read):
+1. SECURITY_MASTER_SPEC.md
+2. PHASE_BREAKDOWN.md
+3. Existing Grid: Include/Logic/Grid/GridStandalone/GridExecution.mqh
+4. Existing Spike: Include/Logic/Strategy_Spike.mqh
+
+MY TASKS (Phase 4):
+1. Extract Hidden TP/SL logic from existing strategies
+2. Create universal module: Include/Logic/Common/HiddenTPSL.mqh
+3. Functions:
+   - ManageHiddenTP(ticket, tp_price, atr)
+   - ManageHiddenSL(ticket, sl_price, atr)
+   - CalculateVirtualLevels(symbol, entry, direction)
+4. Use ATR-based calculation
+5. Support all strategies (Grid, Spike, Trend, Range)
+
+CRITICAL - INCLUDE PATHS:
+  #include "../Include/Logic/Common/HiddenTPSL.mqh"
+
+OUTPUT DELIVERABLES:
+- Include/Logic/Common/HiddenTPSL.mqh
+- Include/Logic/Common/VirtualLevels.mqh
+
+Let's start by analyzing existing implementations.
+```
+
+---
+
+## 🔧 **CHAT_MQL5_5: Trailing Stop Module**
+
+### **Prompt:**
+
+```
+I'm working on FlashEASuite V2 - Phase 5: Trailing Stop Universal Module
+
+CONTEXT:
+I need to extract Trailing Stop logic and make it universal for all strategies.
+
+ATTACHED FILES (please read):
+1. SECURITY_MASTER_SPEC.md
+2. PHASE_BREAKDOWN.md
+3. Existing: Include/Logic/Grid/GridStandalone/GridExecution.mqh (line 311)
+
+MY TASKS (Phase 5):
+1. Extract Trailing Stop from GridExecution.mqh
+2. Create universal module: Include/Logic/Common/TrailingStop.mqh
+3. Functions:
+   - ActivateTrailing(ticket, profit_threshold)
+   - UpdateTrailingStop(ticket, trail_distance)
+   - CalculateTrailDistance(symbol, atr_period)
+4. Use ATR * 0.5 for trail distance
+5. Support all strategies
+
+CRITICAL - INCLUDE PATHS:
+  #include "../Include/Logic/Common/TrailingStop.mqh"
+
+OUTPUT DELIVERABLES:
+- Include/Logic/Common/TrailingStop.mqh
+- Include/Logic/Common/TrailCalculator.mqh
+
+Let's start by extracting the TrailingStop function.
+```
+
+---
+
+## 🐍 **CHAT_PYTHON_3: Symbol Intelligence**
+
+### **Prompt:**
+
+```
+I'm working on FlashEASuite V2 - Phase 6: Symbol Intelligence
+
+CONTEXT:
+I need to create Symbol Selector in Python Brain to rank and select best symbols.
+
+ATTACHED FILES (please read):
+1. SECURITY_MASTER_SPEC.md
+2. PHASE_BREAKDOWN.md
+
+MY TASKS (Phase 6 Track A):
+1. Create Symbol Scorer (symbol_scorer.py)
+   - Score by volatility (ATR)
+   - Score by trend strength (ADX)
+   - Score by spread quality
+   - Score by tick volume
+   - Combine scores
+
+2. Create Symbol Selector (symbol_selector.py)
+   - Rank all 28 pairs + gold
+   - Select top N (e.g., 5)
+   - Update scores every hour
+
+3. Create Market Analyzer (market_analyzer.py)
+   - Analyze market regime
+   - Classify: ranging, trending, volatile
+
+4. Integrate with Policy Generator
+   - Send selected symbols to Trader
+   - Adjust per market condition
+
+OUTPUT DELIVERABLES:
+- 02_Brain/core/intelligence/symbol_selector.py
+- 02_Brain/core/intelligence/symbol_scorer.py
+- 02_Brain/core/intelligence/market_analyzer.py
+
+Let's start with Symbol Scorer.
+```
+
+---
+
+## 🐍 **CHAT_PYTHON_4: CSV Reporting**
+
+### **Prompt:**
+
+```
+I'm working on FlashEASuite V2 - Phase 7: Enhanced CSV Reporting
+
+CONTEXT:
+I need to extend reporting system to auto-generate weekly/monthly/yearly reports.
+
+ATTACHED FILES (please read):
+1. SECURITY_MASTER_SPEC.md
+2. PHASE_BREAKDOWN.md
+3. Existing: 02_Brain/generate_report.py
+
+MY TASKS (Phase 7):
+1. Extend generate_report.py
+2. Create weekly_report.py
+   - Aggregate by week
+   - Generate CSV + charts
+   - Email summary (optional)
+
+3. Create monthly_report.py
+   - Aggregate by month
+   - Performance metrics
+   - Drawdown analysis
+
+4. Create yearly_report.py
+   - Annual summary
+   - Strategy comparison
+   - ROI calculation
+
+5. Create scheduler.py
+   - Windows Task Scheduler integration
+   - Or cron for Linux
+
+OUTPUT DELIVERABLES:
+- 02_Brain/reporting/weekly_report.py
+- 02_Brain/reporting/monthly_report.py
+- 02_Brain/reporting/yearly_report.py
+- 02_Brain/reporting/scheduler.py
+
+Let's start with weekly aggregation.
+```
+
+---
+
+## 🧪 **CHAT_INTEGRATION: Integration Testing**
+
+### **Prompt:**
+
+```
+I'm working on FlashEASuite V2 - Integration Testing
+
+CONTEXT:
+I need to test all phases together and ensure everything works.
+
+ATTACHED FILES (please read):
+1. SECURITY_MASTER_SPEC.md
+2. PHASE_BREAKDOWN.md
+3. All deliverables from Phases 1-7
+
+MY TASKS:
+1. Test License Flow
+   - Generate license
+   - Verify in EA
+   - Test invalid license
+   - Test expired license
+
+2. Test Policy Flow
+   - Generate policy
+   - Send to EA
+   - Verify in EA
+   - Execute trades
+
+3. Test Security
+   - Replay attack (old policy)
+   - Nonce reuse
+   - Mock DLL
+   - Modified DLL
+
+4. Test Grace Period
+   - REVOKE license
+   - Test grace countdown
+   - Test Limited Mode
+
+5. Integration Tests
+   - Full system: Feeder → Brain → Trader
+   - Multiple symbols
+   - Multiple strategies
+
+6. Performance Tests
+   - Latency measurements
+   - Throughput tests
+
+OUTPUT DELIVERABLES:
+- Test scripts
+- Test reports
+- Bug fixes
+- Performance report
+
+Let's start with License Flow testing.
+```
+
+---
+
+## 📝 **Usage Instructions**
+
+### **For Each Phase:**
+
+1. Start new chat
+2. Copy relevant prompt above
+3. Attach required files:
+   - SECURITY_MASTER_SPEC.md (always)
+   - PHASE_BREAKDOWN.md (always)
+   - Other files as specified
+4. Let AI read all files
+5. Begin implementation
+6. Save deliverables
+7. Handoff to next phase
+
+### **File Sharing:**
+
+```
+After Phase 1 Track A:
+  → Save server_public.pem
+  → Share to CHAT_MQL5_1
+
+After Phase 3 Track C:
+  → Save FlashEA_Security.dll
+  → Share to CHAT_MQL5_3
+
+etc.
+```
+
+---
+
+**All chats must coordinate via SECURITY_MASTER_SPEC.md and PHASE_BREAKDOWN.md**

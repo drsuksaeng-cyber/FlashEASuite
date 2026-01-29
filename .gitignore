@@ -1,0 +1,249 @@
+# ============================================================
+# FlashEASuite V2 - Comprehensive .gitignore
+# ============================================================
+
+# ============================================================
+# 1. CRITICAL - SECURITY FILES (NEVER COMMIT!)
+# ============================================================
+**/server_private*.pem
+**/client.key_secret
+**/server.key_secret
+**/*.key_secret
+**/License.key
+**/license.key
+
+# Except public keys (these are OK)
+!**/server_public.pem
+!**/example_license.key
+
+# ============================================================
+# 2. COMPILED FILES - MQL5
+# ============================================================
+*.ex5
+*.ex4
+
+# Except test EAs (keep for reference)
+!Tester/*.ex5
+
+# ============================================================
+# 3. COMPILED FILES - C++/DLL
+# ============================================================
+*.obj
+*.lib
+*.exp
+*.dll
+*.pdb
+*.ilk
+
+# OpenSSL DLLs
+libcrypto*.dll
+libssl*.dll
+
+# ============================================================
+# 4. PYTHON CACHE
+# ============================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# ============================================================
+# 5. LOGS & REPORTS
+# ============================================================
+logs/
+*.log
+*.xlsx
+*.docx
+*.csv
+
+# Except templates
+!**/clients_template.csv
+
+# ============================================================
+# 6. ZIP FILES & ARCHIVES
+# ============================================================
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+
+# ============================================================
+# 7. BACKUP FILES
+# ============================================================
+*_OLD.*
+*_OLD1.*
+*_OLD2.*
+*_OLD3.*
+*_OLD4.*
+*_OLD5.*
+*_Backup.*
+*_BACKUP.*
+*.bak
+*.backup
+
+# ============================================================
+# 8. TEMPORARY FILES
+# ============================================================
+*.tmp
+*.temp
+~*
+*.swp
+*.swo
+*~
+
+# ============================================================
+# 9. IDE & EDITOR FILES
+# ============================================================
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ============================================================
+# 10. WINDOWS SPECIFIC
+# ============================================================
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================================================
+# 11. MAC SPECIFIC
+# ============================================================
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ============================================================
+# 12. TEST OUTPUT & DIAGNOSTICS
+# ============================================================
+DEBUG_*.txt
+DIAGNOSTIC_*.txt
+test_data_*.csv
+
+# ============================================================
+# 13. BUILD ARTIFACTS
+# ============================================================
+*.cache
+*.manifest
+
+# ============================================================
+# 14. SPECIFIC FOLDERS TO IGNORE
+# ============================================================
+# แชต folder (notes only)
+แชต/
+
+# Day1_Package (old)
+Day1_Package/
+
+# Restructure_Package (old)
+Restructure_Package/
+
+# Phase2_3B_WORKS (archive)
+Phase2_3B_WORKS/
+
+# Old files in docs/archive
+docs/archive/
+
+# ============================================================
+# 15. SPECIFIC FILES TO IGNORE
+# ============================================================
+# Tree output
+tree.txt
+folder_structure.txt
+
+# Batch files (some are OK, some are temp)
+cleanup_project*.bat
+CREATE_ZIP.bat
+RUN_*.bat
+
+# Old readmes
+README_v2.1.md
+VERIFICATION.txt
+
+# Thai filenames (usually notes)
+*จบ*.zip
+*แชต*.zip
+*บอกแชต*.zip
+*เสร็จ*.zip
+*สิ่งที่ต้องจำ*.txt
+
+# Specific test files
+test_integration_phase2.py
+test_pull.py
+test_push.py
+
+# ============================================================
+# 16. WHAT TO KEEP (EXCEPTIONS)
+# ============================================================
+# Keep all .py source files
+!*.py
+
+# Keep all .mq5 source files
+!*.mq5
+
+# Keep all .mqh header files
+!*.mqh
+
+# Keep all .h header files
+!*.h
+
+# Keep all .cpp source files
+!*.cpp
+
+# Keep documentation
+!*.md
+!*.txt
+
+# Keep configs
+!*.json
+!config.py
+!requirements.txt
+
+# Keep build scripts that are important
+!build.bat
+!DEPLOY_TO_MT5.bat
+
+# ============================================================
+# SUMMARY
+# ============================================================
+# This .gitignore will:
+# ✅ Keep all source code (.py, .mq5, .mqh, .cpp, .h)
+# ✅ Keep documentation (.md, README)
+# ✅ Keep configs (requirements.txt, config.py)
+# ✅ Keep public keys
+# ❌ Ignore compiled files (.ex5, .dll, .obj)
+# ❌ Ignore cache (__pycache__, logs)
+# ❌ Ignore secrets (private keys)
+# ❌ Ignore zips and backups
+# ❌ Ignore temp and test files
+
+# Prevent any private keys
+tools/keys/server_private*.pem
+**/keys/server_private*.pem

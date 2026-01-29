@@ -20,7 +20,8 @@ class ExecutionListenerThreaded(threading.Thread):
     """
     Execution Listener using Threading (Windows-safe).
     
-    Receives trade results from MT5 Trader (Program C) via ZMQ PULL socket
+    Receives trade results from MT5 Trader (Program C) via ZMQ SUB socket
+    (subscribes to Trader's PUB socket on port 7779)
     and forwards to Strategy Engine via thread-safe queue (Feedback Loop).
     """
     
@@ -53,18 +54,19 @@ class ExecutionListenerThreaded(threading.Thread):
     
     def _setup_zmq(self) -> bool:
         """
-        Setup ZMQ PULL socket.
+        Setup ZMQ PULL socket (to match Trader's PUSH socket).
         
         Returns:
             True if successful, False otherwise
         """
         try:
             self.context = zmq.Context()
-            self.pull_socket = self.context.socket(zmq.PULL)
+            self.pull_socket = self.context.socket(zmq.PULL)  # ✅ FIXED: PULL socket for PUSH-PULL pattern
             self.pull_socket.bind(self.zmq_pull_address)
             self.pull_socket.setsockopt(zmq.RCVTIMEO, 1000)  # 1 second timeout
             
             print(f"📥 EXECUTION LISTENER: Ready to receive trade results on {self.zmq_pull_address}")
+            print(f"✅ Using PUSH-PULL pattern (Trader=PUSH, Python=PULL)")
             return True
             
         except Exception as e:

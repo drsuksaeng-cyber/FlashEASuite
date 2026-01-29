@@ -1,0 +1,75 @@
+// ✅ ถูกต้อง - ใช้ relative path with quotes
+#include "../Include/Security/ClientAuth.mqh"
+#include "../Include/Network/Protocol.mqh"
+
+// ❌ ผิด - ไม่ใช้ system include syntax
+#include <Security/ClientAuth.mqh>
+```
+
+**โครงสร้าง:**
+```
+03_Trader/ProgramC_Trader.mq5
+    → #include "../Include/Security/ClientAuth.mqh"
+
+Include/Security/ClientAuth.mqh
+```
+
+---
+
+### **2. DLL Protection**
+
+**ต้องทำ 2 ขั้นตอน:**
+
+**Step 1: Compile DLL (C++)**
+```
+Visual Studio → Build
+→ FlashEA_Security.dll (unprotected)
+```
+
+**Step 2: Protect with Enigma**
+```
+Enigma Protector → Add DLL → Protect
+→ FlashEA_Security_protected.dll
+
+Rename → FlashEA_Security.dll
+Copy to: Experts/Libraries/
+```
+
+---
+
+### **3. ไฟล์ที่ใช้ร่วมกัน**
+
+**ทุกแชทต้องอ่าน:**
+- SECURITY_MASTER_SPEC.md
+- PHASE_BREAKDOWN.md
+
+**แชร์ระหว่างแชท:**
+- server_public.pem (Python → MQL5)
+- FlashEA_Security.dll (DLL → MQL5)
+- TradingParams.h (DLL → MQL5)
+- example_license.key (Python → All)
+
+---
+
+## 📊 **ลำดับการทำงาน**
+```
+Week 1:
+  CHAT_PYTHON_1 (License Gen)     ─┐
+  CHAT_MQL5_1 (License Verify)    ─┤ Phase 1
+  ↓                                 ↓
+  CHAT_PYTHON_2 (Policy Security) ─┐
+  CHAT_MQL5_2 (Policy Verify)     ─┤ Phase 2
+  
+Week 2:
+  CHAT_DLL_1 (DLL Development)    ─┐
+  CHAT_MQL5_3 (DLL Wrapper)       ─┤ Phase 3
+  ↓                                 ↓
+  CHAT_MQL5_4 (Hidden TP/SL)      ─── Phase 4
+  CHAT_MQL5_5 (Trailing Stop)     ─── Phase 5
+  
+Week 3:
+  CHAT_PYTHON_3 (Symbol Intel)    ─── Phase 6
+  CHAT_PYTHON_4 (CSV Report)      ─── Phase 7
+  CHAT_INTEGRATION (Testing)      ─── Integration
+
+Total: ~3 weeks

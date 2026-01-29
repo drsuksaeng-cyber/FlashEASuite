@@ -2,13 +2,31 @@
 # -*- coding: utf-8 -*-
 """
 FlashEASuite V2 - Policy Publishing Module
-UPDATED: Custom Protocol format (compatible with Serialization.mqh from GitHub)
+UPDATED: Phase 2 Security Layer Integration (JSON format with RSA signature)
+
+Version History:
+- V1.0 (2025-12-28): Custom Protocol format (binary)
+- V2.0 (2026-01-24): Added security layer (sequence, nonce, timestamp, signature)
+
+Author: Dr. Suksaeng Kukanok
+Date: 2026-01-24
 """
 
 import time
 import struct
 import msgpack
 from typing import Dict, Any, Optional
+
+# ========== PHASE 2: SECURITY LAYER IMPORTS ==========
+try:
+    from core.policy import generate_secure_policy
+    SECURITY_LAYER_AVAILABLE = True
+except ImportError:
+    print("⚠️ Security layer not available. Using legacy mode.")
+    SECURITY_LAYER_AVAILABLE = False
+
+# License ID for Phase 2 (hardcoded for testing)
+DEFAULT_LICENSE_ID = "FLASH-2601-TEST-0001"
 
 
 class PolicyPublisher:
@@ -390,6 +408,20 @@ def determine_grid_direction(csm_data: Dict[str, float], symbol: str) -> int:
     # Threshold for direction decision (minimum strength difference)
     threshold = 0.5
     
+    # ✅ ADDED: Check if CSM data is available (all zeros = no data)
+    csm_total = sum(abs(v) for v in csm_data.values())
+    if csm_total < 0.1:  # All CSM values are zero or near-zero
+        print("⚠️ CSM data not available, using simple alternating strategy")
+        # Fallback: Alternate between BUY and SELL every 30 seconds
+        import time
+        cycle = int(time.time() / 30) % 2  # 0 or 1 every 30 seconds
+        if cycle == 0:
+            print("   → Fallback: BUY (cycle 0)")
+            return 1  # BUY
+        else:
+            print("   → Fallback: SELL (cycle 1)")
+            return 2  # SELL
+    
     # Parse symbol into base and quote currencies
     if clean_symbol == 'EURUSD':
         base_strength = csm_data.get('EUR', 0.0)
@@ -436,77 +468,256 @@ def publish_grid_policy(
     symbol: str,
     pub_socket,
     feedback_processor,
-    csm_data: Optional[Dict[str, float]] = None
+    csm_data: Optional[Dict[str, float]] = None,
+    current_price: float = 0.0,
+    license_id: Optional[str] = None  # ✅ NEW: License ID parameter
 ) -> bytes:
     """
-    Publish comprehensive Grid policy with all extended fields.
+    Publish comprehensive Grid policy with Phase 2 security layer.
     
-    This function sends a complete policy message including:
-    - Risk multiplier from feedback loop
-    - Cooldown status
-    - Confidence score based on performance
-    - CSM data for all 8 currencies
-    - Grid direction based on CSM analysis
+    NEW (Phase 2): Adds security fields to prevent replay attacks:
+    - sequence: Incrementing number per (license_id, symbol)
+    - nonce: UUID v4 for one-time use
+    - timestamp: Unix seconds
+    - license_id: From license
+    - signature: RSA-2048 Base64
+    
+    Format changed: Binary (pack_custom_protocol) → JSON (msgpack)
     
     Args:
-        symbol: Symbol to trade (e.g., "XAUUSD")
+        symbol: Symbol to trade (e.g., "XAUUSD.tp")
         pub_socket: ZMQ PUB socket
         feedback_processor: FeedbackProcessor instance
         csm_data: Optional CSM data dict (will fetch if None)
+        current_price: Current market price (default 0.0)
+        license_id: License ID (default: FLASH-2601-TEST-0001)
         
     Returns:
-        bytes: Packed message
+        bytes: Packed message (MessagePack of JSON)
     """
-    # Get feedback stats
-    stats = feedback_processor.get_stats()
+    # =================================================================
+    # PHASE 2: NEW VERSION (JSON + Security Layer)
+    # =================================================================
     
-    # Calculate confidence from performance
+    if SECURITY_LAYER_AVAILABLE:
+        # Get feedback stats
+        stats = feedback_processor.get_stats()
+        
+        # Calculate confidence from performance
+        confidence = feedback_processor.calculate_confidence()
+        
+        # Get CSM data if not provided
+        if csm_data is None:
+            csm_data = get_csm_data()
+        
+        # Determine grid direction from CSM
+        grid_direction = determine_grid_direction(csm_data, symbol)
+        
+        # Use grid_direction as action
+        action = grid_direction  # 0=HOLD, 1=BUY, 2=SELL
+        
+        # Use current_price as entry_price
+        entry_price = current_price if current_price > 0 else 1.0
+        
+        # Use default license if not provided
+        if license_id is None:
+            license_id = DEFAULT_LICENSE_ID
+        
+        # ✅ Step 1: Create base policy (without security fields)
+        base_policy = {
+            'symbol': symbol,
+            'strategy': 'Grid',
+            'action': action,
+            
+            # Trading parameters
+            'params': {
+                'entry_price': entry_price,
+                'stop_loss': 0.0,
+                'take_profit': 0.0,
+                'position_size': 0.01
+            },
+            
+            # Grid-specific parameters
+            'grid_params': {
+                'risk_multiplier': stats['risk_multiplier'],
+                'is_in_cooldown': stats['is_in_cooldown'],
+                'confidence': confidence,
+                'grid_direction': grid_direction
+            },
+            
+            # CSM data
+            'csm_data': csm_data,
+            
+            # Model info
+            'model_version': 'GRID_V2_FEEDBACK_SECURE',
+            
+            # Performance stats (for logging)
+            'debug_info': {
+                'total_wins': stats['total_wins'],
+                'total_losses': stats['total_losses'],
+                'total_profit': stats['total_profit'],
+                'consecutive_wins': stats['consecutive_wins'],
+                'consecutive_losses': stats['consecutive_losses']
+            }
+        }
+        
+        # ✅ Step 2: Add security layer (sequence, nonce, timestamp, signature)
+        secure_policy = generate_secure_policy(
+            base_policy=base_policy,
+            license_id=license_id,
+            feedback_stats=stats
+        )
+        
+        # ✅ Step 3: Pack as MessagePack JSON
+        packed = msgpack.packb(secure_policy)
+        
+        # ✅ Step 4: Send via ZMQ
+        pub_socket.send(packed)
+        
+        # ✅ Step 5: Log comprehensive info
+        action_name = 'HOLD' if action == 0 else ('BUY' if action == 1 else 'SELL')
+        print(f"📤 SECURE GRID POLICY: {symbol} ({len(packed)} bytes)")
+        print(f"   Action: {action_name} | Entry: {entry_price:.2f} | Risk: {stats['risk_multiplier']:.2f}x")
+        print(f"   Sequence: {secure_policy['sequence']} | Nonce: {secure_policy['nonce'][:8]}...")
+        print(f"   Confidence: {confidence:.2f} | Direction: {grid_direction}")
+        print(f"   Performance: {stats['total_wins']}W/{stats['total_losses']}L | Profit: {stats['total_profit']:+.2f}")
+        print(f"   Security: ✅ Signed (RSA-2048)")
+        
+        # Log CSM if available
+        if csm_data.get('USD') != 0.0 or csm_data.get('EUR') != 0.0:
+            print(f"   CSM: USD={csm_data.get('USD', 0):.2f} EUR={csm_data.get('EUR', 0):.2f} " +
+                  f"GBP={csm_data.get('GBP', 0):.2f} JPY={csm_data.get('JPY', 0):.2f}")
+        
+        return packed
+    
+    # =================================================================
+    # LEGACY MODE (Binary Protocol - kept as backup)
+    # =================================================================
+    else:
+        print("⚠️ LEGACY MODE: Using binary protocol (security layer not available)")
+        
+        # Get feedback stats
+        stats = feedback_processor.get_stats()
+        
+        # Calculate confidence from performance
+        confidence = feedback_processor.calculate_confidence()
+        
+        # Get CSM data if not provided
+        if csm_data is None:
+            csm_data = get_csm_data()
+        
+        # Determine grid direction from CSM
+        grid_direction = determine_grid_direction(csm_data, symbol)
+        
+        # Use grid_direction as action
+        action = grid_direction  # 0=HOLD, 1=BUY, 2=SELL
+        
+        # Use current_price as entry_price
+        entry_price = current_price if current_price > 0 else 1.0
+        
+        # Create comprehensive policy with all Grid fields (LEGACY)
+        packed = pack_custom_protocol(
+            msg_type=2,                              # MSG_TYPE_POLICY
+            symbol=symbol,
+            action=action,
+            confidence=confidence,
+            entry_price=entry_price,
+            stop_loss=0.0,
+            take_profit=0.0,
+            position_size=0.01,
+            timestamp_ms=int(time.time() * 1000),
+            model_version="GRID_V2_FEEDBACK",
+            # Grid extended fields
+            risk_multiplier=stats['risk_multiplier'],
+            is_in_cooldown=stats['is_in_cooldown'],
+            csm_data=csm_data,
+            grid_direction=grid_direction
+        )
+        
+        # Send via ZMQ
+        pub_socket.send(packed)
+        
+        # Log
+        action_name = 'HOLD' if action == 0 else ('BUY' if action == 1 else 'SELL')
+        print(f"📤 GRID POLICY (LEGACY): {symbol} ({len(packed)} bytes)")
+        print(f"   Action: {action_name} | Entry: {entry_price:.2f}")
+        
+        return packed
+
+
+# =================================================================
+# OLD VERSION (Before Phase 2) - KEPT FOR REFERENCE
+# =================================================================
+"""
+def publish_grid_policy(
+    symbol: str,
+    pub_socket,
+    feedback_processor,
+    csm_data: Optional[Dict[str, float]] = None,
+    current_price: float = 0.0
+) -> bytes:
+    # OLD IMPLEMENTATION (Binary Protocol)
+    # Replaced with Phase 2 security layer above
+    # Kept here as reference only
+    
+    stats = feedback_processor.get_stats()
     confidence = feedback_processor.calculate_confidence()
     
-    # Get CSM data if not provided
     if csm_data is None:
         csm_data = get_csm_data()
     
-    # Determine grid direction from CSM
     grid_direction = determine_grid_direction(csm_data, symbol)
+    action = grid_direction
+    entry_price = current_price if current_price > 0 else 1.0
     
-    # Create comprehensive policy with all Grid fields
     packed = pack_custom_protocol(
-        msg_type=2,                              # MSG_TYPE_POLICY
+        msg_type=2,
         symbol=symbol,
-        action=0,                                # 0=HOLD (let Grid decide)
+        action=action,
         confidence=confidence,
-        entry_price=0.0,
+        entry_price=entry_price,
         stop_loss=0.0,
         take_profit=0.0,
         position_size=0.01,
         timestamp_ms=int(time.time() * 1000),
         model_version="GRID_V2_FEEDBACK",
-        # Grid extended fields
         risk_multiplier=stats['risk_multiplier'],
         is_in_cooldown=stats['is_in_cooldown'],
         csm_data=csm_data,
         grid_direction=grid_direction
     )
     
-    # Send via ZMQ
     pub_socket.send(packed)
     
-    # Log comprehensive info
+    action_name = 'HOLD' if action == 0 else ('BUY' if action == 1 else 'SELL')
     print(f"📤 GRID POLICY: {symbol} ({len(packed)} bytes)")
-    print(f"   Risk: {stats['risk_multiplier']:.2f}x | Cooldown: {stats['is_in_cooldown']}")
+    print(f"   Action: {action_name} | Entry: {entry_price:.2f} | Risk: {stats['risk_multiplier']:.2f}x | Cooldown: {stats['is_in_cooldown']}")
     print(f"   Confidence: {confidence:.2f} | Direction: {grid_direction} ({'BUY' if grid_direction == 1 else 'SELL' if grid_direction == 2 else 'NONE'})")
     print(f"   Performance: {stats['total_wins']}W/{stats['total_losses']}L | Profit: {stats['total_profit']:+.2f}")
     
-    # Log CSM if available
     if csm_data.get('USD') != 0.0 or csm_data.get('EUR') != 0.0:
         print(f"   CSM: USD={csm_data.get('USD', 0):.2f} EUR={csm_data.get('EUR', 0):.2f} " +
               f"GBP={csm_data.get('GBP', 0):.2f} JPY={csm_data.get('JPY', 0):.2f}")
     
     return packed
+"""
 
 
 # ========== CHANGE LOG ==========
+# Version 2.1 (2026-01-24) - PHASE 2 SECURITY LAYER:
+# - Added security layer integration
+# - Changed format: Binary protocol → JSON (MessagePack)
+# - Added security fields: sequence, nonce, timestamp, license_id, signature
+# - RSA-2048 signature for anti-tampering
+# - Backward compatible: Falls back to binary if security layer unavailable
+#
+# Security Fields Added:
+# 1. sequence (int): Incrementing number per (license_id, symbol)
+# 2. nonce (str): UUID v4 for one-time use
+# 3. timestamp (int): Unix seconds
+# 4. license_id (str): From license
+# 5. signature (str): RSA-2048 Base64
+#
 # Version 2.0 (2025-12-28):
 # - Extended pack_custom_protocol() with 11 new Grid fields
 # - Added get_csm_data() helper function
@@ -521,7 +732,7 @@ def publish_grid_policy(
 # 11. grid_direction (int): 0=NONE, 1=BUY, 2=SELL
 #
 # Compatibility:
-# - Requires MQL5 Serialization.mqh V2.0
-# - Requires MQL5 Definitions.mqh V2.0
-# - Breaking change from V1.0
+# - Phase 2: Requires MQL5 PolicyVerifier (Chat 2)
+# - Phase 1: Compatible with Serialization.mqh V2.0 (binary mode)
+
 

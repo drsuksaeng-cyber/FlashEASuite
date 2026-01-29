@@ -1,0 +1,413 @@
+# 🛡️ DLL Protection Tools Guide
+
+**Last Updated:** 2026-01-21
+
+---
+
+## 📊 **Overview**
+
+DLL protection tools ใช้เพื่อ **obfuscate** และ **protect** DLL จากการ:
+- Decompile (แกะโค้ด)
+- Patch (แก้ไข binary)
+- Debug (วิเคราะห์การทำงาน)
+- Memory dump (ดัก memory)
+
+---
+
+## 💰 **Comparison Table**
+
+| Tool | Price | License Type | Effectiveness | Best For |
+|------|-------|--------------|---------------|----------|
+| **Manual Obfuscation** | FREE | - | ⭐⭐ | Learning / Budget |
+| **Enigma Protector** | **$199** | One-time | ⭐⭐⭐ | **RECOMMENDED** |
+| **VMProtect** | $399 | One-time | ⭐⭐⭐⭐ | Professional |
+| **Themida** | $799 | One-time | ⭐⭐⭐⭐⭐ | Enterprise |
+| **Code Virtualizer** | $599 | One-time | ⭐⭐⭐⭐ | Advanced |
+
+---
+
+## ✅ **RECOMMENDED: Enigma Protector ($199)**
+
+### **Why Enigma Protector?**
+
+```
+✅ One-time payment ($199)
+✅ Lifetime updates
+✅ Good protection/price ratio
+✅ Easy to use (GUI)
+✅ Virtual Machine protection
+✅ Anti-debug
+✅ API hooking prevention
+✅ Support for DLL
+```
+
+### **Purchase Link:**
+
+🔗 **Official Website:**  
+https://enigmaprotector.com/
+
+**Purchase Page:**  
+https://enigmaprotector.com/en/purchase.html
+
+**Pricing (as of 2026-01-21):**
+- **Standard Edition:** $199 USD
+- **Professional Edition:** $399 USD (with virtualization)
+
+**Payment Methods:**
+- Credit Card (Visa, Mastercard)
+- PayPal
+- Wire Transfer
+- Cryptocurrencies (Bitcoin, Ethereum)
+
+### **License Type:**
+
+```
+✅ One-time purchase = ใช้ได้ตลอดไป
+✅ Lifetime updates = ได้ update ฟรีตลอด
+✅ Commercial use = ใช้เชิงพาณิชย์ได้
+✅ No subscription = ไม่ต้องจ่ายรายเดือน/รายปี
+```
+
+### **Features Included:**
+
+```
+1. Code Obfuscation
+   - Encrypt functions
+   - Randomize code flow
+   - Hide imports
+
+2. Virtual Machine
+   - Wrap sensitive code in VM
+   - Hard to analyze
+
+3. Anti-Debug
+   - Detect debuggers (OllyDbg, x64dbg)
+   - Prevent debugging
+
+4. API Hooking Prevention
+   - Prevent DLL injection
+   - Prevent memory hooks
+
+5. License System (Optional)
+   - Built-in license manager
+   - Trial mode support
+   - HWID binding
+```
+
+---
+
+## 📦 **Alternative Options**
+
+### **1. VMProtect ($399)**
+
+🔗 **Website:** https://vmpsoft.com/
+
+**Features:**
+- Virtual Machine technology
+- Mutation technology
+- License system
+- Anti-debug
+- Code obfuscation
+
+**Pros:**
+- Very strong protection
+- Professional tool
+- Good documentation
+
+**Cons:**
+- More expensive ($399 vs $199)
+- Steeper learning curve
+
+**When to use:**
+- High-value software
+- Enterprise clients
+- Need strongest protection
+
+---
+
+### **2. Themida ($799)**
+
+🔗 **Website:** https://www.oreans.com/themida.php
+
+**Features:**
+- Code virtualization
+- Anti-debug (strongest)
+- Anti-memory dump
+- License manager
+- SecureEngine
+
+**Pros:**
+- Best protection available
+- Used by AAA games
+- Extremely hard to crack
+
+**Cons:**
+- Most expensive ($799)
+- Can slow down performance
+- Complex configuration
+
+**When to use:**
+- Maximum security needed
+- Budget allows
+- Enterprise/Military grade
+
+---
+
+### **3. Code Virtualizer ($599)**
+
+🔗 **Website:** https://www.oreans.com/codevirtualizer.php
+
+**Features:**
+- Code virtualization only
+- Multiple VM engines
+- Anti-debug
+- API wrapper
+
+**Pros:**
+- Focused on virtualization
+- Lightweight
+- Good performance
+
+**Cons:**
+- No license system
+- Expensive ($599)
+
+**When to use:**
+- Need VM protection only
+- Don't need license features
+
+---
+
+## 🆓 **Free Alternative: Manual Obfuscation**
+
+If budget is tight, you can do basic protection manually:
+
+### **Techniques:**
+
+```cpp
+// 1. String Obfuscation
+// ❌ Bad
+const char* key = "MySecretKey123";
+
+// ✅ Good
+const char* GetKey() {
+    static char key[] = {
+        'M'^0x55, 'y'^0x55, 'S'^0x55, 'e'^0x55, 'c'^0x55,
+        'r'^0x55, 'e'^0x55, 't'^0x55, 'K'^0x55, 'e'^0x55,
+        'y'^0x55, '1'^0x55, '2'^0x55, '3'^0x55, 0
+    };
+    for(int i=0; key[i]; i++) key[i] ^= 0x55;
+    return key;
+}
+
+// 2. Function Name Obfuscation
+// ❌ Bad
+int CheckLicense() { ... }
+
+// ✅ Good
+int __cdecl _Z9CheckLicenseXYZ() { ... }
+
+// 3. Anti-Debug
+bool IsDebuggerPresent() {
+    return ::IsDebuggerPresent() || 
+           CheckRemoteDebuggerPresent(GetCurrentProcess(), &debugger);
+}
+
+// 4. Checksum
+uint32_t CalculateSelfChecksum() {
+    // Hash DLL file
+    return ComputeFileHash(GetModuleFileName());
+}
+```
+
+**Pros:**
+- Free
+- Learn security techniques
+
+**Cons:**
+- Weak protection
+- Time-consuming
+- Easy to bypass
+
+---
+
+## 🎯 **Recommendation Summary**
+
+```
+Budget < $200:
+→ Manual Obfuscation (Free)
+
+Budget $199-300:
+→ ✅ Enigma Protector ($199) ← BEST VALUE
+
+Budget $300-500:
+→ VMProtect ($399)
+
+Budget $500+:
+→ Themida ($799) ← STRONGEST
+
+FlashEASuite Project:
+→ ✅ Enigma Protector ($199)
+   - Good protection
+   - Reasonable price
+   - One-time payment
+   - Commercial license
+```
+
+---
+
+## 📝 **Purchase Process (Enigma Protector)**
+
+### **Step 1: Visit Website**
+```
+1. Go to: https://enigmaprotector.com/
+2. Click "Purchase" menu
+```
+
+### **Step 2: Select Edition**
+```
+Standard Edition: $199
+- Basic protection
+- Anti-debug
+- ✅ Enough for FlashEASuite
+
+Professional Edition: $399
+- + Code Virtualization
+- + Advanced features
+- Only if need strongest protection
+```
+
+### **Step 3: Choose License Type**
+```
+Personal License: $199
+- 1 developer
+- Commercial use allowed
+- ✅ Choose this
+
+Corporate License: $299
+- Multiple developers
+- For companies
+```
+
+### **Step 4: Payment**
+```
+1. Add to cart
+2. Fill billing info
+3. Choose payment method:
+   - Credit Card (instant)
+   - PayPal (instant)
+   - Wire Transfer (2-3 days)
+   - Crypto (1-2 hours)
+4. Complete payment
+```
+
+### **Step 5: Receive License**
+```
+1. Check email
+2. Download installer
+3. Install Enigma Protector
+4. Enter license key
+5. Done! ✅
+```
+
+---
+
+## 🔧 **Usage Example (Enigma Protector)**
+
+### **Protect DLL:**
+
+```
+1. Open Enigma Protector
+2. Click "Add File"
+3. Select: FlashEA_Security.dll
+4. Configure Options:
+   ☑ Virtual Machine
+   ☑ Anti-Debug
+   ☑ API Hooking Prevention
+   ☐ License System (ไม่ต้อง - เราทำเอง)
+5. Click "Protect"
+6. Output: FlashEA_Security_protected.dll
+7. Rename → FlashEA_Security.dll
+8. Done! ✅
+```
+
+---
+
+## ⚠️ **Important Notes**
+
+### **License Activation:**
+
+```
+✅ Activate once = use forever
+✅ Can transfer between computers
+✅ Deactivate old PC → Activate new PC
+```
+
+### **Updates:**
+
+```
+✅ Free updates for life
+✅ Download from customer portal
+✅ No subscription needed
+```
+
+### **Support:**
+
+```
+✅ Email support
+✅ Forum community
+✅ Documentation
+✅ Video tutorials
+```
+
+---
+
+## 📊 **ROI Calculation**
+
+```
+Cost: $199 (one-time)
+
+Benefit:
+- Prevent crack = ∞ lost sales
+- Protect IP = priceless
+- Professional image = trust
+- Peace of mind = priceless
+
+Break-even:
+- 1 client pays $199+ → ROI positive
+- 10 clients @ $50 each → ROI positive
+- Lifetime protection → ROI excellent
+
+Verdict: ✅ Worth it!
+```
+
+---
+
+## 🔗 **Quick Links Summary**
+
+| Tool | Website | Purchase | Price |
+|------|---------|----------|-------|
+| **Enigma Protector** ⭐ | https://enigmaprotector.com/ | https://enigmaprotector.com/en/purchase.html | **$199** |
+| VMProtect | https://vmpsoft.com/ | https://vmpsoft.com/order/ | $399 |
+| Themida | https://www.oreans.com/themida.php | https://www.oreans.com/buy.php | $799 |
+| Code Virtualizer | https://www.oreans.com/codevirtualizer.php | https://www.oreans.com/buy.php | $599 |
+
+---
+
+## ✅ **Final Recommendation**
+
+```
+For FlashEASuite V2:
+→ ✅ Buy Enigma Protector Standard Edition ($199)
+→ One-time payment
+→ Lifetime license
+→ Commercial use allowed
+→ Good protection/price ratio
+→ Easy to use
+
+Link: https://enigmaprotector.com/en/purchase.html
+```
+
+---
+
+**Questions? Contact tool vendors for pre-sales support.**

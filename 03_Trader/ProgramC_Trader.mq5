@@ -332,10 +332,27 @@ void CheckForPolicies()
 // ========== EXECUTE POLICY FROM PYTHON ==========
 void ExecutePolicy(PolicyMessage &policy)
 {
-   // Skip HOLD actions
+   // ===== CRITICAL: Update Grid state FIRST (before checking action) =====
+   // Grid needs to receive ALL policies, even HOLD actions
+   CStrategyGrid* grid = g_council.GetGridStrategy();
+   if(grid != NULL)
+   {
+      // Create modified policy with formatted symbol
+      PolicyMessage formatted_policy = policy;
+      formatted_policy.symbol = FormatSymbol(policy.symbol);
+      
+      grid.UpdateFromPolicy(formatted_policy);
+      Print("✅ Grid state updated with policy data");
+   }
+   else
+   {
+      Print("⚠️  Grid strategy not found in Council");
+   }
+   
+   // Skip HOLD actions (AFTER updating Grid)
    if(policy.action == 0)
    {
-      Print("⏸️  Action is HOLD - Skipping execution");
+      Print("⏸️  Action is HOLD - Skipping execution (Grid already updated)");
       return;
    }
    
@@ -384,22 +401,6 @@ void ExecutePolicy(PolicyMessage &policy)
    
    Print("   Validated lot size: ", DoubleToString(lot_size, 2));
    
-   // ===== NEW: Update Grid state with policy data =====
-   CStrategyGrid* grid = g_council.GetGridStrategy();
-   if(grid != NULL)
-   {
-      // Create modified policy with formatted symbol
-      PolicyMessage formatted_policy = policy;
-      formatted_policy.symbol = FormatSymbol(policy.symbol);
-      
-      grid.UpdateFromPolicy(formatted_policy);
-      Print("✅ Grid state updated with policy data");
-   }
-   else
-   {
-      Print("⚠️  Grid strategy not found in Council");
-   }
-   
    // Execute via Council (uses Grid strategy if applicable)
    Print("🎯 Sending to Council for execution...");
    g_council.ExecuteTradeWithGrid(order_type);
@@ -414,23 +415,58 @@ void ExecutePolicy(PolicyMessage &policy)
 }
 
 // ========== SEND FEEDBACK TO PYTHON ==========
+//+------------------------------------------------------------------+
+//| Send feedback to Python Brain (12 fields format)                  |
+//+------------------------------------------------------------------+
 void SendFeedback(bool success, long ticket, double profit, string message)
 {
+   // Get position details if ticket exists
+   string symbol = "UNKNOWN";
+   int type = -1;
+   double volume = 0.0;
+   double open_price = 0.0;
+   double sl = 0.0;
+   double tp = 0.0;
+   long magic = 0;
+   string comment = message;
+   
+   if(ticket > 0 && PositionSelectByTicket(ticket))
+   {
+      symbol = PositionGetString(POSITION_SYMBOL);
+      type = (int)PositionGetInteger(POSITION_TYPE);
+      volume = PositionGetDouble(POSITION_VOLUME);
+      open_price = PositionGetDouble(POSITION_PRICE_OPEN);
+      sl = PositionGetDouble(POSITION_SL);
+      tp = PositionGetDouble(POSITION_TP);
+      magic = PositionGetInteger(POSITION_MAGIC);
+      comment = PositionGetString(POSITION_COMMENT);
+      if(comment == "") comment = message;
+   }
+   
    Print("📨 Sending feedback to Python: ", 
          (success ? "SUCCESS" : "FAILED"), 
-         " Ticket: ", ticket,
+         " Ticket: #", ticket,
+         " Symbol: ", symbol,
+         " Type: ", (type == 0 ? "BUY" : (type == 1 ? "SELL" : "UNKNOWN")),
          " Profit: ", DoubleToString(profit, 2));
    
    // Create MessagePack serializer
    CMsgPack msgpack;
    
-   // Simple feedback format: [type=3, success, ticket, profit, message]
-   msgpack.PackArray(5);
-   msgpack.PackInt(3);                    // Type 3 = Feedback
-   msgpack.PackInt(success ? 1 : 0);      // Success flag
-   msgpack.PackInt(ticket);               // Order ticket
-   msgpack.PackDouble(profit);            // Profit amount
-   msgpack.PackString(message);           // Message
+   // ✅ FIXED: Pack 12 fields as Brain expects (was 5 fields before)
+   msgpack.PackArray(12);
+   msgpack.PackInt(100);                              // [0] msg_type: 100 (TRADE_RESULT)
+   msgpack.PackDouble(TimeCurrent() * 1000.0);        // [1] timestamp (milliseconds as double)
+   msgpack.PackDouble((double)ticket);                // [2] ticket (as double - Python converts back to int)
+   msgpack.PackString(symbol);                        // [3] symbol
+   msgpack.PackInt(type);                             // [4] type (0=BUY, 1=SELL)
+   msgpack.PackDouble(volume);                        // [5] volume
+   msgpack.PackDouble(open_price);                    // [6] open_price
+   msgpack.PackDouble(sl);                            // [7] sl
+   msgpack.PackDouble(tp);                            // [8] tp
+   msgpack.PackDouble(profit);                        // [9] profit
+   msgpack.PackInt((int)magic);                       // [10] magic (cast to int)
+   msgpack.PackString(comment);                       // [11] comment
    
    // Get binary data
    uchar feedback_data[];
@@ -440,7 +476,7 @@ void SendFeedback(bool success, long ticket, double profit, string message)
    int sent = g_pub_socket.send_bin(feedback_data, true);
    if(sent > 0)
    {
-      Print("✅ Feedback sent (", sent, " bytes)");
+      Print("✅ Feedback sent (", sent, " bytes) - 12 fields format");
    }
    else
    {

@@ -2,6 +2,9 @@
 //|                                                 Grid/GridCore.mqh |
 //|                                      FlashEASuite V2 - Program C |
 //|                 Elastic Grid Strategy - Core Logic Module         |
+//|                                                                    |
+//|                      Phase 3.5: ATR Ratio Protection ENABLED      |
+//|                      Phase 3.6: Swap Filter ENABLED               |
 //+------------------------------------------------------------------+
 #property strict
 
@@ -11,17 +14,31 @@
 //+------------------------------------------------------------------+
 //| Class: CStrategyGrid                                             |
 //| Elastic Grid Strategy Main Implementation                        |
+//| Phase 3.5: Multi-timeframe ATR Protection                        |
 //+------------------------------------------------------------------+
 class CStrategyGrid : public CGridState
   {
 private:
    // Trading (no Trade.mqh needed - will use built-in functions)
-   int               m_atr_handle;
+   int               m_atr_handle;          // ATR H1 for elastic step
+   int               m_atr_d1_handle;       // NEW: ATR D1 for regime check
    double            m_atr_current;
    double            m_atr_reference;
    double            m_base_step_points;
    double            m_sl_points;
    double            m_tp_points;
+   
+   // Phase 3.5: ATR Ratio Protection
+   double            m_atr_ratio_threshold;  // NEW: Default 0.8 (80%)
+   
+   // Phase 3.6: Swap Filter
+   bool              m_swap_filter_enabled;  // NEW: Enable/disable swap filter
+   
+   // Phase 3.6.1: Performance Optimization
+   datetime          m_last_score_time;      // Last time GetScore was calculated
+   double            m_cached_score;         // Cached score value
+   bool              m_atr_fail_logged;      // Prevent ATR fail spam
+   bool              m_swap_allow_logged;    // Prevent swap allow spam
 
 public:
    //+------------------------------------------------------------------+
@@ -29,13 +46,34 @@ public:
    //+------------------------------------------------------------------+
    CStrategyGrid() : CGridState()
      {
-      // Initialize ATR for elastic step calculation
+      // Initialize ATR for elastic step calculation (H1)
       m_atr_handle = iATR(_Symbol, PERIOD_H1, 14);
+      
+      // NEW: Initialize ATR D1 for regime protection
+      m_atr_d1_handle = iATR(_Symbol, PERIOD_D1, 14);
+      
       m_atr_reference = 100.0;
       m_atr_current = m_atr_reference;
       m_base_step_points = 100.0;
       m_sl_points = 0;
       m_tp_points = 0;
+      
+      // NEW: Set ATR ratio threshold (configurable)
+      m_atr_ratio_threshold = 0.8;  // 80% - if H1/D1 > this, possible trend
+      
+      // NEW: Set swap filter (configurable)
+      m_swap_filter_enabled = true;  // Enable by default
+      
+      // NEW: Initialize cache variables
+      m_last_score_time = 0;
+      m_cached_score = -1.0;
+      m_atr_fail_logged = false;
+      m_swap_allow_logged = false;
+      
+      Print("[Grid] ✅ Phase 3.5 + 3.6 Initialized");
+      Print("   ATR Ratio Protection: Active");
+      Print("   ATR Ratio Threshold: ", DoubleToString(m_atr_ratio_threshold, 2));
+      Print("   Swap Filter: ", m_swap_filter_enabled ? "Enabled" : "Disabled");
      }
    
    //+------------------------------------------------------------------+
@@ -43,17 +81,62 @@ public:
    //+------------------------------------------------------------------+
    double GetScore()
      {
+      // ═════════════════════════════════════════════════════════════
+      // Phase 3.6.1: Performance Optimization - Rate Limiting
+      // ═════════════════════════════════════════════════════════════
+      datetime current_time = TimeCurrent();
+      
+      // Cache score for same second (prevent spam calls)
+      if(current_time == m_last_score_time && m_cached_score >= 0)
+        {
+         return m_cached_score;
+        }
+      
+      // Update cache timestamp
+      m_last_score_time = current_time;
+      
+      // ═════════════════════════════════════════════════════════════
+      // NEW: Safety Check 0 - Multi-timeframe ATR Protection (Phase 3.5)
+      // ═════════════════════════════════════════════════════════════
+      if(!CheckATRRegime())
+        {
+         // ATR ratio too high - possible trend regime
+         // Grid should NOT trade against strong trends
+         m_cached_score = 0.0;
+         return 0.0;
+        }
+      
+      // ═════════════════════════════════════════════════════════════
+      // NEW: Safety Check 0.5 - Swap Filter (Phase 3.6)
+      // ═════════════════════════════════════════════════════════════
+      if(m_swap_filter_enabled && !CheckSwapFilter())
+        {
+         // Swap is negative for this direction
+         // Grid should NOT trade with negative swap
+         m_cached_score = 0.0;
+         return 0.0;
+        }
+      
       // Safety Check 1: Cooldown from Python
       if(m_is_in_cooldown)
+        {
+         m_cached_score = 0.0;
          return 0.0;
+        }
       
       // Safety Check 2: Low Confidence
       if(m_python_confidence < 0.3)
+        {
+         m_cached_score = 0.0;
          return 0.0;
+        }
       
       // Safety Check 3: CSM Data Required
       if(!m_csm_data_received || m_current_direction == GRID_DIR_NONE)
+        {
+         m_cached_score = 0.0;
          return 0.0;
+        }
       
       // Update ATR and elastic step
       UpdateATRAndElasticStep();
@@ -66,8 +149,13 @@ public:
       
       // Check if we need to open new grid level
       if(ShouldOpenNewGridLevel())
-         return CalculateGridScore();
+        {
+         double score = CalculateGridScore();
+         m_cached_score = score;
+         return score;
+        }
       
+      m_cached_score = 0.0;
       return 0.0; // No action needed
      }
    
@@ -175,8 +263,184 @@ public:
             " GBP=", DoubleToString(m_csm_gbp, 2),
             " JPY=", DoubleToString(m_csm_jpy, 2));
      }
+   
+   //+------------------------------------------------------------------+
+   //| NEW: Set ATR Ratio Threshold (Configurable)                     |
+   //+------------------------------------------------------------------+
+   void SetATRRatioThreshold(double threshold)
+     {
+      if(threshold > 0 && threshold <= 1.0)
+        {
+         m_atr_ratio_threshold = threshold;
+         Print("[Grid] ✅ ATR Ratio Threshold updated: ", DoubleToString(threshold, 2));
+        }
+      else
+        {
+         Print("[Grid] ⚠️ Invalid ATR Ratio Threshold (", threshold, ") - keeping default: ", 
+               DoubleToString(m_atr_ratio_threshold, 2));
+        }
+     }
+   
+   //+------------------------------------------------------------------+
+   //| NEW: Set Swap Filter Enabled (Configurable) - Phase 3.6         |
+   //+------------------------------------------------------------------+
+   void SetSwapFilterEnabled(bool enabled)
+     {
+      m_swap_filter_enabled = enabled;
+      Print("[Grid] ✅ Swap Filter: ", enabled ? "Enabled" : "Disabled");
+     }
 
 private:
+   //+------------------------------------------------------------------+
+   //| NEW: Check ATR Regime (Phase 3.5)                               |
+   //| Returns: true if safe to trade, false if regime protection active|
+   //+------------------------------------------------------------------+
+   bool CheckATRRegime()
+     {
+      // Get ATR H1
+      double atr_h1_buffer[1];
+      if(CopyBuffer(m_atr_handle, 0, 0, 1, atr_h1_buffer) <= 0)
+        {
+         // Log only first time to avoid spam
+         if(!m_atr_fail_logged)
+           {
+            Print("[Grid] ⚠️ Failed to get ATR H1 - allowing trade (safe default)");
+            m_atr_fail_logged = true;
+           }
+         return true;  // If can't get data, don't block
+        }
+      
+      // Get ATR D1
+      double atr_d1_buffer[1];
+      if(CopyBuffer(m_atr_d1_handle, 0, 0, 1, atr_d1_buffer) <= 0)
+        {
+         // Log only first time to avoid spam
+         if(!m_atr_fail_logged)
+           {
+            Print("[Grid] ⚠️ Failed to get ATR D1 - allowing trade (safe default)");
+            m_atr_fail_logged = true;
+           }
+         return true;  // If can't get data, don't block
+        }
+      
+      // Reset flag when we successfully get data
+      m_atr_fail_logged = false;
+      
+      double atr_h1 = atr_h1_buffer[0];
+      double atr_d1 = atr_d1_buffer[0];
+      
+      // Prevent division by zero
+      if(atr_d1 <= 0)
+        {
+         // Rare case, log once
+         if(!m_atr_fail_logged)
+           {
+            Print("[Grid] ⚠️ ATR D1 is zero - allowing trade");
+            m_atr_fail_logged = true;
+           }
+         return true;
+        }
+      
+      // Calculate ratio
+      double atr_ratio = atr_h1 / atr_d1;
+      
+      // Check if H1 volatility is too high relative to D1
+      // High ratio means H1 is very volatile compared to D1 = possible trend regime
+      if(atr_ratio > m_atr_ratio_threshold)
+        {
+         Print("[Grid] 🛡️ ATR REGIME PROTECTION ACTIVE");
+         Print("   ATR H1: ", DoubleToString(atr_h1, 5));
+         Print("   ATR D1: ", DoubleToString(atr_d1, 5));
+         Print("   Ratio: ", DoubleToString(atr_ratio, 3), " (threshold: ", 
+               DoubleToString(m_atr_ratio_threshold, 2), ")");
+         Print("   🚫 Grid disabled - possible trend regime detected");
+         return false;  // Block grid trading
+        }
+      
+      // Ratio is OK - safe to trade
+      Print("[Grid] ✅ ATR regime check passed");
+      Print("   ATR H1: ", DoubleToString(atr_h1, 5), 
+            " | D1: ", DoubleToString(atr_d1, 5), 
+            " | Ratio: ", DoubleToString(atr_ratio, 3), 
+            " (OK < ", DoubleToString(m_atr_ratio_threshold, 2), ")");
+      
+      return true;  // Safe to trade
+     }
+   
+   //+------------------------------------------------------------------+
+   //| NEW: Check Swap Filter (Phase 3.6)                              |
+   //| Returns: true if swap is positive, false if negative            |
+   //+------------------------------------------------------------------+
+   bool CheckSwapFilter()
+     {
+      // Get swap values for current symbol
+      double swap_long = SymbolInfoDouble(m_target_symbol, SYMBOL_SWAP_LONG);
+      double swap_short = SymbolInfoDouble(m_target_symbol, SYMBOL_SWAP_SHORT);
+      
+      // Determine which direction we're trading
+      bool is_buy = (m_current_direction == GRID_DIR_BUY);
+      bool is_sell = (m_current_direction == GRID_DIR_SELL);
+      
+      // Check if our direction has positive swap
+      if(is_buy)
+        {
+         if(swap_long <= 0)
+           {
+            // Only log if this is state change (was allowed, now blocked)
+            if(!m_swap_allow_logged)
+              {
+               Print("[Grid] 🚫 SWAP FILTER BLOCKED");
+               Print("   Direction: BUY");
+               Print("   Swap Long: ", DoubleToString(swap_long, 2), " (NEGATIVE)");
+               Print("   Swap Short: ", DoubleToString(swap_short, 2));
+               Print("   Grid disabled - negative swap for BUY direction");
+              }
+            m_swap_allow_logged = false;
+            return false;
+           }
+         
+         // Only log first time or after being blocked
+         if(!m_swap_allow_logged)
+           {
+            Print("[Grid] ✅ Swap filter passed");
+            Print("   Direction: BUY | Swap Long: ", DoubleToString(swap_long, 2), " (POSITIVE ✅)");
+            m_swap_allow_logged = true;
+           }
+         return true;
+        }
+      
+      if(is_sell)
+        {
+         if(swap_short <= 0)
+           {
+            // Only log if this is state change
+            if(!m_swap_allow_logged)
+              {
+               Print("[Grid] 🚫 SWAP FILTER BLOCKED");
+               Print("   Direction: SELL");
+               Print("   Swap Long: ", DoubleToString(swap_long, 2));
+               Print("   Swap Short: ", DoubleToString(swap_short, 2), " (NEGATIVE)");
+               Print("   Grid disabled - negative swap for SELL direction");
+              }
+            m_swap_allow_logged = false;
+            return false;
+           }
+         
+         // Only log first time or after being blocked
+         if(!m_swap_allow_logged)
+           {
+            Print("[Grid] ✅ Swap filter passed");
+            Print("   Direction: SELL | Swap Short: ", DoubleToString(swap_short, 2), " (POSITIVE ✅)");
+            m_swap_allow_logged = true;
+           }
+         return true;
+        }
+      
+      // No direction set - allow silently (normal for HOLD action)
+      // Don't log to avoid spam when action = 0 (HOLD)
+      return true;
+     }
+   
    //+------------------------------------------------------------------+
    //| Update ATR and Calculate Elastic Step                           |
    //+------------------------------------------------------------------+

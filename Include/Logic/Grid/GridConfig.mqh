@@ -68,6 +68,9 @@ public:
    CGridConfig()
      {
       // Default Configuration
+      // Set Strategy Name (CRITICAL for StrategyManager to find Grid!)
+      m_name = "ElasticGrid";
+      
       m_max_grid_levels = 5;
       m_base_lot = 0.01;
       

@@ -1,0 +1,456 @@
+# 🎯 FlashEASuite V2 - Phase Breakdown & Task Assignment
+
+**Total Phases:** 7  
+**Parallel Tracks:** 3 (Python, MQL5, DLL)  
+**Estimated Time:** 2-3 weeks
+
+---
+
+## 🏗️ **Parallel Work Structure**
+
+```
+Track A (Python Brain) ←→ Track B (MQL5 EA) ←→ Track C (DLL)
+        │                        │                    │
+        └────────── Shared: SECURITY_MASTER_SPEC.md ──┘
+```
+
+---
+
+## 📋 **PHASE 1: Core License System**
+
+### **Track A: Python License Generator**
+
+**Chat Assignment:** `CHAT_PYTHON_1`
+
+**Deliverables:**
+```
+02_Brain/tools/license_generator/
+├── generate_license.py
+├── sign_license.py
+├── verify_license.py
+├── keys/
+│   ├── server_private.pem (SECRET!)
+│   └── server_public.pem
+└── config/
+    └── license_templates.json
+```
+
+**Tasks:**
+1. Generate RSA 2048-bit key pair
+2. Create License.key generator
+   - Input: client info (name, email, hwid)
+   - Output: License.key (JSON + signature)
+3. Create License verifier (for testing)
+4. Create CLI tool for admin use
+
+**Dependencies:**
+- `cryptography` library
+- SECURITY_MASTER_SPEC.md
+
+**Output Files for Others:**
+```
+→ server_public.pem (send to Track B)
+→ example_license.key (for testing)
+```
+
+---
+
+### **Track B: MQL5 License Verification**
+
+**Chat Assignment:** `CHAT_MQL5_1`
+
+**Deliverables:**
+```
+Include/Security/
+├── ClientAuth.mqh
+├── HWIDGenerator.mqh
+├── LicenseVerifier.mqh
+└── SlotManager.mqh
+```
+
+**Tasks:**
+1. Create HWID generator
+   - CPU Serial (Win32 API)
+   - Disk Volume Serial
+   - Machine GUID
+   - MT5 Path hash
+2. Create Fingerprint generator
+3. Create License reader & parser (JSON)
+4. Create RSA signature verifier
+5. Create Slot manager (track used slots)
+6. Create local cache (encrypted)
+
+**Dependencies:**
+- server_public.pem (from Track A)
+- SECURITY_MASTER_SPEC.md
+
+**Include Paths:**
+```cpp
+// In ProgramC_Trader.mq5:
+#include "../Include/Security/ClientAuth.mqh"
+```
+
+---
+
+## 📋 **PHASE 2: Policy Security (Anti-Replay)**
+
+### **Track A: Python Policy Generator**
+
+**Chat Assignment:** `CHAT_PYTHON_2`
+
+**Deliverables:**
+```
+02_Brain/core/policy/
+├── policy_generator.py
+├── policy_signer.py
+├── nonce_manager.py
+└── sequence_tracker.py
+```
+
+**Tasks:**
+1. Modify PolicyGenerator to add:
+   - `sequence` (per client)
+   - `nonce` (UUID v4)
+   - `timestamp` (Unix time)
+2. Sign policy with Private Key
+3. Track sequence per client_id
+4. Store sequence in database/file
+
+**Dependencies:**
+- server_private.pem
+- SECURITY_MASTER_SPEC.md
+- Existing strategy/policy.py
+
+---
+
+### **Track B: MQL5 Policy Verifier**
+
+**Chat Assignment:** `CHAT_MQL5_2`
+
+**Deliverables:**
+```
+Include/Network/
+├── PolicyVerifier.mqh
+├── NonceManager.mqh
+└── SequenceTracker.mqh
+```
+
+**Tasks:**
+1. Create Nonce manager
+   - Store used nonces (array/file)
+   - Check duplicate
+   - Clean old nonces (>1 hour)
+2. Create Sequence tracker
+   - Track last sequence per symbol
+   - Reject out-of-order
+3. Modify PolicyManager to verify:
+   - Timestamp (< 5 minutes)
+   - Nonce (not used)
+   - Sequence (must increment)
+   - Signature (RSA verify)
+
+**Dependencies:**
+- server_public.pem
+- SECURITY_MASTER_SPEC.md
+- Existing Logic/PolicyManager.mqh
+
+---
+
+## 📋 **PHASE 3: DLL Protection Layer**
+
+### **Track C: DLL Development**
+
+**Chat Assignment:** `CHAT_DLL_1`
+
+**Deliverables:**
+```
+FlashEA_Security/
+├── Security.cpp
+├── Security.h
+├── TradingParams.cpp
+├── TradingParams.h
+├── Challenge.cpp
+├── Checksum.cpp
+└── FlashEA_Security.dll
+```
+
+**Tasks:**
+1. **CheckLicense()**
+   - Read License.key
+   - Verify RSA signature
+   - Check HWID
+   - Check expiry
+   
+2. **GetHWID()**
+   - Get CPU Serial (WMI)
+   - Get Disk Serial
+   - Get Machine GUID (Registry)
+   - Return SHA256 hash
+
+3. **CalculateTradingParams()** (CRITICAL!)
+   - Input: symbol, balance, license_path
+   - Calculate: lot_size, grid_step, max_orders, tp, sl
+   - Encrypt output
+   - Return params
+
+4. **VerifyPolicy()**
+   - Parse JSON
+   - Verify RSA signature
+   - Return valid/invalid
+
+5. **VerifyChallenge()** (Anti-Mock)
+   - Compute HASH(random + license_secret + timestamp)
+   - Compare with expected
+   - Return valid/invalid
+
+6. **VerifyDLLIntegrity()**
+   - Calculate self-checksum
+   - Compare with hardcoded hash
+   - Return valid/invalid
+
+**Dependencies:**
+- OpenSSL (for RSA)
+- RapidJSON (for JSON parsing)
+- Windows API (for HWID)
+
+**Include Paths in MQL5:**
+```cpp
+#import "FlashEA_Security.dll"
+   int CheckLicense(string license_path);
+   void GetHWID(string &output);
+   int CalculateTradingParams(string license, string symbol, 
+                              double balance, TradingParams &output);
+#import
+```
+
+---
+
+### **Track B: MQL5 DLL Wrapper**
+
+**Chat Assignment:** `CHAT_MQL5_3`
+
+**Deliverables:**
+```
+Include/Security/
+├── DLLWrapper.mqh
+└── TradingParamsStruct.mqh
+```
+
+**Tasks:**
+1. Create TradingParams struct (match DLL)
+2. Create wrapper functions:
+   - ValidateLicense()
+   - GetSystemHWID()
+   - GetTradingParams()
+   - VerifyPolicySignature()
+   - ChallengeDLL() (random verification)
+3. Add periodic DLL verification (every 5 minutes)
+
+---
+
+## 📋 **PHASE 4: Hidden TP/SL Module**
+
+**Chat Assignment:** `CHAT_MQL5_4`
+
+**Deliverables:**
+```
+Include/Logic/Common/
+├── HiddenTPSL.mqh
+└── VirtualLevels.mqh
+```
+
+**Tasks:**
+1. Extract Hidden TP/SL logic from Grid
+2. Create universal module:
+   - ManageHiddenTP()
+   - ManageHiddenSL()
+   - CalculateVirtualLevels() (ATR-based)
+3. Support all strategies (Grid, Spike, Trend, Range)
+
+**Dependencies:**
+- Existing Grid/GridExecution.mqh
+- Existing Strategy_Spike.mqh
+
+---
+
+## 📋 **PHASE 5: Trailing Stop Module**
+
+**Chat Assignment:** `CHAT_MQL5_5`
+
+**Deliverables:**
+```
+Include/Logic/Common/
+├── TrailingStop.mqh
+└── TrailCalculator.mqh
+```
+
+**Tasks:**
+1. Extract Trailing Stop from GridExecution
+2. Create universal module:
+   - ActivateTrailing()
+   - UpdateTrailingStop()
+   - CalculateTrailDistance() (ATR * 0.5)
+3. Support all strategies
+
+**Dependencies:**
+- Existing Grid/GridStandalone/GridExecution.mqh
+
+---
+
+## 📋 **PHASE 6: Symbol Intelligence**
+
+### **Track A: Python Symbol Selector**
+
+**Chat Assignment:** `CHAT_PYTHON_3`
+
+**Deliverables:**
+```
+02_Brain/core/intelligence/
+├── symbol_selector.py
+├── symbol_scorer.py
+└── market_analyzer.py
+```
+
+**Tasks:**
+1. Rank symbols by:
+   - Volatility (ATR)
+   - Trend strength (ADX)
+   - Spread quality
+   - Tick volume
+2. Select top N symbols (e.g., 5)
+3. Send to Policy
+4. Update scores every hour
+
+---
+
+### **Track B: MQL5 Symbol Scanner**
+
+**Chat Assignment:** `CHAT_MQL5_6`
+
+**Deliverables:**
+```
+Include/Utils/
+└── SymbolScanner.mqh (update existing)
+```
+
+**Tasks:**
+1. Receive symbol list from Brain
+2. Fallback: use 28 pairs + gold
+3. Handle prefix/suffix
+4. Monitor symbol availability
+
+---
+
+## 📋 **PHASE 7: CSV Reporting Enhancement**
+
+**Chat Assignment:** `CHAT_PYTHON_4`
+
+**Deliverables:**
+```
+02_Brain/reporting/
+├── weekly_report.py
+├── monthly_report.py
+├── yearly_report.py
+└── scheduler.py
+```
+
+**Tasks:**
+1. Extend generate_report.py
+2. Create weekly aggregation
+3. Create monthly aggregation
+4. Create yearly aggregation
+5. Add scheduler (Windows Task Scheduler / cron)
+
+---
+
+## 🔄 **Integration Testing**
+
+**Chat Assignment:** `CHAT_INTEGRATION`
+
+**Tasks:**
+1. Test License flow:
+   - Generate → Verify → Use
+2. Test Policy flow:
+   - Generate → Sign → Send → Verify → Execute
+3. Test DLL calls:
+   - CheckLicense → CalculateParams → Execute
+4. Test Replay attack:
+   - Send old policy → Should reject
+5. Test Nonce reuse:
+   - Send same policy twice → Should reject
+6. Test Mock DLL:
+   - Replace DLL → Should fail integrity check
+7. Test Grace Period:
+   - REVOKE → Grace → Limited Mode
+
+---
+
+## 📦 **Deliverables Summary**
+
+### **Files for Shared Use:**
+
+```
+SECURITY_MASTER_SPEC.md      ← All chats read this
+PHASE_BREAKDOWN.md           ← This file
+DLL_SPECIFICATION.md         ← Track C → Track B
+keys/server_public.pem       ← Track A → Track B
+example_license.key          ← Track A → All (testing)
+TradingParams.h              ← Track C → Track B
+```
+
+---
+
+## 📅 **Timeline Estimate**
+
+| Phase | Track A | Track B | Track C | Total |
+|-------|---------|---------|---------|-------|
+| **Phase 1** | 2 days | 3 days | - | 3 days |
+| **Phase 2** | 1 day | 2 days | - | 2 days |
+| **Phase 3** | - | 2 days | 4 days | 4 days |
+| **Phase 4** | - | 2 days | - | 2 days |
+| **Phase 5** | - | 2 days | - | 2 days |
+| **Phase 6** | 2 days | 1 day | - | 2 days |
+| **Phase 7** | 1 day | - | - | 1 day |
+| **Integration** | 2 days | 2 days | 1 day | 3 days |
+| **Total** | 8 days | 14 days | 5 days | **~3 weeks** |
+
+*Note: Phases 1-2, 4-5, 6-7 can run in parallel*
+
+---
+
+## 🚀 **Deployment Checklist**
+
+```
+□ Phase 1: License system tested
+□ Phase 2: Policy security tested
+□ Phase 3: DLL protection tested
+□ Phase 4: Hidden TP/SL integrated
+□ Phase 5: Trailing Stop integrated
+□ Phase 6: Symbol intelligence working
+□ Phase 7: Reports automated
+□ Integration: All tests passed
+□ Documentation: Complete
+□ User Guide: Written
+```
+
+---
+
+## 📞 **Communication Between Chats**
+
+### **Handoff Points:**
+
+1. **Track A → Track B:**
+   - Files: `server_public.pem`, `example_license.key`
+   - Trigger: After Phase 1 Track A complete
+
+2. **Track C → Track B:**
+   - Files: `FlashEA_Security.dll`, `TradingParams.h`
+   - Trigger: After Phase 3 Track C complete
+
+3. **Track B → Track A:**
+   - Files: Test results, logs
+   - Trigger: After each phase integration
+
+---
+
+**All tracks must coordinate via this document and SECURITY_MASTER_SPEC.md**

@@ -174,7 +174,7 @@ class StrategyEngineThreaded(threading.Thread):
                     
                     # Generate policy if signal exists
                     if signal:
-                        symbol = tick_data.get('symbol', 'XAUUSD')
+                        symbol = tick_data.get('symbol', 'XAUUSD.tp')  # ✅ FIXED: Added .tp suffix
                         self.policy_publisher.publish_policy(
                             signal,
                             symbol,
@@ -187,12 +187,31 @@ class StrategyEngineThreaded(threading.Thread):
                 current_time = time.time()
                 if current_time - last_grid_policy_time >= GRID_POLICY_INTERVAL:
                     from .policy import publish_grid_policy
-                    publish_grid_policy(
-                        'XAUUSD',
-                        self.pub_socket,
-                        self.feedback_processor
-                    )
-                    self.policy_count += 1
+                    
+                    # ✅ FIXED: Get current price from latest XAUUSD tick ONLY
+                    current_price = 0.0  # Default fallback
+                    target_symbol = 'XAUUSD.tp'
+                    
+                    # Search backwards through buffer for most recent XAUUSD tick
+                    for tick in reversed(self.tick_buffer):
+                        if tick.get('symbol') == target_symbol:
+                            if 'bid' in tick and 'ask' in tick:
+                                # Use mid price (average of bid and ask)
+                                current_price = (tick['bid'] + tick['ask']) / 2.0
+                                break
+                    
+                    # Only publish if we have a valid price
+                    if current_price > 0:
+                        publish_grid_policy(
+                            target_symbol,
+                            self.pub_socket,
+                            self.feedback_processor,
+                            current_price=current_price
+                        )
+                        self.policy_count += 1
+                    else:
+                        print(f"⚠️ No valid price for {target_symbol}, skipping policy")
+                    
                     last_grid_policy_time = current_time
                 
                 # Step 4: Print dashboard

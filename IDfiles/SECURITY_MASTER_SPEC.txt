@@ -1,0 +1,404 @@
+# 🔐 FlashEASuite V2 - Security Master Specification
+
+**Version:** 2.0  
+**Date:** 2026-01-21  
+**Status:** Implementation Phase
+
+---
+
+## 📊 **System Overview**
+
+FlashEASuite V2 = 3-component HFT system:
+- **Program A (FeederEA)**: MQL5 data collector → ZMQ port 7777
+- **Program B (Brain)**: Python AI analyzer (4 workers) → ZMQ port 7778
+- **Program C (Trader)**: MQL5 order executor → ZMQ port 7779
+
+---
+
+## 🔐 **Security Architecture (5 Layers)**
+
+```
+Layer 1: License Verification (Digital Signature + HWID)
+Layer 2: Policy Security (Anti-Replay Attack)
+Layer 3: DLL Protection (Anti-Mock/Fake)
+Layer 4: Optional Online Check (Passive, monthly)
+Layer 5: Feature Downgrade (Soft Kill)
+```
+
+---
+
+## 📋 **License Structure (JSON)**
+
+```json
+{
+  "license_id": "FLASH-2026-AAAA-XXXX",
+  "product": "FlashEASuite-Pro",
+  "license_type": "reporting",
+  
+  "hardware_binding": {
+    "hwid": "SHA256(CPU+Disk+MachineGUID)",
+    "max_slots": 5,
+    "used_slots": [
+      {
+        "slot_id": 1,
+        "fingerprint": "SHA256(HWID+Account+Server+MT5Path)",
+        "activated_date": "2026-01-15T10:30:00Z"
+      }
+    ]
+  },
+  
+  "features": {
+    "strategies": ["Grid", "Spike", "Trend", "Range"],
+    "hidden_tpsl": true,
+    "trailing_stop": true,
+    "multi_symbol": true,
+    "max_symbols": 10
+  },
+  
+  "validity": {
+    "issued_date": "2026-01-15",
+    "expiry_date": "2030-12-31",
+    "grace_days": 7
+  },
+  
+  "brain_config": {
+    "can_receive_policy": true,
+    "policy_level": "FULL",
+    "feedback_enabled": true
+  },
+  
+  "signature": "RSA_2048_SIGNATURE_BASE64"
+}
+```
+
+---
+
+## 📋 **Policy Structure (JSON)**
+
+```json
+{
+  "symbol": "XAUUSD",
+  "strategy": "Grid",
+  "sequence": 12345,
+  "timestamp": 1737450000,
+  "nonce": "550e8400-e29b-41d4-a716-446655440000",
+  
+  "params": {
+    "entry_price": 2650.00,
+    "lot_size": 0.05,
+    "grid_levels": [2640, 2645, 2650, 2655, 2660],
+    "tp": 2660.00,
+    "sl": 2640.00
+  },
+  
+  "indicator_params": {
+    "atr_period": 14,
+    "ema_fast": 12,
+    "ema_slow": 26
+  },
+  
+  "license_id": "FLASH-2026-AAAA-XXXX",
+  "signature": "RSA_2048_SIGNATURE_BASE64"
+}
+```
+
+---
+
+## 🔑 **HWID Generation Algorithm**
+
+```cpp
+string GenerateHWID()
+{
+    string components = "";
+    
+    // 1. CPU Serial (Win32 API)
+    components += GetCPUSerial();
+    
+    // 2. Disk Volume Serial
+    components += GetDiskVolumeSerial();
+    
+    // 3. Windows Machine GUID
+    components += GetMachineGUID();
+    
+    // 4. MT5 Installation Path Hash
+    components += HashString(TerminalInfoString(TERMINAL_PATH));
+    
+    // SHA256 Hash
+    return SHA256(components);
+}
+
+string GenerateFingerprint()
+{
+    string fp = "";
+    fp += GetHWID();
+    fp += IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN));
+    fp += AccountInfoString(ACCOUNT_SERVER);
+    fp += HashString(TerminalInfoString(TERMINAL_PATH));
+    
+    return SHA256(fp);
+}
+```
+
+---
+
+## 🛡️ **Policy Security Rules**
+
+### **Anti-Replay Attack:**
+
+1. **Timestamp Tolerance:** 5 minutes (300 seconds)
+   ```cpp
+   long policy_age = TimeCurrent() - policy.timestamp;
+   if(policy_age > 300) return false;  // Too old
+   if(policy_age < -60) return false;  // From future
+   ```
+
+2. **Nonce (One-Time Use):**
+   ```cpp
+   // Policy must have unique nonce (UUID v4)
+   if(IsNonceUsed(policy.nonce)) return false;
+   
+   // After verification, store nonce
+   StoreNonce(policy.nonce);
+   ```
+
+3. **Sequence Number:**
+   ```cpp
+   // Policy sequence must increment
+   if(policy.sequence <= g_last_sequence) return false;
+   
+   // Update after verification
+   g_last_sequence = policy.sequence;
+   ```
+
+---
+
+## 🛡️ **DLL Protection Strategy**
+
+### **Critical Functions in DLL:**
+
+```cpp
+// FlashEA_Security.dll
+
+// 1. License Verification
+extern "C" __declspec(dllexport)
+int CheckLicense(const wchar_t* license_path);
+
+// 2. HWID Generation
+extern "C" __declspec(dllexport)
+void GetHWID(wchar_t* output, int max_len);
+
+// 3. Trading Parameters Calculation (CRITICAL!)
+extern "C" __declspec(dllexport)
+int CalculateTradingParams(
+    const wchar_t* license_path,
+    const char* symbol,
+    double account_balance,
+    TradingParams* output
+);
+
+// 4. Policy Verification
+extern "C" __declspec(dllexport)
+int VerifyPolicy(const char* policy_json, const char* public_key);
+
+// 5. Challenge-Response (Anti-Mock)
+extern "C" __declspec(dllexport)
+int VerifyChallenge(Challenge* challenge, Response* response);
+
+// 6. Self-Checksum
+extern "C" __declspec(dllexport)
+int VerifyDLLIntegrity();
+```
+
+### **TradingParams Structure:**
+
+```cpp
+struct TradingParams {
+    double lot_size;
+    double grid_step;
+    int max_orders;
+    double tp_points;
+    double sl_points;
+    uint32_t checksum;  // Encrypted
+};
+```
+
+---
+
+## ⏰ **Grace Period Configuration**
+
+```python
+GRACE_PERIOD_CONFIG = {
+    "standalone": 0,      # No grace (offline 100%)
+    "trial": 3,           # 3 days
+    "reporting": 7,       # 7 days (HFT - must connect often)
+    "premium": 14,        # 14 days (paid more)
+}
+```
+
+---
+
+## 🔒 **Limited Mode Settings**
+
+```cpp
+// When License is REVOKED after grace period
+struct LimitedModeConfig {
+    double max_lot = 0.01;
+    int max_symbols = 1;           // EURUSD only
+    string allowed_strategies[] = {"Grid"};
+    int max_orders = 5;
+    bool hidden_tpsl = false;
+    bool trailing_stop = false;
+    string timeframe = "M15";
+};
+```
+
+---
+
+## 📂 **Include Path Rules (CRITICAL)**
+
+### **DO:**
+```cpp
+// ✅ Correct - Relative path with quotes
+#include "../Include/Security/ClientAuth.mqh"
+#include "../Include/Network/Protocol.mqh"
+#include "../Include/Logic/Common/HiddenTPSL.mqh"
+```
+
+### **DON'T:**
+```cpp
+// ❌ Wrong - System include syntax
+#include <Security/ClientAuth.mqh>
+
+// ❌ Wrong - Absolute path
+#include "C:/Users/.../Include/Security/ClientAuth.mqh"
+```
+
+### **Structure:**
+```
+FlashEASuite_V2/
+├── 03_Trader/
+│   └── ProgramC_Trader.mq5
+│       → #include "../Include/Security/ClientAuth.mqh"
+│
+└── Include/
+    ├── Security/
+    │   ├── ClientAuth.mqh
+    │   └── DLLWrapper.mqh
+    ├── Network/
+    │   └── Protocol/
+    ├── Logic/
+    │   └── Common/
+    └── Risk/
+```
+
+---
+
+## 🔐 **RSA Key Generation (Python)**
+
+```python
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+
+# Generate RSA key pair (2048-bit)
+private_key = rsa.generate_private_key(
+    public_exponent=65537,
+    key_size=2048
+)
+
+public_key = private_key.public_key()
+
+# Save Private Key (Server only - SECRET!)
+with open("server_private.pem", "wb") as f:
+    f.write(private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption()
+    ))
+
+# Save Public Key (Embed in EA)
+with open("server_public.pem", "wb") as f:
+    f.write(public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    ))
+```
+
+---
+
+## 🎯 **Symbol List (28 Pairs + Gold)**
+
+```cpp
+string g_symbol_list[] = {
+    // Majors
+    "EURUSD", "GBPUSD", "USDJPY", "USDCHF",
+    "AUDUSD", "USDCAD", "NZDUSD",
+    
+    // Crosses
+    "EURJPY", "GBPJPY", "EURGBP", "EURAUD",
+    "EURCHF", "EURCAD", "GBPAUD", "GBPCHF",
+    "GBPCAD", "GBPNZD", "AUDJPY", "AUDNZD",
+    "AUDCAD", "AUDCHF", "CADJPY", "CHFJPY",
+    "NZDJPY", "NZDCAD", "NZDCHF", "CADCHF",
+    
+    // Gold
+    "XAUUSD"
+};
+
+// Symbol prefix/suffix handling
+string GetFullSymbol(string base_symbol)
+{
+    string prefix = "";  // e.g., "FX_"
+    string suffix = "";  // e.g., ".tp", "_m"
+    
+    return prefix + base_symbol + suffix;
+}
+```
+
+---
+
+## 📊 **Performance Requirements**
+
+```
+Target Metrics:
+- License verification: < 100ms
+- Policy verification: < 10ms
+- DLL calls: < 5ms
+- HWID generation: < 50ms
+- Challenge-Response: < 20ms
+```
+
+---
+
+## ⚠️ **Security Warnings**
+
+### **CRITICAL - NEVER DO:**
+
+1. ❌ Store Private Key in EA
+2. ❌ Store License Secret in plaintext
+3. ❌ Use Account Number as sole identifier
+4. ❌ Skip signature verification
+5. ❌ Accept old Policy without Nonce check
+6. ❌ Trust DLL return value without verification
+7. ❌ Use system include syntax for project files
+
+### **MUST DO:**
+
+1. ✅ Verify RSA signature on every License/Policy
+2. ✅ Check HWID on every EA start
+3. ✅ Store Nonce to prevent replay
+4. ✅ Use relative include paths
+5. ✅ Implement Challenge-Response for DLL
+6. ✅ Encrypt sensitive data in memory
+7. ✅ Log all security events
+
+---
+
+## 📞 **Contact & Support**
+
+- Technical Issues: [to be defined]
+- License Issues: [to be defined]
+- Security Concerns: [to be defined]
+
+---
+
+**This is the MASTER REFERENCE for all implementation phases.**

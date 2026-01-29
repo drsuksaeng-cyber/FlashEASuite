@@ -1,0 +1,76 @@
+================================================= 
+FlashEA Security - Diagnostic Report 
+================================================= 
+ 
+[1] DLL Source Directory 
+Current: C:\Users\drsuk\AppData\Roaming\MetaQuotes\Terminal\B2C22A9C2EA0D03B7096C9AF7E852052\MQL5\Experts\FlashEASuite_V2\04_DLL\FlashEA_Security 
+ 
+ERROR: FlashEA_Security.dll NOT FOUND! 
+ 
+[2] MT5 Libraries 
+Path: C:\Users\drsuk\AppData\Roaming\MetaQuotes\Terminal\B2C22A9C2EA0D03B7096C9AF7E852052\MQL5\Libraries\ 
+ 
+ Volume in drive C is OS
+ Volume Serial Number is E211-5DF4
+
+ Directory of C:\Users\drsuk\AppData\Roaming\MetaQuotes\Terminal\B2C22A9C2EA0D03B7096C9AF7E852052\MQL5\Libraries
+
+01/26/2026  06:22 PM           101,888 FlashEA_Security.dll
+               1 File(s)        101,888 bytes
+               0 Dir(s)  767,265,673,216 bytes free
+OK: libssl-3-x64.dll found 
+OK: libcrypto-3-x64.dll found 
+ 
+[3] License File 
+Path: C:\Users\drsuk\AppData\Roaming\MetaQuotes\Terminal\B2C22A9C2EA0D03B7096C9AF7E852052\MQL5\Files\ 
+ 
+ Volume in drive C is OS
+ Volume Serial Number is E211-5DF4
+
+ Directory of C:\Users\drsuk\AppData\Roaming\MetaQuotes\Terminal\B2C22A9C2EA0D03B7096C9AF7E852052\MQL5\Files
+
+01/26/2026  05:01 PM             1,046 License.key
+               1 File(s)          1,046 bytes
+               0 Dir(s)  767,265,673,216 bytes free
+ 
+First few lines: 
+{
+  "license_id": "FLASH-2026-REAL-0001",
+  "product": "FlashEASuite-Pro",
+  "license_type": "reporting",
+  "hardware_binding": {
+    "hwid": "965596efcea12869318bbc8099ed1b3d5e102e639c762d18192ebae3b19db2e0",
+    "max_slots": 5,
+    "used_slots": []
+  },
+  "features": {
+    "strategies": [
+      "Grid",
+      "Spike",
+      "Trend",
+      "Range"
+    ],
+    "hidden_tpsl": true,
+    "trailing_stop": true,
+    "multi_symbol": true,
+    "max_symbols": 10
+  },
+  "validity": {
+    "issued_date": "2026-01-26",
+    "expiry_date": "2027-01-26",
+    "grace_days": 7
+  },
+  "brain_config": {
+    "can_receive_policy": true,
+    "policy_level": "FULL",
+    "feedback_enabled": true
+  },
+  "signature": "rjLx/y31qM8AVzg3qQ81EGGz6aq6YRVGBdzWliBzpempKE5a7LgLrpOKEseQrK2osiVdeky1zhsnIkf+VUTolHcWY1seF4cw02pSOvEBRgX6IxB3NbW0gPWNON8wA2S/SD+Yc76F55LytXbyylpCQG+5ZbzHaklykJMmq9slVb9yQyohved9inDDem3hYUILuiPBTxMEtfH8wgGibhwjxxDIlQlT749eMQPCFdcFcNdHMLgbf1D80I8E8e5WoLY3m6UVzRwy2eJ1PBZ+3Ww9r1Zpj8AWOy2afWgDT9dIaXH0RdN0cJa4N1ddEx8F4Nsa8+fBTSjDC6Yt4KnbTqINDg=="
+}
+ 
+[4] Debug Log 
+No debug log found 
+ 
+================================================= 
+End of Report 
+================================================= 
