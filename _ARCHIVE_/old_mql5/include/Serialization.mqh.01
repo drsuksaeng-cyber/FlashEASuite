@@ -1,0 +1,479 @@
+//+------------------------------------------------------------------+
+//|                                        Protocol/Serialization.mqh |
+//|                                    FlashEASuite V2 - Program C   |
+//|                         MessagePack Manual Parsing (No Library)  |
+//|                     MATCHES Python engine.py format v2.3         |
+//|                     FIXED: IEEE 754 + MQL5 Syntax Compatible     |
+//+------------------------------------------------------------------+
+#property copyright "Dr. Suksaeng Kukanok"
+#property link      "https://www.mql5.com"
+#property strict
+
+//+------------------------------------------------------------------+
+//| MessagePack Manual Parser                                         |
+//| Supports: fixint, int8-64, uint8-64, float, double, fixstr,     |
+//|           str8-32, fixarray, array16/32, nil, bool               |
+//+------------------------------------------------------------------+
+class CMsgPackParser
+  {
+private:
+   int m_pos;
+   int m_size;
+   uchar m_data[];
+   
+   bool CheckBounds(int need)
+     {
+      if(m_pos + need > m_size)
+        {
+         Print("❌ MsgPack: Buffer overflow at pos ", m_pos, " need ", need, " have ", m_size);
+         return false;
+        }
+      return true;
+     }
+   
+   long ReadInt64()
+     {
+      if(!CheckBounds(8)) return 0;
+      long value = 0;
+      for(int i = 0; i < 8; i++)
+         value = (value << 8) | m_data[m_pos++];
+      return value;
+     }
+   
+   int ReadInt32()
+     {
+      if(!CheckBounds(4)) return 0;
+      int value = 0;
+      for(int i = 0; i < 4; i++)
+         value = (value << 8) | m_data[m_pos++];
+      return value;
+     }
+   
+   int ReadInt16()
+     {
+      if(!CheckBounds(2)) return 0;
+      int value = (m_data[m_pos] << 8) | m_data[m_pos + 1];
+      m_pos += 2;
+      return value;
+     }
+   
+   //+------------------------------------------------------------------+
+   //| ✅ FIXED: ReadDoubleBits() - IEEE 754 Big-Endian to MQL5 Double|
+   //| MQL5-compatible version (no UL suffix, proper casting)          |
+   //+------------------------------------------------------------------+
+   double ReadDoubleBits()
+     {
+      if(!CheckBounds(8)) return 0.0;
+      
+      // Read 8 bytes in big-endian order from MessagePack
+      uchar bytes[8];
+      for(int i = 0; i < 8; i++)
+         bytes[i] = m_data[m_pos++];
+      
+      // Convert to little-endian (MQL5 native)
+      uchar reversed[8];
+      for(int i = 0; i < 8; i++)
+         reversed[i] = bytes[7 - i];
+      
+      // Extract bits as ulong
+      ulong bits = 0;
+      for(int i = 7; i >= 0; i--)
+         bits = (bits << 8) | (ulong)reversed[i];
+      
+      // IEEE 754 double format:
+      // Bit 63: sign
+      // Bits 62-52: exponent (11 bits)
+      // Bits 51-0: mantissa (52 bits)
+      
+      // Extract components
+      ulong sign_bit = (bits >> 63) & 1;
+      ulong exp_bits = (bits >> 52) & 0x7FF;  // 11 bits
+      ulong mantissa_bits = bits & 0x000FFFFFFFFFFFFF;  // 52 bits (no UL suffix)
+      
+      // Convert to int for processing
+      int sign = (int)sign_bit;
+      int exponent = (int)exp_bits;
+      
+      // Special cases
+      if(exponent == 0x7FF)  // Infinity or NaN
+        {
+         if(mantissa_bits != 0)
+            return 0.0;  // NaN → return 0
+         else
+            return (sign == 0) ? DBL_MAX : -DBL_MAX;  // Infinity
+        }
+      
+      if(exponent == 0 && mantissa_bits == 0)
+         return 0.0;  // Zero
+      
+      // Normal case: calculate value
+      // Value = (-1)^sign × 2^(exponent-1023) × (1 + mantissa)
+      
+      // Calculate mantissa fraction (1.xxx binary)
+      double fraction = 1.0;
+      double bit_value = 0.5;  // Start with 2^-1
+      
+      for(int i = 51; i >= 0; i--)
+        {
+         ulong bit_mask = ((ulong)1 << i);
+         if((mantissa_bits & bit_mask) != 0)
+            fraction += bit_value;
+         bit_value /= 2.0;
+        }
+      
+      // Calculate final value
+      double power = MathPow(2.0, exponent - 1023);
+      double result = fraction * power;
+      
+      if(sign == 1)
+         result = -result;
+      
+      return result;
+     }
+   
+   float ReadFloatBits()
+     {
+      if(!CheckBounds(4)) return 0.0f;
+      
+      // Read 4 bytes in big-endian
+      uchar bytes[4];
+      for(int i = 0; i < 4; i++)
+         bytes[i] = m_data[m_pos++];
+      
+      // Reverse to little-endian
+      uchar reversed[4];
+      for(int i = 0; i < 4; i++)
+         reversed[i] = bytes[3 - i];
+      
+      // Extract bits as uint
+      uint bits = 0;
+      for(int i = 3; i >= 0; i--)
+         bits = (bits << 8) | (uint)reversed[i];
+      
+      // IEEE 754 float format
+      uint sign_bit = (bits >> 31) & 1;
+      uint exp_bits = (bits >> 23) & 0xFF;
+      uint mantissa_bits = bits & 0x7FFFFF;
+      
+      int sign = (int)sign_bit;
+      int exponent = (int)exp_bits;
+      
+      // Special cases
+      if(exponent == 0xFF)
+        {
+         if(mantissa_bits != 0)
+            return 0.0f;  // NaN
+         else
+            return (sign == 0) ? FLT_MAX : -FLT_MAX;  // Infinity
+        }
+      
+      if(exponent == 0 && mantissa_bits == 0)
+         return 0.0f;  // Zero
+      
+      // Normal case
+      float fraction = 1.0f;
+      float bit_value = 0.5f;
+      
+      for(int i = 22; i >= 0; i--)
+        {
+         uint bit_mask = ((uint)1 << i);
+         if((mantissa_bits & bit_mask) != 0)
+            fraction += bit_value;
+         bit_value /= 2.0f;
+        }
+      
+      float power = (float)MathPow(2.0, exponent - 127);
+      float result = fraction * power;
+      
+      if(sign == 1)
+         result = -result;
+      
+      return result;
+     }
+   
+   string ReadStringData()
+     {
+      if(!CheckBounds(1)) return "";
+      uchar type = m_data[m_pos++];
+      int len = 0;
+      
+      // fixstr (0xa0 - 0xbf)
+      if((type & 0xe0) == 0xa0)
+         len = type & 0x1f;
+      // str 8 (0xd9)
+      else if(type == 0xd9)
+        {
+         if(!CheckBounds(1)) return "";
+         len = m_data[m_pos++];
+        }
+      // str 16 (0xda)
+      else if(type == 0xda)
+        {
+         if(!CheckBounds(2)) return "";
+         len = ReadInt16();
+        }
+      // str 32 (0xdb)
+      else if(type == 0xdb)
+        {
+         if(!CheckBounds(4)) return "";
+         len = ReadInt32();
+        }
+      else
+        {
+         Print("❌ MsgPack: Expected string, got type 0x", 
+               IntegerToString(type, 2, '0'));
+         m_pos--; // Put byte back
+         return "";
+        }
+      
+      if(!CheckBounds(len)) return "";
+      
+      // Read string bytes
+      string result = "";
+      for(int i = 0; i < len; i++)
+         result += CharToString(m_data[m_pos++]);
+      return result;
+     }
+   
+public:
+   void SetData(const uchar &data[])
+     {
+      m_size = ArraySize(data);
+      ArrayResize(m_data, m_size);
+      ArrayCopy(m_data, data);
+      m_pos = 0;
+     }
+   
+   int GetPos() { return m_pos; }
+   int GetSize() { return m_size; }
+   
+   //--- Read array header, returns element count or -1 on error
+   int ReadArraySize()
+     {
+      if(!CheckBounds(1)) return -1;
+      uchar type = m_data[m_pos++];
+      
+      // fixarray (0x90 - 0x9f)
+      if((type & 0xf0) == 0x90)
+         return (type & 0x0f);
+      // array 16 (0xdc)
+      if(type == 0xdc)
+         return ReadInt16();
+      // array 32 (0xdd)
+      if(type == 0xdd)
+         return ReadInt32();
+      
+      Print("❌ MsgPack: Expected array, got type 0x", 
+            IntegerToString(type, 2, '0'));
+      return -1;
+     }
+   
+   //--- Read next value as integer (handles all int types)
+   long ReadNextInt()
+     {
+      if(!CheckBounds(1)) return 0;
+      uchar type = m_data[m_pos++];
+      
+      // Positive fixint (0x00 - 0x7f)
+      if(type <= 0x7f) return (long)type;
+      // Negative fixint (0xe0 - 0xff)
+      if(type >= 0xe0) return (long)((char)type);
+      
+      // uint8 (0xcc)
+      if(type == 0xcc) { if(!CheckBounds(1)) return 0; return (long)m_data[m_pos++]; }
+      // int8 (0xd0)
+      if(type == 0xd0) { if(!CheckBounds(1)) return 0; return (long)((char)m_data[m_pos++]); }
+      // uint16 (0xcd)
+      if(type == 0xcd) return (long)ReadInt16();
+      // int16 (0xd1)
+      if(type == 0xd1) { short v = (short)ReadInt16(); return (long)v; }
+      // uint32 (0xce)
+      if(type == 0xce) return (long)((uint)ReadInt32());
+      // int32 (0xd2)
+      if(type == 0xd2) return (long)ReadInt32();
+      // uint64 (0xcf)
+      if(type == 0xcf) return ReadInt64();
+      // int64 (0xd3)
+      if(type == 0xd3) return ReadInt64();
+      
+      Print("❌ MsgPack: Expected int, got type 0x", 
+            IntegerToString(type, 2, '0'));
+      return 0;
+     }
+   
+   //--- Read next value as double (handles float64, float32, and int fallback)
+   double ReadNextDouble()
+     {
+      if(!CheckBounds(1)) return 0.0;
+      uchar type = m_data[m_pos];
+      
+      // double (0xcb)
+      if(type == 0xcb) { m_pos++; return ReadDoubleBits(); }
+      // float (0xca)
+      if(type == 0xca) { m_pos++; return (double)ReadFloatBits(); }
+      
+      // Might be encoded as integer (e.g., 0 or 1)
+      return (double)ReadNextInt();
+     }
+   
+   //--- Read next value as string
+   string ReadNextString()
+     {
+      return ReadStringData();
+     }
+  };
+
+//+------------------------------------------------------------------+
+//| Protocol Handler Class                                            |
+//|                                                                   |
+//| Python engine.py sends 11-element MessagePack array:             |
+//|   [0]  type           (int)    = 2 (POLICY)                      |
+//|   [1]  timestamp_ms   (int64)  = milliseconds                    |
+//|   [2]  symbol         (string) = "XAUUSD.tp"                     |
+//|   [3]  strategy       (string) = "Grid" or "Spike"               |
+//|   [4]  entry_price    (double)                                    |
+//|   [5]  lot_size       (double)                                    |
+//|   [6]  max_orders     (int)                                       |
+//|   [7]  take_profit    (double)                                    |
+//|   [8]  stop_loss      (double)                                    |
+//|   [9]  confidence     (double) 0.0-1.0                           |
+//|   [10] risk_multiplier (double)                                   |
+//+------------------------------------------------------------------+
+class CProtocol
+  {
+public:
+   //+------------------------------------------------------------------+
+   //| Deserialize Policy Message from Python Brain                     |
+   //| Input:  MessagePack binary data (82~ bytes)                     |
+   //| Output: PolicyMessage struct (from Definitions.mqh)             |
+   //| Return: true if successful, false if format error               |
+   //+------------------------------------------------------------------+
+   static bool DeserializePolicyMessage(const uchar &data[], PolicyMessage &policy)
+     {
+      // Initialize with safe defaults
+      policy.symbol = "";
+      policy.action = 0;
+      policy.confidence = 0.0;
+      policy.entry_price = 0.0;
+      policy.stop_loss = 0.0;
+      policy.take_profit = 0.0;
+      policy.position_size = 0.0;
+      policy.timestamp_ms = 0;
+      policy.model_version = "";
+      policy.risk_multiplier = 1.0;
+      policy.is_in_cooldown = false;
+      policy.grid_direction = 0;
+      policy.csm_usd = 0.0;
+      policy.csm_eur = 0.0;
+      policy.csm_gbp = 0.0;
+      policy.csm_jpy = 0.0;
+      policy.csm_aud = 0.0;
+      policy.csm_cad = 0.0;
+      policy.csm_chf = 0.0;
+      policy.csm_nzd = 0.0;
+      
+      int data_size = ArraySize(data);
+      if(data_size < 10)
+        {
+         Print("❌ Policy data too small: ", data_size, " bytes");
+         return false;
+        }
+      
+      CMsgPackParser parser;
+      parser.SetData(data);
+      
+      //--- Read array header
+      int array_size = parser.ReadArraySize();
+      if(array_size < 0)
+        {
+         Print("❌ Not a valid MessagePack array");
+         return false;
+        }
+      
+      if(array_size < 10)
+        {
+         Print("❌ Array too small: ", array_size, " elements (need >= 10)");
+         return false;
+        }
+      
+      Print("📦 Deserializing policy: ", data_size, " bytes, ", 
+            array_size, " elements");
+      
+      //--- [0] Message type (must be 2 = POLICY)
+      long msg_type = parser.ReadNextInt();
+      if(msg_type != MSG_TYPE_POLICY)
+        {
+         Print("❌ Wrong message type: ", msg_type, " (expected 2)");
+         return false;
+        }
+      
+      //--- [1] Timestamp (milliseconds since epoch)
+      policy.timestamp_ms = parser.ReadNextInt();
+      
+      //--- [2] Symbol (e.g. "XAUUSD.tp")
+      policy.symbol = parser.ReadNextString();
+      if(policy.symbol == "")
+        {
+         Print("❌ Empty symbol in policy");
+         return false;
+        }
+      
+      //--- [3] Strategy name → store in model_version, map to action
+      policy.model_version = parser.ReadNextString();
+      
+      // Map strategy name to action
+      if(policy.model_version == "Grid")
+         policy.action = 0;      // Grid = HOLD/Grid mode
+      else if(policy.model_version == "Spike")
+         policy.action = 1;      // Spike = BUY-like aggressive
+      else
+         policy.action = 0;      // Default
+      
+      //--- [4] Entry price
+      policy.entry_price = parser.ReadNextDouble();
+      
+      //--- [5] Lot size → position_size
+      policy.position_size = parser.ReadNextDouble();
+      
+      //--- [6] Max orders → grid_direction (reuse field for max_orders)
+      policy.grid_direction = (int)parser.ReadNextInt();
+      
+      //--- [7] Take profit
+      policy.take_profit = parser.ReadNextDouble();
+      
+      //--- [8] Stop loss
+      policy.stop_loss = parser.ReadNextDouble();
+      
+      //--- [9] Confidence (0.0 - 1.0)
+      policy.confidence = parser.ReadNextDouble();
+      
+      //--- [10] Risk multiplier (optional, depends on array size)
+      if(array_size >= 11)
+         policy.risk_multiplier = parser.ReadNextDouble();
+      else
+         policy.risk_multiplier = 1.0;
+      
+      //--- Validation
+      if(policy.entry_price <= 0.0)
+        {
+         Print("⚠️ Policy entry_price is ", policy.entry_price, 
+               " (might be zero - check Python)");
+        }
+      
+      //--- Success log
+      Print("✅ Policy deserialized OK:");
+      Print("   Symbol:     ", policy.symbol);
+      Print("   Strategy:   ", policy.model_version);
+      Print("   Entry:      ", DoubleToString(policy.entry_price, 5));
+      Print("   Lots:       ", DoubleToString(policy.position_size, 4));
+      Print("   MaxOrders:  ", policy.grid_direction);
+      Print("   TP:         ", DoubleToString(policy.take_profit, 5));
+      Print("   SL:         ", DoubleToString(policy.stop_loss, 5));
+      Print("   Confidence: ", DoubleToString(policy.confidence, 4));
+      Print("   RiskMult:   ", DoubleToString(policy.risk_multiplier, 4));
+      Print("   Timestamp:  ", policy.timestamp_ms);
+      
+      return true;
+     }
+  };
+//+------------------------------------------------------------------+

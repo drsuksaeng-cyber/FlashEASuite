@@ -1,0 +1,853 @@
+PS C:\Users\drsuk\AppData\Roaming\MetaQuotes\Terminal\B2C22A9C2EA0D03B7096C9AF7E852052\MQL5\Experts\FlashEASuite_V2> tree /f
+Folder PATH listing for volume OS
+Volume serial number is E211-5DF4
+C:.
+│   .gitignore
+│   00_Common.zip
+│   02_Brain (10).zip
+│   02_Brain (11).zip
+│   02_Brain (12).zip
+│   02_Brain (13).zip
+│   02_Brain (14).zip
+│   02_Brain (15).zip
+│   02_Brain (2).zip
+│   02_Brain (3).zip
+│   02_Brain (4).zip
+│   02_Brain (5).zip
+│   02_Brain (6).zip
+│   02_Brain (7).zip
+│   02_Brain (8).zip
+│   02_Brain (9).zip
+│   02_Brain.zip
+│   03_Trader (2).zip
+│   03_Trader (3).zip
+│   03_Trader (4).zip
+│   03_Trader (5).zip
+│   03_Trader.zip
+│   12302025แขตใหม่.zip
+│   2.18.02ท้าย.zip
+│   Claude_Grid.zip
+│   Claude_listen.zip
+│   claude_listen_test.zip
+│   Claudeสรุป.zip
+│   Claudeแก้Grid.zip
+│   cleanup_project.bat
+│   cleanup_project_v2.1_FIXED.bat
+│   cleanup_project_v2.bat
+│   cleanup_project_v3.bat
+│   COMPLETE_WORK_SUMMARY_AND_CONTEXT.md
+│   CREATE_ZIP.bat
+│   DailyLossLimit.mqh
+│   DAILY_LOGBOOK_2025-12-28.md
+│   DAILY_LOGBOOK_2025-12-29.md
+│   DAILY_LOG_20251225.md
+│   DAILY_LOG_20251226.md
+│   daily_loss_limit.py
+│   docs (2).zip
+│   docs (3).zip
+│   docs.zip
+│   Example_GridStandalone_EA_DEBUG.ex5
+│   Example_GridStandalone_EA_DEBUG.mq5
+│   Example_GridStandalone_EA_FIXED.ex5
+│   Example_GridStandalone_EA_FIXED.mq5
+│   files.zip
+│   files2.18.1.zip
+│   FINAL_SOLUTION_COMPLETE.md
+│   FIX_TARGET_FOLDER_ERROR.zip
+│   FlashEASuite_V2 (3).zip
+│   folder_structure.txt
+│   for2_19.zip
+│   gitignore
+│   GridNearlyComplete.zip
+│   GridNearlyComplete1.zip
+│   GridStandalone_Enhanced_EA.mq5
+│   GridStressTester.ex5
+│   GridStressTester.mq5
+│   GridTester.ex5
+│   GridTester.mq5
+│   GridTester_Advanced.ex5
+│   GridTester_Advanced.mq5
+│   Grid_Test_Mode_EA.mq5
+│   IDfiles.zip
+│   Include (2).zip
+│   Include (3).zip
+│   Include (4).zip
+│   Include (5).zip
+│   Include (6).zip
+│   Include (7).zip
+│   Include (8).zip
+│   Include (9).zip
+│   Include.zip
+│   INCLUDE_DEPENDENCY_MAP.md
+│   INSTALL.bat
+│   INSTALL_ALL.bat
+│   INSTALL_INSTRUCTIONS_V2.1.md
+│   INSTALL_MANUAL.bat
+│   install_modules.bat
+│   install_modules_v2.1_FIXED.bat
+│   install_modules_v3.bat
+│   logbook12272025.zip
+│   MQL5_CLIENT_LOGIC_PART1.md
+│   PositionSizingManager.mqh
+│   position_sizing.py
+│   PROJECT_RESTRUCTURE_PROPOSAL.md
+│   python_fixed.zip
+│   README.md
+│   README_v2.1.md
+│   READY_TO_TEST.md
+│   RiskGuardian.mqh
+│   run_integration_tests.py
+│   RUN_RESTRUCTURE.bat
+│   RUN_TESTS.bat
+│   setup_structure.bat
+│   TestTradeReporter_Standalone.ex5
+│   test_daily_loss_limit.ex5
+│   test_daily_loss_limit.mq5
+│   test_data_capture.csv
+│   test_integration_day1.mq5
+│   test_integration_phase2.py
+│   test_position_sizing.ex5
+│   test_position_sizing.mq5
+│   tree.txt
+│   UPLOAD_TO_GITHUB.ps1
+│   VERIFICATION.txt
+│   __init__.py
+│   จบ2.18.zip
+│   บอกแชตใหม่271225.zip
+│   บอกแชตใหม่271225_2.zip
+│   สิ่งที่ต้องจำ.txt
+│   เสร็จgridรอtest.zip
+│
+├───00_Common
+│   │   ProtocolSpecs.md
+│   │
+│   └───Keys
+│           client.key
+│           client.key_secret
+│           license.key
+│           server.key
+│           server.key_secret
+│
+├───01_Feeder
+│   └───Src
+│           FeederEA.ex5
+│           FeederEA.mq5
+│
+├───02_Brain
+│   │   config (2).zip
+│   │   config.py
+│   │   config.py.OLD
+│   │   config.zip
+│   │   core (2).zip
+│   │   core.zip
+│   │   dashboard.py
+│   │   debug_policy_format.py
+│   │   FEEDBACK_LOOP_GUIDE.md
+│   │   files.zip
+│   │   fix_phase1_test3.ps1
+│   │   generate_mock_license.py
+│   │   generate_report.py
+│   │   generate_test_report.py
+│   │   influxdb2-2.8.0-windows_amd64.zip
+│   │   License.key
+│   │   LICENSE_INFO.txt
+│   │   main.py
+│   │   main.py.OLD
+│   │   main_v2.py
+│   │   nonce_manager.py
+│   │   PHASE2_COMPLETE_SUMMARY.md
+│   │   PHASE2_TRACK_A_COMPLETE.md
+│   │   policy_generator.py
+│   │   policy_signer.py
+│   │   python1.zip
+│   │   QUICKSTART.md
+│   │   QUICK_START.md
+│   │   README.md
+│   │   requirements.txt
+│   │   sequence_tracker.py
+│   │   server_public.pem
+│   │   SimpleSender.ex5
+│   │   SPIKE_STRATEGY_TEST_GUIDE.md
+│   │   spike_test_injector.py
+│   │   spike_test_injector_OLD.py
+│   │   TASK1_SUMMARY.md
+│   │   test_feedback_loop.py
+│   │   test_foundation.py
+│   │   test_installation.py
+│   │   test_integration_phase2.py
+│   │   test_latency_monitor.py
+│   │   test_license_system.py
+│   │   test_message_types.py
+│   │   test_optimization_pipeline.py
+│   │   test_p03.py
+│   │   test_parameter_repository.py
+│   │   test_phase0_chat3.py
+│   │   test_pull.py
+│   │   test_push.py
+│   │   TEST_TRADE_RESULT_GUIDE.md
+│   │
+│   ├───api
+│   ├───config
+│   │   │   mm_parameters.json
+│   │   │   mm_parameter_families.json
+│   │   │   mm_selection_matrix.json
+│   │   │   strategy_parameters.json
+│   │   │   strategy_parameters.zip
+│   │   │   strategy_parameter_families.json
+│   │   │
+│   │   └───migrations
+│   │           create_mm_params_table.sql
+│   │           create_strategy_params_table.sql
+│   │
+│   ├───core
+│   │   │   config_push_generator.py
+│   │   │   config_push_generator.zip
+│   │   │   emergency_system.py
+│   │   │   execution_listener.py
+│   │   │   execution_listener_Backup.py
+│   │   │   ingestion.py
+│   │   │   message_types.py
+│   │   │   message_types.py.OLD
+│   │   │   Parameter_Family_Index.py
+│   │   │   Parameter_repository.py
+│   │   │   Parameter_repository.zip
+│   │   │   protocol_handler.py
+│   │   │   protocol_handler.py.OLD
+│   │   │   risk_management.zip
+│   │   │   strategy.zip
+│   │   │   strategy_old_backup.py
+│   │   │   system_monitor.py
+│   │   │   __init__.py
+│   │   │   __init__.py.OLD
+│   │   │
+│   │   ├───data
+│   │   │   │   data_ingestion.py
+│   │   │   │   influxdb_client.py
+│   │   │   │   __init__.py
+│   │   │   │
+│   │   │   └───__pycache__
+│   │   │           data_ingestion.cpython-310.pyc
+│   │   │           influxdb_client.cpython-310.pyc
+│   │   │           __init__.cpython-310.pyc
+│   │   │
+│   │   ├───feedback
+│   │   │   │   multi_strategy_feedback.py
+│   │   │   │
+│   │   │   └───__pycache__
+│   │   │           multi_strategy_feedback.cpython-310.pyc
+│   │   │
+│   │   ├───intelligence
+│   │   │   │   generic_strategy_analyzer.py
+│   │   │   │   init.py
+│   │   │   │   mm_analyzer.py
+│   │   │   │   multi_strategy_analyzer.py
+│   │   │   │   spike_analyzer.py
+│   │   │   │   symbol_scorer.py
+│   │   │   │   __init__.py
+│   │   │   │
+│   │   │   └───__pycache__
+│   │   │           generic_strategy_analyzer.cpython-310.pyc
+│   │   │           mm_analyzer.cpython-310.pyc
+│   │   │           spike_analyzer.cpython-310.pyc
+│   │   │           symbol_scorer.cpython-310.pyc
+│   │   │           __init__.cpython-310.pyc
+│   │   │
+│   │   ├───optimization
+│   │   │   │   multi_strategy_optimizer.py
+│   │   │   │   optimization_scheduler.py
+│   │   │   │   optimization_scheduler.zip
+│   │   │   │   parameter_family_optimizer.py
+│   │   │   │   regime_parameter_mapper.py
+│   │   │   │
+│   │   │   └───__pycache__
+│   │   │           multi_strategy_optimizer.cpython-310.pyc
+│   │   │           optimization_scheduler.cpython-310.pyc
+│   │   │           parameter_family_optimizer.cpython-310.pyc
+│   │   │           regime_parameter_mapper.cpython-310.pyc
+│   │   │
+│   │   ├───policy
+│   │   │       nonce_manager.py
+│   │   │       policy_generator.py
+│   │   │       policy_signer.py
+│   │   │       sequence_tracker.py
+│   │   │       __init__.py
+│   │   │
+│   │   ├───risk_management
+│   │   │   │   daily_loss_limit.py
+│   │   │   │   position_sizing.py
+│   │   │   │   __init__.py
+│   │   │   │
+│   │   │   └───__pycache__
+│   │   │           daily_loss_limit.cpython-310.pyc
+│   │   │           position_sizing.cpython-310.pyc
+│   │   │           __init__.cpython-310.pyc
+│   │   │
+│   │   ├───strategy
+│   │   │   │   analysis.py
+│   │   │   │   analysis.zip
+│   │   │   │   analysis_OLD.py
+│   │   │   │   engine.py
+│   │   │   │   engine_OLD.py
+│   │   │   │   feedback.py
+│   │   │   │   policy.py
+│   │   │   │   policy01.py
+│   │   │   │   policyOLD.py
+│   │   │   │   print_module.py
+│   │   │   │   spike_test_injector.py
+│   │   │   │   __init__.py
+│   │   │   │
+│   │   │   └───__pycache__
+│   │   │           analysis.cpython-310.pyc
+│   │   │           engine.cpython-310.pyc
+│   │   │           feedback.cpython-310.pyc
+│   │   │           policy.cpython-310.pyc
+│   │   │           __init__.cpython-310.pyc
+│   │   │
+│   │   └───__pycache__
+│   │           emergency_system.cpython-310.pyc
+│   │           execution_listener.cpython-310.pyc
+│   │           ingestion.cpython-310.pyc
+│   │           message_types.cpython-310.pyc
+│   │           Parameter_Family_Index.cpython-310.pyc
+│   │           Parameter_repository.cpython-310.pyc
+│   │           protocol_handler.cpython-310.pyc
+│   │           system_monitor.cpython-310.pyc
+│   │           __init__.cpython-310.pyc
+│   │
+│   ├───lib
+│   ├───logs
+│   │       flashea_brain.log
+│   │
+│   ├───modules
+│   │   │   currency_meter.py
+│   │   │   tick_analyzer.py
+│   │   │   __init__.py
+│   │   │
+│   │   └───__pycache__
+│   │           currency_meter.cpython-310.pyc
+│   │           tick_analyzer.cpython-310.pyc
+│   │           __init__.cpython-310.pyc
+│   │
+│   ├───reports
+│   │       chart_daily_pnl.png
+│   │       chart_equity_curve.png
+│   │       FlashEA_Report_20251130_193714.xlsx
+│   │
+│   ├───tests
+│   │   │   test_foundation.py
+│   │   │   test_influxdb_ingestion.py
+│   │   │   test_multi_strategy_optimizer.py
+│   │   │   test_p065_mm_analyzer_regime_mapper.py
+│   │   │   test_p06_6_optimizer.py
+│   │   │   test_parameter_management.py
+│   │   │   test_policy_security.py
+│   │   │   test_spike_analyzer.py
+│   │   │   __init__.py
+│   │   │
+│   │   └───__pycache__
+│   │           test_influxdb_ingestion.cpython-310.pyc
+│   │           __init__.cpython-310.pyc
+│   │
+│   ├───tools
+│   │   │   license_generator.zip
+│   │   │
+│   │   └───license_generator
+│   │       │   generate_from_csv.py
+│   │       │   generate_keys.py
+│   │       │   generate_single.py
+│   │       │   sign_license.py
+│   │       │   verify_license.py
+│   │       │
+│   │       ├───docs
+│   │       │       FAQ.md
+│   │       │       FILE_EXPLANATIONS.md
+│   │       │       INSTALLATION_GUIDE.md
+│   │       │       MASTER_INDEX.md
+│   │       │       QUICK_REFERENCE.md
+│   │       │       USER_GUIDE.md
+│   │       │
+│   │       ├───keys
+│   │       │       server_private.pem
+│   │       │       server_private_NEW.pem
+│   │       │       server_public.pem
+│   │       │       server_public_NEW.pem
+│   │       │
+│   │       ├───licenses
+│   │       │       FLASH-202601-9699850F.key
+│   │       │       FLASH-202601-AE47C39E.key
+│   │       │       FLASH-202601-BE5B353B.key
+│   │       │       FLASH-202601-E44F74CC.key
+│   │       │
+│   │       ├───logs
+│   │       ├───templates
+│   │       │       clients_template.csv
+│   │       │
+│   │       └───__pycache__
+│   │               generate_from_csv.cpython-310.pyc
+│   │               generate_keys.cpython-310.pyc
+│   │               sign_license.cpython-310.pyc
+│   │               verify_license.cpython-310.pyc
+│   │
+│   ├───Utils
+│   │       symbol_formatter.py
+│   │
+│   └───__pycache__
+│           config.cpython-310.pyc
+│           dashboard.cpython-310.pyc
+│           test_parameter_repository.cpython-310.pyc
+│
+├───03_Trader
+│   │   files.zip
+│   │   fromClaude.zip
+│   │   ProgramC_Trader.ex5
+│   │   ProgramC_Trader.mq5
+│   │   ProgramC_Trader.zip
+│   │   ProgramC_Trader_o1.ex5
+│   │   ProgramC_Trader_OLD.mq5
+│   │   ProgramC_Trader_OLD1.mq5
+│   │   ProgramC_Trader_OLD3.ex5
+│   │   ProgramC_Trader_OLD3.mq5
+│   │   ProgramC_Trader_OLD4.ex5
+│   │   ProgramC_Trader_OLD4.mq5
+│   │   ProgramC_Trader_OLD5.ex5
+│   │   ProgramC_Trader_OLD5.mq5
+│   │   SKN_Report_20251230_204356.docx
+│   │   SKN_Report_20251230_205617.docx
+│   │   TestDLLWrapper.mq5
+│   │   Test_FlashEA_V6_Skeleton.ex5
+│   │   Test_FlashEA_V6_Skeleton.mq5
+│   │   test_foundation_ea.ex5
+│   │   test_foundation_ea.mq5
+│   │   Test_P1_1_Strategies.mq5
+│   │   สิ่งที่ต้องจำ.txt
+│   │
+│   ├───files
+│   │       DELIVERY_SUMMARY.txt
+│   │       INSTALLATION_INSTRUCTIONS.txt
+│   │       INTEGRATION_GUIDE.txt
+│   │       QUICK_FIX_FOR_YOUR_STRUCTURE.txt
+│   │       START_HERE.txt
+│   │
+│   └───Src
+├───04_DLL
+│   │   FlashEA_Security.zip
+│   │
+│   └───FlashEA_Security
+│       │   build.bat
+│       │   build_option2.bat
+│       │   CHECK_KEY.bat
+│       │   CHECK_SYSTEM.bat
+│       │   CHECK_SYSTEM_SIMPLE.bat
+│       │   DEBUG_DEEP.bat
+│       │   DEBUG_DEEP.txt
+│       │   DEBUG_REPORT.txt
+│       │   DEBUG_SIMPLE.bat
+│       │   DEPLOY_TO_MT5.bat
+│       │   DIAGNOSTIC_REPORT.txt
+│       │   FIX_INSTRUCTIONS.md
+│       │   FIX_STEP_BY_STEP.bat
+│       │   FlashEA_Security.dll
+│       │   FlashEA_Security.exp
+│       │   FlashEA_Security.lib
+│       │   FORCE_DEPLOY.bat
+│       │   HWIDGenerator.cpp
+│       │   HWIDGenerator.h
+│       │   HWIDGenerator.obj
+│       │   libcrypto-3-x64.dll
+│       │   libssl-3-x64.dll
+│       │   LicenseVerifier.cpp
+│       │   LicenseVerifier.h
+│       │   LicenseVerifier.obj
+│       │   NEXT_STEPS.md
+│       │   QUICK_INSTALL.md
+│       │   README.md
+│       │   REBUILD_ABSOLUTE.bat
+│       │   REBUILD_CORRECT.bat
+│       │   REBUILD_DLL.bat
+│       │   RSAVerifier.cpp
+│       │   RSAVerifier.h
+│       │   RSAVerifier.obj
+│       │   Security.cpp
+│       │   Security.h
+│       │   SecurityHelpers.cpp
+│       │   Security_Real.cpp
+│       │   Security_Real.obj
+│       │   TradingParams.h
+│       │
+│       └───old
+│               FlashEA_Security.lib
+│               HWIDGenerator.obj
+│               LicenseVerifier.obj
+│               RSAVerifier.obj
+│               Security_Real.cpp
+│               Security_Real.obj
+│
+├───Day1_Package
+│       QUICK_START.md
+│       README.md
+│       START_HERE.txt
+│
+├───docs
+│   │   COMPLETE_SUMMARY.md
+│   │   FIX_NOTES.md
+│   │   INSTALLATION_GUIDE.md
+│   │   mql5.pdf
+│   │
+│   ├───archive
+│   │       DELIVERY_SUMMARY.txt
+│   │       INSTALLATION_INSTRUCTIONS.txt
+│   │       INTEGRATION_GUIDE.txt
+│   │       new chat4.txt
+│   │       Phase0 chat3 - Completion Summary.md
+│   │       QUICK_FIX_FOR_YOUR_STRUCTURE.txt
+│   │       README.txt
+│   │       START_HERE.txt
+│   │
+│   ├───fixes
+│   │       FINAL_FIX_TIMESTAMP.md
+│   │       FIX_ACCESS_VIOLATION.md
+│   │       FIX_PROGRAMC_ERRORS.md
+│   │       FIX_SYNTAX_ERROR.md
+│   │       FIX_TARGET_FOLDER_ERROR.md
+│   │
+│   ├───guides
+│   │       19_Dynamic_Money_Management_Methods_Comprehensive.docx
+│   │       1ภาพรวมแผนพัฒนา.txt
+│   │       BACKTEST_QUICK_GUIDE.md
+│   │       Claude_vs_Manus_V5_Comparison.docx
+│   │       COMPLETE_INSTALLATION_GUIDE.md
+│   │       COMPLETE_RUN_GUIDE.md
+│   │       FlashEASuite Feature.docx
+│   │       FLASHEASUITE_V2_COMPLETE_KNOWLEDGE_BASE.md
+│   │       FLASHEASUITE_V2_MASTER_ROADMAP_V6.md
+│   │       FlashEASuite_V2_Roadmap_V6_MERGED.docx
+│   │       FlashEASuite_V2_Spike_Grid_Strategies.docx
+│   │       FLASHEASUITE_VS_MURAMASA_COMPARISON.md
+│   │       NewTreeV6.txt
+│   │       PROMPT 1.txt
+│   │       PROMPT 2 phase2.txt
+│   │       PROTOCOL_TESTING_GUIDE.md
+│   │       READY_TO_USE_PROMPTS.md
+│   │       strategy_details_1_10.md.docx
+│   │       THE_ULTIMATE_20_FOREX_STRATEGIES_2026.docx
+│   │       top10_forex_definitive_2026.docx
+│   │       top10_forex_strategiesก่อนปรับ.docx
+│   │       TOP_10_FOREX_STRATEGIES.docx
+│   │       TreeBeginV6.txt
+│   │       คำถามให้สร้างภาพรวม และ phase การทำงาน.txt
+│   │       คำถามให้สร้างภาพรวม.txt
+│   │       รายงานการวิเคราะห์เปรียบเทียบ_ FlashEASuite V2 (Upgraded) vs Muramasa Quant Prot   tocol.md
+│   │       รายงานการเปรียบเทียบโครงสร้างกลยุทธ์การเทรดขั้นสูงกับ_FlashEASuite_V2.docx      
+│   │       รายงานวิเคราะห์_10_อันดับกลยุทธ์การเทรด_Forex_ระดับโลก_ประสิทธิภาพสูงและเ.docx  
+│   │       สมุดบันทึกงาน.docx
+│   │
+│   ├───installation
+│   │       INSTALLATION_README.md
+│   │       QUICK_FIX_THAI.md
+│   │       QUICK_START_THAI.md
+│   │       tree.txt
+│   │
+│   └───summaries
+│           DOWNLOAD_CHECKLIST.md
+│           MASTER_SUMMARY.md
+│           PACKAGE_SUMMARY.md
+│           QUICK_FIX_SUMMARY.md
+│           QUICK_SUMMARY.md
+│           REFACTORING_COMPLETE.md
+│
+├───IDfiles
+│       DLL_TOOLS_GUIDE.txt
+│       HANDOFF_PROMPTS.txt
+│       PHASE_BREAKDOWN.txt
+│       SECURITY_MASTER_SPEC.txt
+│
+├───Include
+│   │   Logic (2).zip
+│   │   Logic (3).zip
+│   │   Logic.zip
+│   │   MqlMsgPack.mqh
+│   │   Network.zip
+│   │   Security.mqh
+│   │   Zmq.zip
+│   │
+│   ├───Logic
+│   │   │   ConfigReceiver.mqh
+│   │   │   ConnectionMonitor.mqh
+│   │   │   DailyStats.mqh
+│   │   │   IStrategy.mqh
+│   │   │   NonceManager.mqh
+│   │   │   PolicyManager.mqh
+│   │   │   PolicyVerifier.mqh
+│   │   │   SequenceTracker.mqh
+│   │   │   SpreadFilter.mqh
+│   │   │   StrategyBase.mqh
+│   │   │   StrategyConstants.mqh
+│   │   │   StrategyManager.mqh
+│   │   │   StrategyManagerOLD.mqh
+│   │   │   StrategyManager_V6).mqh
+│   │   │   StrategyManager_V6.mqh
+│   │   │   Strategy_Grid.mqh
+│   │   │   Strategy_Grid_OLD.mqh
+│   │   │   Strategy_Implementation.mqh
+│   │   │   Strategy_Spike.mqh
+│   │   │   TickDensity.mqh
+│   │   │
+│   │   ├───Grid
+│   │   │   │   AdaptiveGridConfig.mqh
+│   │   │   │   GridConfig.mqh
+│   │   │   │   GridCore.mqh
+│   │   │   │   GridCore01.mqh
+│   │   │   │   GridCoreOLD.mqh
+│   │   │   │   GridCoreOLD1.mqh
+│   │   │   │   GridCostCalculator.mqh
+│   │   │   │   GridDecision.mqh
+│   │   │   │   GridExecution.mqh
+│   │   │   │   GridProtectionSystem.mqh
+│   │   │   │   GridRecoveryTracker.mqh
+│   │   │   │   GridRiskManager.mqh
+│   │   │   │   GridRiskRewardAnalyzer.mqh
+│   │   │   │   GridState.mqh
+│   │   │   │   GridTester (1).mq5
+│   │   │   │   GridTester.mq5
+│   │   │   │   MarketAnalysis.mqh
+│   │   │   │   RangeAnalyzer.mqh
+│   │   │   │   SKN_Report_20260106_112129.docx
+│   │   │   │   SKN_Report_20260108_093711.docx
+│   │   │   │   SlippageController.mqh
+│   │   │   │   SpreadFilter.mqh
+│   │   │   │
+│   │   │   └───GridStandalone
+│   │   │           GridConfig.mqh
+│   │   │           GridConfig_Enhanced.mqh
+│   │   │           GridDecision.mqh
+│   │   │           GridDecision_Enhanced.mqh
+│   │   │           GridExecution.mqh
+│   │   │           GridExecution_Enhanced.mqh
+│   │   │           GridExit.mqh
+│   │   │           GridRiskManager.mqh
+│   │   │           GridState.mqh
+│   │   │           MarketAnalysis.mqh
+│   │   │           MarketAnalysis_Enhanced.mqh
+│   │   │           RiskGuardian.mqh
+│   │   │           ServerComm.mqh
+│   │   │           SlippageController.mqh
+│   │   │           SpreadFilter.mqh
+│   │   │           Strategy_Grid_Standalone.mqh
+│   │   │
+│   │   ├───Spike
+│   │   │       ADXFilter.mqh
+│   │   │       ROCCalculator.mqh
+│   │   │       VolumeAnalyzer.mqh
+│   │   │       ZScoreFilter.mqh
+│   │   │
+│   │   └───Strategies
+│   │           S01_StatArb.mqh
+│   │           S07_MeanReversion.mqh
+│   │
+│   ├───Network
+│   │   │   NonceManager.mqh
+│   │   │   PolicyVerifier.mqh
+│   │   │   Protocol.mqh
+│   │   │   SequenceTracker.mqh
+│   │   │   ZmqHub01.mqh
+│   │   │
+│   │   └───Protocol
+│   │           Definitions.mqh
+│   │           Definitions.mqh.OLD
+│   │           Definitions_OLD.mqh
+│   │           Serialization.mqh
+│   │           Serialization.mqh.01
+│   │           Serialization.mqh.OLD
+│   │           Serialization01.mqh
+│   │           Serialization_MANUAL.mqh
+│   │
+│   ├───Risk
+│   │       DailyLossLimit.mqh
+│   │       Day1_Files_FINAL.zip
+│   │       GridWithRiskManagement.mqh
+│   │       GridWithRiskManagement_SIMPLE.mqh
+│   │       PositionSizingManager.mqh
+│   │       RiskGuardian.mqh
+│   │
+│   ├───Security
+│   │       Clientauth.mqh
+│   │       ConfigManager.mqh
+│   │       DLLWrapper.mqh
+│   │       DLLWrapper_Enhanced.mqh
+│   │       HWIDGenerator.mqh
+│   │       Licenseverifier.mqh
+│   │       LicenseverifierOLD.mqh
+│   │       Slotmanager.mqh
+│   │       TradingParamsStruct.mqh
+│   │
+│   ├───Utils
+│   │       SymbolScanner.mqh
+│   │       TradeLogger.mqh
+│   │
+│   └───Zmq
+│           Zmq.mqh
+│           ZmqHub.mqh
+│
+├───mql_grid
+│       GridConfig.mqh
+│       GridCore.mqh
+│       GridState.mqh
+│       Strategy_Grid.mqh
+│
+├───mql_protocol
+│       Definitions.mqh
+│       Protocol.mqh
+│       Serialization.mqh
+│
+├───Phase2_3B_WORKS
+│   │   README.md
+│   │
+│   ├───Documentation
+│   ├───Phase2_MQL5
+│   │       NonceManager.mqh
+│   │       PolicyVerifier.mqh
+│   │       SequenceTracker.mqh
+│   │
+│   ├───Phase2_Python
+│   │       nonce_manager.py
+│   │       policy_generator.py
+│   │       policy_signer.py
+│   │       sequence_tracker.py
+│   │
+│   ├───Phase3B_MQL5
+│   │       DLLWrapper_Enhanced.mqh
+│   │
+│   └───Tests
+│           TestIntegration_Phase2_3B.mq5
+│           TestPhase3B_Complete.mq5
+│           TestPolicyVerifier_Simple.mq5
+│
+├───python_strategy
+│       analysis01.py
+│       engine01.py
+│       feedback01.py
+│       polic01y.py
+│       __init__01.py
+│
+├───Restructure_Package
+│   │   .gitignore
+│   │   CHANGELOG.md
+│   │   PROJECT_STRUCTURE.md
+│   │   README.md
+│   │   RESTRUCTURE.bat
+│   │   START_HERE.txt
+│   │
+│   ├───02_Brain
+│   │   └───core
+│   │       └───risk_management
+│   │               daily_loss_limit.py
+│   │               position_sizing.py
+│   │               __init__.py
+│   │
+│   ├───docs
+│   │   ├───installation
+│   │   │       INSTALLATION_GUIDE.md
+│   │   │       QUICK_START.md
+│   │   │
+│   │   └───summaries
+│   │           DATA_CONTROL_FLOW.md
+│   │           FEEDER_EA_TECHNICAL_DOC.md
+│   │           REFACTORING_COMPLETE.md
+│   │           SYSTEM_OVERVIEW.md
+│   │
+│   ├───Include
+│   │   └───Risk
+│   │           DailyLossLimit.mqh
+│   │           PositionSizingManager.mqh
+│   │           RiskGuardian.mqh
+│   │
+│   └───Tester
+│           README.md
+│           test_daily_loss_limit.mq5
+│           test_integration_day1.mq5
+│           test_position_sizing.mq5
+│
+├───Tester
+│       files.zip
+│       generate_test_report.py
+│       GetMyHWID.ex5
+│       GetMyHWID.mq5
+│       GridStandalone_Phase35_Test.ex5
+│       GridStandalone_Phase35_Test.mq5
+│       GridStandalone_Phase36_Test.ex5
+│       GridStandalone_Phase36_Test.mq5
+│       IntegrationTest_Trader.ex5
+│       IntegrationTest_Trader.mq5
+│       MINIMAL_TEST.ex5
+│       MINIMAL_TEST.mq5
+│       ProgramC_Trader_TEST_ORDERS.ex5
+│       ProgramC_Trader_TEST_ORDERS.mq5
+│       SKNA_Report_20260119_141853.docx
+│       TestDLLWrapper.ex5
+│       TestDLLWrapper.mq5
+│       TestGridWithRisk.mq5
+│       TESTING_INSTRUCTIONS_CORRECT_PATH.md
+│       TestIntegrationPhase2.mq5
+│       TestLicenseSystem.ex5
+│       TestLicenseSystem.mq5
+│       TestLogger.mqh
+│       TestPhase1_LicenseVerify.ex5
+│       TestPhase1_LicenseVerify.mq5
+│       TestPhase1_LicenseVerify_v2.ex5
+│       TestPhase1_LicenseVerify_v2.mq5
+│       TestPhase1_LicenseVerify_v4.ex5
+│       TestPhase1_LicenseVerify_v4.mq5
+│       TestPolicyVerification.ex5
+│       TestPolicyVerification.mq5
+│       TestPolicyVerification_Simple.ex5
+│       TestPolicyVerification_Simple.mq5
+│       TestPublicKey.ex5
+│       TestPublicKey.mq5
+│       TestRiskManagement.ex5
+│       TestRiskManagement.mq5
+│       TestSpikeStrategy.ex5
+│       TestSpikeStrategy.mq5
+│       test_daily_loss_limit.ex5
+│       test_daily_loss_limit.mq5
+│       Test_FlashEA_V6_Skeleton.ex5
+│       Test_FlashEA_V6_Skeleton.mq5
+│       test_foundation_ea.ex5
+│       test_foundation_ea.mq5
+│       test_integration_day1.ex5
+│       test_integration_day1.mq5
+│       TEST_MqlMsgPack.ex5
+│       TEST_MqlMsgPack.mq5
+│       Test_P1_1_Strategies.ex5
+│       Test_P1_1_Strategies.mq5
+│       test_position_sizing.ex5
+│       test_position_sizing.mq5
+│       TEST_PROTOCOL.ex5
+│       TEST_PROTOCOL.mq5
+│       TEST_PROTOCOL.py
+│
+├───tools
+│   │   example_license.key
+│   │   fix_license_encoding.py
+│   │   generate_keys.py
+│   │   generate_license.py
+│   │   license_admin.py
+│   │   verify_license.py
+│   │
+│   └───keys
+│           server_private.pem
+│           server_public.pem
+│
+└───แชต
+    │   2_6_02_Brain.zip
+    │   2_6_End.zip
+    │   2_6_IntegrationTest_Trader.mq5
+    │   2_6_LOGBOOK.md
+    │   2_6_NEXT_TEST_PLAN.md
+    │   Include.zip
+    │   strategy_fixed.zip
+    │
+    └───strategy_fixed
+            engine01.py
+            policy01.py
+
+PS C:\Users\drsuk\AppData\Roaming\MetaQuotes\Terminal\B2C22A9C2EA0D03B7096C9AF7E852052\MQL5\Experts\FlashEASuite_V2>

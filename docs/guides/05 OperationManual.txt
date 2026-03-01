@@ -1,0 +1,764 @@
+================================================================================
+  FlashEASuite V2 — OPERATION MANUAL
+  คู่มือการดำเนินงานระบบเทรด FlashEASuite V2
+================================================================================
+  Version : 2.0 (P9-5 Production)
+  Date    : 2026-03-01
+  Author  : Dr. Suksaeng Kukanok
+  Motto   : "Smart Server, Powerful Client"
+================================================================================
+
+สารบัญ (Table of Contents)
+───────────────────────────
+  1. ภาพรวมระบบ (System Overview)
+  2. ความต้องการก่อนใช้งาน (Prerequisites)
+  3. การติดตั้ง (Installation)
+  4. การเปิดระบบ (System Startup)
+  5. การปิดระบบ (System Shutdown)
+  6. การตรวจสอบระบบ (System Monitoring)
+  7. กิจกรรมประจำวัน (Daily Operations)
+  8. การตั้งค่า Strategy และ MM (Configuration Reference)
+  9. การแก้ไขปัญหาเบื้องต้น (Troubleshooting)
+  10. ขั้นตอนฉุกเฉิน (Emergency Procedures)
+  11. Quick Reference Card
+
+================================================================================
+  1. ภาพรวมระบบ (SYSTEM OVERVIEW)
+================================================================================
+
+FlashEASuite V2 คือระบบเทรดอัตโนมัติแบบ Hybrid ที่ประกอบด้วย 3 components
+หลักที่ทำงานร่วมกันผ่าน ZeroMQ messaging:
+
+  ┌────────────────┐  Port 7777  ┌────────────────┐  Port 7778  ┌────────────────┐
+  │  PROGRAM A     │ ──────────► │  PROGRAM B     │ ──────────► │  PROGRAM C     │
+  │  FeederEA      │   ZMQ PUB  │  Python Brain  │   ZMQ PUB  │  Trader EA     │
+  │  (MQL5)        │             │  (Python 3.10) │             │  (MQL5)        │
+  └────────────────┘             └────────┬───────┘             └───────┬────────┘
+                                          │                             │
+                                          └──────────────── ◄───────────┘
+                                               Port 7779 (Feedback / TRADE_REPORT)
+
+  Program A (FeederEA)
+  ─────────────────────
+  - ส่ง tick data + OHLC + indicator data จาก MT5
+  - ZMQ PUB port 7777 ทุก 100ms ต่อ symbol
+  - รองรับ 28+ symbols พร้อมกัน
+
+  Program B (Python Brain)
+  ────────────────────────
+  - รับ tick data → Regime Classification → Strategy Selection
+  - ส่ง CONFIG_PUSH (type=10) ไปให้ Trader ทุก cycle
+  - 3 Threads: Ingestion, StrategyEngine, ExecutionListener
+  - Standalone fallback: ถ้า disconnect จะส่ง default params
+
+  Program C (ProgramC_Trader)
+  ────────────────────────────
+  - รับ CONFIG_PUSH → เปิด/ปิด strategies ตาม Brain directive
+  - 16 Strategies + 19 MM Methods ทำงานใน MQL5 (latency = 0)
+  - ส่ง TRADE_REPORT กลับให้ Brain เพื่อ feedback loop
+  - Standalone Mode: ถ้า Brain ปิด → ใช้ StandaloneSelector
+
+  ZMQ Ports Summary:
+  ──────────────────
+    7777  = FeederEA → Brain (TICK/OHLC/INDICATOR data)
+    7778  = Brain → Trader   (CONFIG_PUSH policies)
+    7779  = Trader → Brain   (TRADE_REPORT feedback)
+
+  CONFIG_PUSH Format (type=10 array):
+    [type, ts, symbol, strategy, entry, lot, max_orders, tp, sl, confidence, risk_mult]
+
+================================================================================
+  2. ความต้องการก่อนใช้งาน (PREREQUISITES)
+================================================================================
+
+  Software Requirements:
+  ──────────────────────
+  ┌─────────────────────┬─────────────────────┬──────────────────────────┐
+  │ Software            │ Version             │ ตรวจสอบ                  │
+  ├─────────────────────┼─────────────────────┼──────────────────────────┤
+  │ Windows             │ 10/11 64-bit        │ ดู System Properties     │
+  │ MetaTrader 5        │ Build 3770+         │ Help → About             │
+  │ Python              │ 3.8+ (แนะนำ 3.10)   │ python --version         │
+  │ pip                 │ ล่าสุด              │ pip --version            │
+  └─────────────────────┴─────────────────────┴──────────────────────────┘
+
+  Python Dependencies:
+  ────────────────────
+  ติดตั้งทั้งหมดในครั้งเดียว:
+    pip install pyzmq msgpack numpy pandas
+
+  ตรวจสอบ:
+    python -c "import zmq, msgpack; print('OK:', zmq.__version__)"
+
+  MQL5 DLL Files (ต้องมีใน MQL5\Libraries\):
+  ────────────────────────────────────────────
+    libzmq.dll
+    libsodium.dll
+
+  Broker Account:
+  ───────────────
+    [ ] Account type : Demo (แนะนำก่อน) / Live
+    [ ] Symbol suffix: ตรวจกับ broker เช่น ".tp", "_m", หรือ ว่าง
+    [ ] Allow algo trading: ✅ enabled ในบัญชี
+    [ ] Free Margin: > 50% ของ Balance
+
+================================================================================
+  3. การติดตั้ง (INSTALLATION)
+================================================================================
+
+  Step 1: วาง Project Folder
+  ──────────────────────────
+  Copy FlashEASuite_V2/ ไปที่:
+    C:\Users\<YOU>\AppData\Roaming\MetaQuotes\Terminal\<TERMINAL_ID>\MQL5\Experts\
+
+  หา path ใน MetaEditor: File → Open Data Folder
+
+  Structure ที่ต้องมี:
+    FlashEASuite_V2/
+    ├── 01_Feeder/Src/FeederEA.mq5          ← Program A
+    ├── 02_Brain/main.py                     ← Program B entry point
+    ├── 02_Brain/core/                       ← Python modules
+    ├── 03_Trader/ProgramC_Trader.mq5        ← Program C
+    ├── Include/Logic/                       ← Strategy headers
+    ├── Include/Network/Protocol/            ← ZMQ protocol
+    ├── Include/Risk/RiskGuardian.mqh        ← Risk management
+    ├── Include/Security/DLLWrapper.mqh      ← ZMQ DLL wrapper
+    ├── tools/health_monitor.py             ← Health monitor
+    ├── tools/validate_live_readiness.py    ← Pre-live validator
+    └── start_flashea.bat                   ← Main start script
+
+  Step 2: Copy ZMQ DLLs
+  ──────────────────────
+  Copy libzmq.dll และ libsodium.dll ไปที่:
+    MQL5\Libraries\
+
+  Step 3: Compile EA ใน MetaEditor
+  ─────────────────────────────────
+  ⚠️ สำคัญ: ต้องเปิดไฟล์จาก MetaEditor Navigator เท่านั้น
+             ห้ามเปิดจาก Windows Explorer
+
+  Compile FeederEA:
+    1. MetaEditor → Navigator → Experts → FlashEASuite_V2 → 01_Feeder
+    2. Double-click FeederEA.mq5
+    3. กด F7 → ✅ 0 errors
+
+  Compile ProgramC_Trader:
+    1. Navigator → Experts → FlashEASuite_V2 → 03_Trader
+    2. Double-click ProgramC_Trader.mq5
+    3. กด F7 → ✅ 0 errors
+
+  Step 4: ตั้งค่า MT5
+  ────────────────────
+  Tools → Options → Expert Advisors:
+    [✅] Allow algorithmic trading
+    [✅] Allow DLL imports
+
+  Toolbar: กดปุ่ม AutoTrading ให้เป็น ✅ สีเขียว
+
+  Market Watch: เพิ่ม symbols ที่ต้องการ (View → Market Watch → Symbols):
+    EURUSD, GBPUSD, USDJPY, XAUUSD (พร้อม broker suffix)
+
+  Step 5: Validation ก่อน Deploy
+  ───────────────────────────────
+    cd FlashEASuite_V2
+    python tools\validate_live_readiness.py
+
+  ผลที่คาดหวัง:
+    ✅ PASS  Imports
+    ✅ PASS  Deps
+    ✅ PASS  Files
+    ✅ PASS  Ports
+    ✅ PASS  ZMQ
+    ✅ PASS  Config
+    🚀 SYSTEM READY FOR LIVE TRADING!
+
+================================================================================
+  4. การเปิดระบบ (SYSTEM STARTUP)
+================================================================================
+
+  ลำดับที่ถูกต้อง: MT5 → Brain → FeederEA → Trader → Monitor
+  ⚠️ ห้ามข้ามลำดับ — Brain ต้องพร้อมก่อน EA เสมอ
+
+  ── STEP 1: เปิด MetaTrader 5 (1 นาที) ──────────────────────────────────────
+
+    1. Double-click MT5 icon
+    2. รอจน login สำเร็จ (ดูขวาล่าง: connection status)
+    3. ตรวจ: Market Watch มี symbols ที่ต้องการ
+    4. ตรวจ: AutoTrading button = ✅ สีเขียว
+
+  ✅ สัญญาณว่าพร้อม: Status bar แสดง xx/xx KB (มี data flow)
+
+  ── STEP 2: เปิด Python Brain (1 นาที) ──────────────────────────────────────
+
+    เปิด Command Prompt แล้วรัน:
+
+      cd C:\...\MQL5\Experts\FlashEASuite_V2\
+      start_flashea.bat
+
+  ✅ สัญญาณว่าพร้อม (ใน console):
+      ✅ Ingestion Worker started
+      ✅ Strategy Engine started
+      ✅ Execution Listener started
+      🚀 All workers started successfully (3 threads)
+      🎯 System is running with FEEDBACK LOOP enabled!
+
+  💡 Tip: ถ้า Brain เปิดแล้วแต่ MT5 ยังไม่ส่ง tick → Brain จะรอ (ไม่ crash)
+
+  ── STEP 3: Attach FeederEA (1 นาที) ─────────────────────────────────────────
+
+  ⚠️ ข้ามขั้นนี้ถ้า EA ถูก attach ไว้แล้วจาก session ก่อนหน้า (MT5 จำ state)
+
+    1. เปิด chart (เช่น EURUSD M1)
+    2. Navigator (Ctrl+N) → Expert Advisors → FlashEASuite_V2 → 01_Feeder
+    3. ลาก FeederEA ไปวางบน chart
+    4. Inputs tab: Timer = 50 (ms)
+    5. Common tab: [✅] Allow DLL imports
+    6. กด OK
+
+  ✅ สัญญาณ (MT5 → Experts tab):
+      ✅ ZMQ PUB bound to tcp://*:7777
+      ✅ Broadcasting on 4 symbols
+
+  ── STEP 4: Attach ProgramC_Trader (1 นาที) ──────────────────────────────────
+
+  ⚠️ ใช้ chart คนละ chart กับ FeederEA (MT5 รองรับ 1 EA ต่อ 1 chart เท่านั้น)
+
+    1. เปิด chart ใหม่ (เช่น GBPUSD M5)
+    2. Navigator → 03_Trader → ลาก ProgramC_Trader ไปวางบน chart
+    3. Inputs tab:
+
+       ┌──────────────────┬─────────────────────────────────────────────┐
+       │ Parameter        │ ค่า                                         │
+       ├──────────────────┼─────────────────────────────────────────────┤
+       │ SYMBOL_PREFIX    │ (ว่าง) — ขึ้นกับ broker                     │
+       │ SYMBOL_SUFFIX    │ .tp — ขึ้นกับ broker (ตรวจกับ Market Watch) │
+       │ V6_EnableMode    │ false — ใช้ legacy mode                      │
+       │ InpMagicNumber   │ 999000 (default)                            │
+       │ InpUserMaxRisk   │ 2.0 (% per trade)                           │
+       └──────────────────┴─────────────────────────────────────────────┘
+
+    4. Common tab: [✅] Allow DLL imports  [✅] Allow algo trading
+    5. กด OK
+
+  ✅ สัญญาณ (MT5 → Experts tab):
+      ✅ ZMQ Hub created
+      ✅ Subscribed to tcp://127.0.0.1:7778
+      ✅ Grid Strategy added to Council
+      ✅ Spike Hunter Strategy added to Council
+      ProgramC_Trader V2.12 READY
+
+  ── STEP 5: Health Monitor (optional, 30 วินาที) ─────────────────────────────
+
+    เปิด Command Prompt ใหม่:
+      python tools\health_monitor.py
+
+  ✅ สัญญาณ:
+      🟢 Python Brain        UP
+      🟢 MetaTrader 5        UP
+      🟢 Port 7777           LISTENING
+      🟢 Port 7778           LISTENING
+
+  ── STEP 6: ตรวจ Data Flow (2 นาที) ─────────────────────────────────────────
+
+    Brain console ควรแสดง:
+      ✅ Tick count เพิ่มขึ้นเรื่อยๆ (Ticks Processed > 0)
+      ✅ Dashboard แสดง symbols ที่รับ data
+      ✅ ไม่มี error สีแดง
+
+  ตรวจเร็ว:
+    start_flashea.bat status
+
+  ผลที่คาดหวัง:
+    Python Brain:     [RUNNING]
+    MetaTrader 5:     [RUNNING]
+    Port 7777:        [LISTENING]
+    Port 7778:        [LISTENING]
+    Port 7779:        [FREE]        ← OK (Trader ใช้ CONNECT ไม่ใช่ BIND)
+
+  ── ตารางเตรียมพร้อมก่อน Go-Live ─────────────────────────────────────────────
+
+  ┌──────────┬────────────────────────────────────┬──────────────────────────────┐
+  │ เวลา     │ ทำอะไร                             │ เครื่องมือ                   │
+  ├──────────┼────────────────────────────────────┼──────────────────────────────┤
+  │ T-30 min │ Run full validation                │ validate_live_readiness.py   │
+  │ T-20 min │ Start Python Brain                 │ start_flashea.bat            │
+  │ T-15 min │ Attach FeederEA                    │ MT5 Navigator → drag EA      │
+  │ T-10 min │ Attach Trader                      │ MT5 Navigator → drag EA      │
+  │ T-5 min  │ Verify data flow                   │ Brain console + Dashboard    │
+  │ T-2 min  │ Check status                       │ start_flashea.bat status     │
+  │ T-1 min  │ Start health monitor               │ python tools\health_monitor  │
+  │ T-0      │ 🚀 GO LIVE                         │ Enable AutoTrading           │
+  └──────────┴────────────────────────────────────┴──────────────────────────────┘
+
+================================================================================
+  5. การปิดระบบ (SYSTEM SHUTDOWN)
+================================================================================
+
+  ลำดับปกติ (Graceful Shutdown):
+  ────────────────────────────────
+    1. ปิด Trader EA  (Remove จาก chart)
+    2. ปิด FeederEA   (Remove จาก chart)
+    3. ปิด Python Brain:  start_flashea.bat stop
+    4. ปิด Health Monitor: Ctrl+C
+    5. ปิด MT5 ตามปกติ
+
+  ⚠️ ห้ามปิด Brain ขณะที่มี open positions อยู่
+
+  Emergency Shutdown Levels:
+  ──────────────────────────
+  🔴 Level 1 — หยุดเทรดทันที (5 วินาที)
+    MT5 → กดปุ่ม AutoTrading ให้เป็นสีแดง
+    → EA ทุกตัวหยุดส่ง order ใหม่ แต่ยังทำงานอยู่
+
+  🔴 Level 2 — ถอด EA (30 วินาที)
+    MT5 → chart Trader → Right-click → Expert Advisors → Remove
+    MT5 → chart Feeder → Right-click → Expert Advisors → Remove
+    → ZMQ connections ปิด
+
+  🔴 Level 3 — ปิดทั้งระบบ (1 นาที)
+    start_flashea.bat stop
+    Ctrl+C ที่ Health Monitor window
+    ปิด MetaTrader 5
+
+  🔴 Level 4 — Force Kill ฉุกเฉิน
+    taskkill /im python.exe /f
+    taskkill /im terminal64.exe /f
+    ⚠️ หลัง Force Kill ต้อง restart ทั้งระบบตามลำดับ Step 1-6
+
+  ปิด Open Positions:
+  ────────────────────
+    MT5 → Trade tab (ล่างสุด) → Right-click position → Close Position
+    หรือ Close All: Right-click → Close All Positions
+
+================================================================================
+  6. การตรวจสอบระบบ (SYSTEM MONITORING)
+================================================================================
+
+  Brain Dashboard (auto-refresh ทุก 5-10 วินาที):
+  ──────────────────────────────────────────────────
+  ══════════════════════════════════════════════════
+  📊 STRATEGY ENGINE DASHBOARD v2.3
+  ══════════════════════════════════════════════════
+  Ticks Processed:    1,234
+  Policies Sent:      5
+  Risk Multiplier:    1.00x
+
+  Symbol Mapping:
+    XAUUSD.tp        → XAUUSD    (1234 ticks)
+    EURUSD.tp        → EURUSD    (856 ticks)
+
+  Top 5 Symbols (Spike Score):
+    1. XAUUSD      :  45.30 ⏳ Below threshold
+    2. GBPUSD      :  32.10 ⏳ Below threshold
+  ══════════════════════════════════════════════════
+
+  Metrics ปกติ vs สัญญาณเตือน:
+  ──────────────────────────────
+  ┌────────────────────┬───────────────┬──────────────────────────────────────┐
+  │ Metric             │ ค่าปกติ       │ สัญญาณเตือน                          │
+  ├────────────────────┼───────────────┼──────────────────────────────────────┤
+  │ Tick count         │ เพิ่มเรื่อยๆ  │ หยุดนิ่ง = connection lost           │
+  │ Policies sent      │ 0–10/ชม.      │ >50/ชม. = อาจ overtrade              │
+  │ Spike score        │ 0–100         │ >70 = spike detected (S16 active)    │
+  │ Memory (Python)    │ 100–200 MB    │ >500 MB = possible memory leak       │
+  │ CPU (Python)       │ 5–10%         │ >30% = performance issue             │
+  │ Risk Multiplier    │ 0.5–2.0x      │ <0.5 หรือ >2.0 = ผิดปกติ            │
+  │ Win Rate (30d)     │ 45–65%        │ <40% = review strategy selection     │
+  │ Max Drawdown       │ <10%          │ >20% = Emergency stop                │
+  └────────────────────┴───────────────┴──────────────────────────────────────┘
+
+  Commands สำหรับ Monitoring:
+  ────────────────────────────
+    start_flashea.bat status          ← Quick status check
+    start_flashea.bat doctor          ← Diagnose problems
+    python tools\health_monitor.py    ← Continuous health monitor
+    python 02_Brain\dashboard.py      ← Manual dashboard
+
+  Log Files:
+  ───────────
+    02_Brain\logs\flashea_brain.log        ← Brain main log
+    02_Brain\logs\trades_YYYYMMDD.json     ← Daily trade journal
+    02_Brain\explainable\                  ← AI decision logs
+    logs\health.log                        ← Health monitor log
+
+  Validation Commands:
+  ────────────────────
+    python tools\validate_live_readiness.py           ← Full check
+    python tools\validate_live_readiness.py --quick   ← Import + files only
+    python tools\validate_live_readiness.py --zmq     ← ZMQ connection only
+    python tools\validate_live_readiness.py --influx  ← InfluxDB only
+
+================================================================================
+  7. กิจกรรมประจำวัน (DAILY OPERATIONS)
+================================================================================
+
+  🌅 เช้า — ก่อนตลาดเปิด (ใช้เวลา ~5 นาที)
+  ─────────────────────────────────────────────
+    [ ] ตรวจว่า MT5 เปิดอยู่และ connected (ดูขวาล่าง)
+    [ ] ตรวจ Brain status: start_flashea.bat status → ต้อง [RUNNING]
+    [ ] ตรวจ health.log: ดูว่าคืนมีปัญหาไหม
+    [ ] ตรวจ account balance + Free Margin > 50%
+    [ ] ตรวจข่าวสำคัญ (High-Impact News): หลีกเลี่ยงช่วง news release
+    [ ] ดู Brain console: Tick count ควรเพิ่มขึ้นเป็นปกติ
+
+  🌆 เย็น — หลังตลาดปิด (ใช้เวลา ~10 นาที)
+  ─────────────────────────────────────────────
+    [ ] ตรวจ trade journal: MT5 → Account History
+    [ ] ดู Brain dashboard: tick count, policy count, win/loss
+    [ ] ตรวจ memory usage: Task Manager → Python process (< 300 MB)
+    [ ] Review health.log สำหรับ warnings หรือ errors
+    [ ] บันทึก daily P&L ลง trade journal
+    [ ] ไม่ต้องปิดระบบ (ให้ทำงานต่อเนื่องข้ามคืน)
+
+  📅 รายสัปดาห์ (Weekly — วันเสาร์แนะนำ)
+  ─────────────────────────────────────────
+    [ ] Restart Brain สัปดาห์ละครั้ง (clear memory, reload params):
+          start_flashea.bat stop
+          start_flashea.bat
+    [ ] Review performance: win rate, drawdown, Sharpe ratio
+    [ ] Backup ทั้ง folder:
+          xcopy FlashEASuite_V2 Backup_YYYYMMDD /E /I
+    [ ] ตรวจ disk space: 02_Brain\logs\ ไม่ควรเกิน 2 GB
+    [ ] Update MT5 ถ้ามี update ใหม่
+    [ ] ตรวจ 02_Brain\data\metrics\performance_metrics.json
+
+  📅 รายเดือน (Monthly)
+  ──────────────────────
+    [ ] Review strategy performance แต่ละ strategy
+    [ ] Compare Spike Score vs actual trade results
+    [ ] Review and update RiskGuardian parameters ถ้าจำเป็น
+    [ ] Check InfluxDB disk usage (flashea_ticks bucket)
+    [ ] Run full regression test suite:
+          python 02_Brain\tests\test_p9_1_python.py
+
+  เวลาตลาด (GMT+7 Bangkok):
+  ──────────────────────────
+  ┌────────────────────┬──────────────────┬───────────────────────────────────┐
+  │ Session            │ เวลา (ไทย)       │ คู่เงินที่ active                  │
+  ├────────────────────┼──────────────────┼───────────────────────────────────┤
+  │ Sydney             │ 04:00–13:00      │ AUD, NZD                          │
+  │ Tokyo              │ 06:00–15:00      │ JPY pairs                         │
+  │ London             │ 14:00–23:00      │ EUR, GBP (volatile!)              │
+  │ New York           │ 19:00–04:00      │ USD (most volatile!)              │
+  │ London+NY overlap  │ 19:00–23:00      │ ✅ Best time — highest liquidity  │
+  └────────────────────┴──────────────────┴───────────────────────────────────┘
+
+================================================================================
+  8. การตั้งค่า Strategy และ MM (CONFIGURATION REFERENCE)
+================================================================================
+
+  Strategy Index (ทั้ง 16 strategies):
+  ──────────────────────────────────────
+  ┌──────────────────┬───────┬───────┬────────────┬──────────────┬────────────┐
+  │ Strategy         │ Index │ Magic │ Standalone │ Best Regime  │ Category   │
+  ├──────────────────┼───────┼───────┼────────────┼──────────────┼────────────┤
+  │ S01_STAT_ARB     │   0   │ 1001  │    Yes     │ RANGING      │ HYBRID     │
+  │ S02_ML_ENSEMBLE  │   1   │ 1002  │    No      │ ALL          │ HYBRID     │
+  │ S03_SMC          │   2   │ 1003  │    No      │ TRENDING     │ FULL_MQL5  │
+  │ S04_MARKET_PROF  │   3   │ 1004  │    No      │ RANGING      │ FULL_MQL5  │
+  │ S05_SUPPLY_DEM   │   4   │ 1005  │    No      │ RANGING      │ FULL_MQL5  │
+  │ S06_KAMA         │   5   │ 1006  │    Yes     │ TRENDING     │ FULL_MQL5  │
+  │ S07_MEAN_REV     │   6   │ 1007  │    Yes     │ RANGING      │ FULL_MQL5  │
+  │ S08_INTERMARKET  │   7   │ 1008  │    No      │ TRENDING     │ HYBRID     │
+  │ S09_SESSION_BRK  │   8   │ 1009  │    No      │ VOLATILE     │ FULL_MQL5  │
+  │ S10_TURTLE       │   9   │ 1010  │    Yes     │ TRENDING     │ FULL_MQL5  │
+  │ S11_ICHIMOKU     │  10   │ 1011  │    No      │ TRENDING     │ FULL_MQL5  │
+  │ S12_PRICE_ACT    │  11   │ 1012  │    No      │ TRENDING     │ FULL_MQL5  │
+  │ S13_FIB_STOCH    │  12   │ 1013  │    No      │ RANGING      │ FULL_MQL5  │
+  │ S14_BB_SQUEEZE   │  13   │ 1014  │    Yes     │ SQUEEZE      │ FULL_MQL5  │
+  │ S15_GRID         │  14   │ 1015  │    Yes     │ RANGING      │ FULL_MQL5  │
+  │ S16_SPIKE        │  15   │ 1016  │    Yes     │ VOLATILE     │ FULL_MQL5  │
+  └──────────────────┴───────┴───────┴────────────┴──────────────┴────────────┘
+
+  Standalone-capable strategies (ทำงานได้เมื่อ Brain offline):
+    S01, S06, S07, S10, S14, S15, S16
+
+  Money Management Index (ทั้ง 19 MM methods):
+  ───────────────────────────────────────────────
+  ┌───────┬────────────────────────────────┬──────────────────────────────────┐
+  │ Index │ MM Method                      │ ลักษณะ                           │
+  ├───────┼────────────────────────────────┼──────────────────────────────────┤
+  │  01   │ MM01_FixedConservative         │ Fixed lot 0.01 — ปลอดภัยสุด      │
+  │  02   │ MM02_FixedAggressive           │ Fixed lot ใหญ่กว่า               │
+  │  03   │ MM03_ATRBased                  │ lot ตาม ATR volatility           │
+  │  04   │ MM04_KellyCriterion            │ Kelly formula — optimize growth  │
+  │  05   │ MM05_MartingaleControlled      │ Martingale มี cap จำกัด          │
+  │  06   │ MM06_AntiMartingale            │ เพิ่ม lot ตาม winning streak     │
+  │  07   │ MM07_PctVolatility             │ lot % ของ volatility             │
+  │  08   │ MM08_Pyramid                   │ pyramid เพิ่ม lot เมื่อกำไร      │
+  │  09   │ MM09_EquityCurveRecovery       │ ลด lot เมื่อ equity ลด          │
+  │  10   │ MM10_DrawdownBased             │ lot ตาม drawdown level           │
+  │  11   │ MM11_SessionBased              │ lot ปรับตาม trading session      │
+  │  12   │ MM12_EquityCurveFilter         │ pause เมื่อ equity curve ลง      │
+  │  13   │ MM13_CorrelationAdjusted       │ ปรับตาม correlation ของ symbols  │
+  │  14   │ MM14_TieredRisk                │ risk levels ตาม confidence       │
+  │  15   │ MM15_AdaptiveWinStreak         │ ปรับตาม win/loss streak          │
+  │  16   │ MM16_VolatilityPercentile      │ lot ตาม volatility percentile    │
+  │  17   │ MM17_RegimeBased               │ lot ปรับตาม market regime        │
+  │  18   │ MM18_PortfolioCap              │ cap ทั้ง portfolio               │
+  │  19   │ MM19_DynamicMulti              │ รวม multiple MM methods          │
+  └───────┴────────────────────────────────┴──────────────────────────────────┘
+
+  Market Regime Types:
+  ─────────────────────
+    TRENDING  = ราคาเคลื่อนทิศทางชัดเจน (ใช้ S03, S06, S08, S10, S11, S12)
+    RANGING   = ราคา sideway (ใช้ S01, S04, S05, S07, S13, S15)
+    VOLATILE  = ราคากระโดดแรง (ใช้ S09, S16)
+    SQUEEZE   = volatility ต่ำก่อน breakout (ใช้ S14)
+
+  Key Configuration Files:
+  ─────────────────────────
+    02_Brain\config.py                        ← Brain parameters (risk limits, etc.)
+    Include\Logic\StrategyConstants.mqh       ← Strategy enums + magic numbers
+    Include\Network\Protocol\Definitions.mqh  ← SDynamicParams, message types
+    02_Brain\core\strategy\policy.py          ← Policy selection logic
+
+  RiskGuardian Parameters (Include\Risk\RiskGuardian.mqh):
+  ──────────────────────────────────────────────────────────
+    DD_DAILY_LIMIT_PCT  = 2.0    ← Daily loss limit (% of balance)
+    MAX_DRAWDOWN_PCT    = 20.0   ← Max total drawdown before halt
+
+================================================================================
+  9. การแก้ไขปัญหาเบื้องต้น (TROUBLESHOOTING)
+================================================================================
+
+  ปัญหา: Brain ไม่เริ่ม / Crash ตั้งแต่ต้น
+  ──────────────────────────────────────────
+  ┌───────────────────────────┬────────────────────────────────────────────────┐
+  │ ตรวจ                      │ วิธีแก้                                        │
+  ├───────────────────────────┼────────────────────────────────────────────────┤
+  │ python --version          │ ต้อง 3.8+; ถ้าไม่มี ติดตั้ง Python           │
+  │ pip list | find "zmq"     │ ถ้าไม่มี: pip install pyzmq msgpack           │
+  │ netstat -ano | find "7778"│ ถ้า port ถูกใช้: taskkill /pid <PID> /f       │
+  │ dir 02_Brain\main.py      │ ต้องรันจาก root (FlashEASuite_V2/) folder     │
+  └───────────────────────────┴────────────────────────────────────────────────┘
+
+  Quick diagnosis:
+    start_flashea.bat doctor
+
+  ───────────────────────────────────────────────────────────────────────────────
+
+  ปัญหา: FeederEA ไม่ broadcast ticks
+  ──────────────────────────────────────
+  ┌─────────────────────────────┬──────────────────────────────────────────────┐
+  │ ตรวจ                        │ วิธีแก้                                      │
+  ├─────────────────────────────┼──────────────────────────────────────────────┤
+  │ EA มี smiley face icon?      │ ไม่มี icon = EA ไม่ได้ attach → ลาก EA ใหม่ │
+  │ Icon เป็นหน้าเศร้า?         │ Algo trading OFF → กดปุ่ม AutoTrading        │
+  │ Experts tab มี "DLL not found"│ libzmq.dll ไม่อยู่ใน MQL5\Libraries\      │
+  │ Experts tab มี compile error │ Recompile FeederEA จาก MetaEditor Navigator  │
+  └─────────────────────────────┴──────────────────────────────────────────────┘
+
+  ───────────────────────────────────────────────────────────────────────────────
+
+  ปัญหา: Trader ไม่รับ policy / ไม่เทรด
+  ─────────────────────────────────────────
+  ┌──────────────────────────────────┬─────────────────────────────────────────┐
+  │ ตรวจ                             │ วิธีแก้                                  │
+  ├──────────────────────────────────┼─────────────────────────────────────────┤
+  │ Brain running?                   │ start_flashea.bat status → [RUNNING]    │
+  │ Port 7778 listening?             │ netstat -an | find "7778"               │
+  │ SYMBOL_SUFFIX ถูกต้อง?          │ ตรวจใน Market Watch ว่า suffix ตรงกัน   │
+  │ FeederEA ส่ง tick?               │ Brain console: Ticks Processed เพิ่มไหม │
+  │ V6_EnableMode = false?           │ ตรวจ Input parameter ของ Trader         │
+  └──────────────────────────────────┴─────────────────────────────────────────┘
+
+  ───────────────────────────────────────────────────────────────────────────────
+
+  ปัญหา: Port ถูกใช้อยู่แล้ว (Port already in use)
+  ────────────────────────────────────────────────────
+    netstat -ano | find "7778"
+    → Output: TCP 0.0.0.0:7778  ...  LISTENING  12345  ← PID คือ 12345
+    taskkill /pid 12345 /f
+    → แล้วรัน start_flashea.bat อีกครั้ง
+
+  ───────────────────────────────────────────────────────────────────────────────
+
+  ปัญหา: Compile Error ใน MetaEditor
+  ─────────────────────────────────────
+    Lesson Learned:
+    1. ห้ามใช้ #if compound → ใช้ #ifdef / #ifndef เท่านั้น
+    2. ต้อง compile จาก MetaEditor Navigator เท่านั้น (ไม่ใช่ Windows Explorer)
+    3. ตรวจ #include path ทุกครั้ง → ดู Include\ tree ก่อน
+
+  ───────────────────────────────────────────────────────────────────────────────
+
+  ปัญหา: High Memory Usage (Python > 500 MB)
+  ────────────────────────────────────────────
+    Cause: Long uptime อาจทำให้ memory drift
+    Fix:
+      start_flashea.bat stop
+      start_flashea.bat
+    → Brain จะ restart ใหม่พร้อมเคลียร์ memory
+
+  ───────────────────────────────────────────────────────────────────────────────
+
+  ปัญหา: InfluxDB ไม่ทำงาน
+  ──────────────────────────
+    InfluxDB เป็น OPTIONAL — ระบบเทรดได้โดยไม่มี
+    ถ้าต้องการ historical data:
+      1. เปิด influxd.exe หรือ Docker container
+      2. ตรวจ: http://localhost:8086 ใน browser
+      3. python tools\validate_live_readiness.py --influx
+
+  ───────────────────────────────────────────────────────────────────────────────
+
+  ปัญหา: Standalone Mode ไม่ทำงาน (Brain offline)
+  ─────────────────────────────────────────────────
+    ถ้า Brain ปิด → Trader ควร switch เป็น Standalone Mode อัตโนมัติ
+    Standalone strategies: S01, S06, S07, S10, S14, S15, S16
+    ตรวจ Experts tab: "Switched to Standalone Mode"
+    ถ้าไม่ switch: ตรวจ ConfigReceiver.mqh → fallback logic
+
+  ───────────────────────────────────────────────────────────────────────────────
+
+  Known Issues (ทราบล่วงหน้า):
+  ─────────────────────────────
+  ┌────────────────────────────────────┬──────────────┬───────────────────────┐
+  │ Issue                              │ ความรุนแรง   │ Status                │
+  ├────────────────────────────────────┼──────────────┼───────────────────────┤
+  │ S16_Spike memory leak (สำหรับ      │ ⚠️ CRITICAL  │ แก้แล้วใน P9-4b       │
+  │ backtest ยาว)                      │  backtest เท่า│ (Strategy_Spike.mqh   │
+  │                                    │ นั้น         │  v2.02)               │
+  │ Feature engineering latency        │ ℹ️ INFO       │ 100-340ms/inference   │
+  │ (ยังไม่เป็น incremental)           │              │ (acceptable)          │
+  │ InfluxDB optional                  │ ℹ️ INFO       │ ระบบทำงานได้โดยไม่มี  │
+  │ Standalone = HMA+LinReg แทน Kalman │ ℹ️ INFO       │ OK for standalone use │
+  └────────────────────────────────────┴──────────────┴───────────────────────┘
+
+  ⚠️ ห้ามรัน optimization หรือ backtest ยาวๆ บน S16_Spike
+     จนกว่าจะยืนยันว่า memory leak แก้หมดแล้วใน environment ของคุณ
+
+================================================================================
+  10. ขั้นตอนฉุกเฉิน (EMERGENCY PROCEDURES)
+================================================================================
+
+  Scenario A: Drawdown เกิน 10%
+  ──────────────────────────────
+    1. MT5 → AutoTrading OFF (สีแดง) ← ทันที
+    2. ดู open positions ทั้งหมด
+    3. ตัดสินใจ: Close all หรือ รอ?
+    4. Review: สาเหตุที่ drawdown สูง
+    5. ปรับ lot size ลง หรือ เปลี่ยน MM method
+    6. กลับมาเทรดด้วย lot เล็กลงก่อน
+
+  Scenario B: Python Brain Crash กลางดึก
+  ────────────────────────────────────────
+    - Health Monitor จะ auto-restart Brain (max 3 ครั้ง)
+    - ถ้าไม่ restart:
+        start_flashea.bat stop
+        start_flashea.bat
+    - Trader จะ switch เป็น Standalone Mode อัตโนมัติ
+    - ตรวจ logs\health.log เพื่อหาสาเหตุ
+
+  Scenario C: MT5 Crash
+  ──────────────────────
+    1. Restart MT5
+    2. MT5 จะ auto-attach EA ที่เคย attach ไว้ (จำ state)
+    3. ตรวจ: Experts tab ว่า FeederEA และ Trader re-attach แล้ว
+    4. ถ้าไม่ auto-attach: ทำ STEP 3 และ STEP 4 อีกครั้ง
+
+  Scenario D: News Spike / Flash Crash
+  ──────────────────────────────────────
+    1. MT5 → AutoTrading OFF ทันที
+    2. รอจน spread กลับปกติ (< 2x ค่าปกติ)
+    3. ปิด positions ที่ขาดทุนหนักถ้าจำเป็น
+    4. เปิด AutoTrading หลัง spike จบ (โดยปกติ < 5 นาที)
+    Note: S16_Spike จะตรวจ spread อัตโนมัติ แต่ manual override ดีกว่า
+
+  Scenario E: ระบบ Overload / CPU spike
+  ──────────────────────────────────────
+    1. ตรวจ Task Manager: Python CPU > 50% ผิดปกติ
+    2. start_flashea.bat stop แล้ว start ใหม่
+    3. ถ้ายังสูง: ลด symbols ใน FeederEA
+    4. ตรวจ logs สำหรับ infinite loop หรือ exception storm
+
+  Emergency Contact Summary:
+  ──────────────────────────
+  ┌──────────────────────────────┬──────────────────────────────────────────────┐
+  │ สถานการณ์                    │ Action                                       │
+  ├──────────────────────────────┼──────────────────────────────────────────────┤
+  │ Brain crash                  │ Health monitor auto-restart (max 3 ครั้ง)   │
+  │ Brain ไม่ restart            │ start_flashea.bat stop แล้ว start ใหม่      │
+  │ MT5 crash                    │ Restart MT5 → EA จะ re-attach อัตโนมัติ    │
+  │ ปิดทุกอย่างเร่งด่วน         │ start_flashea.bat stop → ปิด MT5            │
+  │ Port conflict                │ netstat -ano | find "777" → taskkill /pid   │
+  │ Drawdown > 20%               │ Level 1 stop → Close positions → Review     │
+  └──────────────────────────────┴──────────────────────────────────────────────┘
+
+  Do's และ Don'ts สำหรับการดำเนินงาน:
+  ──────────────────────────────────────
+  ✅ DO:
+    - เริ่มด้วย Demo account อย่างน้อย 1 สัปดาห์
+    - ใช้ lot size เล็ก (0.01) จนกว่าจะมั่นใจ
+    - เปิด Health Monitor ตลอดเวลา
+    - ตั้ง Daily Loss Limit ใน RiskGuardian (default 2%)
+    - จด trade journal ทุกวัน
+    - Backup folder ทุกสัปดาห์
+
+  ❌ DON'T:
+    - อย่าเริ่ม Live โดยไม่ผ่าน Demo
+    - อย่าเพิ่ม lot size โดยไม่ดู performance ก่อน
+    - อย่าแก้โค้ดขณะระบบทำงาน (ปิด EA ก่อน)
+    - อย่าปิด Brain ขณะมี open positions
+    - อย่าเพิกเฉย Health Monitor warnings
+    - อย่ารัน Optimization โดยไม่ตรวจ S16 memory ก่อน
+
+================================================================================
+  11. QUICK REFERENCE CARD
+================================================================================
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║               FlashEASuite V2 — Quick Reference (P9-5 Production)           ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  STARTUP (ลำดับสำคัญ):                                                      ║
+║    1. เปิด MT5 → Login → AutoTrading = 🟢                                   ║
+║    2. start_flashea.bat              ← เปิด Python Brain                    ║
+║    3. Attach FeederEA ลง chart 1     ← Port 7777 PUB                        ║
+║    4. Attach ProgramC_Trader chart 2  ← Port 7778 SUB                       ║
+║    5. python tools\health_monitor.py ← Monitor (optional)                   ║
+║                                                                              ║
+║  COMMANDS:                                                                   ║
+║    start_flashea.bat          ← Start Brain                                 ║
+║    start_flashea.bat status   ← Quick status                                ║
+║    start_flashea.bat stop     ← Stop Brain                                  ║
+║    start_flashea.bat doctor   ← Diagnose problems                           ║
+║    validate_live_readiness.py ← Pre-live full check                         ║
+║                                                                              ║
+║  ZMQ PORTS:                                                                  ║
+║    7777 = FeederEA  → Brain  (tick data)                                    ║
+║    7778 = Brain     → Trader (CONFIG_PUSH policies)                         ║
+║    7779 = Trader    → Brain  (TRADE_REPORT feedback)                        ║
+║                                                                              ║
+║  EMERGENCY STOPS:                                                            ║
+║    Level 1: MT5 → AutoTrading OFF (red button)          ← 5 sec            ║
+║    Level 2: Remove EA from charts                        ← 30 sec           ║
+║    Level 3: start_flashea.bat stop + close MT5          ← 1 min            ║
+║    Level 4: taskkill /im python.exe /f (force kill)     ← immediate        ║
+║                                                                              ║
+║  LOGS:                                                                       ║
+║    02_Brain\logs\flashea_brain.log    ← Python Brain log                    ║
+║    02_Brain\logs\trades_YYYYMMDD.json ← Daily trade journal                 ║
+║    logs\health.log                    ← Health monitor                      ║
+║    MT5 → Experts tab                  ← EA messages                         ║
+║                                                                              ║
+║  HEALTH METRICS (ค่าปกติ):                                                  ║
+║    Python Memory  < 300 MB                                                   ║
+║    Python CPU     < 15%                                                      ║
+║    Tick count     เพิ่มขึ้นเรื่อยๆ                                           ║
+║    Policy/hr      0–50 (ปกติ)                                                ║
+║    Spike score    < 70 (ปกติ)                                                ║
+║                                                                              ║
+║  DATA FLOW:                                                                  ║
+║    FeederEA ──7777──► Brain ──7778──► Trader                                ║
+║                          ▲                │                                  ║
+║                          └────7779────────┘                                  ║
+║                            (feedback loop)                                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+================================================================================
+  END OF DOCUMENT
+  FlashEASuite V2 Operation Manual v2.0 — P9-5 Production
+  "Smart Server, Powerful Client"
+================================================================================

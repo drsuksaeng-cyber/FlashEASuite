@@ -1,10 +1,10 @@
 //+------------------------------------------------------------------+
 //|                                          ProgramC_Trader.mq5     |
 //|                            FlashEASuite V2 - Program C Trader    |
-//|                            V2.11 - Connected to Python Brain     |
+//|                            V2.12 + V6 (Phase0 chat3 merged)      |
 //+------------------------------------------------------------------+
 #property copyright "Dr. Suksaeng Kukanok"
-#property version   "2.11"
+#property version   "2.13"
 #property strict
 
 // ========== INCLUDES ==========
@@ -18,30 +18,71 @@
 // Note: RiskGuardian.mqh includes PositionSizingManager.mqh and DailyLossLimit.mqh
 #include "../Include/Utils/SymbolScanner.mqh"  // Multi-symbol scanner
 
+// ✅ FIX #1: เพิ่ม includes สำหรับ Spike Strategy
+#include "../Include/Logic/TickDensity.mqh"    // Required by Strategy_Spike
+#include "../Include/Logic/SpreadFilter.mqh"   // Required by Strategy_Spike
+#include "../Include/Logic/Strategy_Spike.mqh" // Spike Hunter Strategy
+
+// ========== V6 PHASE0 CHAT3 INCLUDES ==========
+#include "../Include/Logic/IStrategy.mqh"
+#include "../Include/Logic/StrategyConstants.mqh"
+#include "../Include/Logic/ConnectionMonitor.mqh"
+#include "../Include/Logic/ConfigReceiver.mqh"
+#include "../Include/Logic/StrategyManager_V6.mqh"
+
+// ========== SECURITY LAYER P9-2 ==========
+// Remove #define STUB_MODE after deploying FlashEA_Security.dll
+// to: %AppData%\MetaQuotes\Terminal\<ID>\MQL5\Libraries\
+#define STUB_MODE
+#include "../Include/Security/DLLWrapper.mqh"
+
 // ========== INPUT PARAMETERS ==========
 //+------------------------------------------------------------------+
 //| Symbol Formatting (Broker-specific)                              |
 //+------------------------------------------------------------------+
 input string   SYMBOL_PREFIX = "";           // Symbol Prefix (e.g., "f" for FXPro, empty for most)
-input string   SYMBOL_SUFFIX = "";           // Symbol Suffix (e.g., ".tp", "m", "_i", empty for ICMarkets)
+input string   SYMBOL_SUFFIX = ".tp";          // Symbol Suffix (e.g., ".tp", "m", "_i", empty for ICMarkets)
+
+//+------------------------------------------------------------------+
+//| V6 Connection Parameters (Phase0 chat3)                          |
+//+------------------------------------------------------------------+
+input string   V6_ServerIP            = "127.0.0.1";      // Python Server IP (V6 mode)
+input int      V6_ServerPort          = 7778;             // ZMQ PUB port for CONFIG_PUSH
+input string   V6_ClientID            = "MT5_Client_001"; // Unique client identifier
+input bool     V6_EnableMode          = false;            // Enable V6 mode? (default: legacy mode)
+input int      V6_HeartbeatTimeout    = 30;              // Seconds until disconnect
+input int      V6_HeartbeatInterval   = 10;              // Seconds between heartbeats
 
 // ========== GLOBAL VARIABLES ==========
-// ZMQ Components
+// ZMQ Components (Legacy)
 CZmqHub g_zmq_hub;              // Handles SUB socket (receive policies)
 Context g_pub_context;          // Separate context for PUB socket
 Socket  g_pub_socket(ZMQ_PUB);  // Send feedback to Python (port 7779)
 
-// Strategy & Risk Components
+// Strategy & Risk Components (Legacy)
 CStrategyManager    g_council;
 CRiskGuardian       g_risk_guardian;
 CSymbolScanner      g_scanner;  // Multi-symbol scanner
 // Note: PositionSizingManager and DailyLossLimit are managed by RiskGuardian
+
+// V6 Components (Phase0 chat3)
+CConnectionMonitor      g_connection_monitor_v6;
+CConfigReceiver         g_config_receiver_v6;
+CStrategyManager_V6     g_strategy_manager_v6;
 
 // Operational State
 bool g_is_connected = false;
 int  g_policies_received = 0;
 int  g_trades_executed = 0;
 datetime g_last_policy_time = 0;
+
+// V6 State
+bool g_v6_mode_active = false;
+bool g_v6_online_mode = false;
+bool g_v6_standalone_mode = false;
+
+// Security P9-2
+CDLLWrapper g_security;
 
 // Scanner state
 datetime g_last_scan_time = 0;
@@ -57,8 +98,34 @@ int  g_poll_failures = 0;
 int OnInit()
 {
    Print("╔════════════════════════════════════════════════╗");
-   Print("║  ProgramC_Trader V2.11 - Initializing...     ║");
+   Print("║  ProgramC_Trader V2.12 + V6 - Initializing...║");
    Print("╚════════════════════════════════════════════════╝");
+   
+   // Check if V6 mode is enabled
+   if(V6_EnableMode)
+   {
+      Print("[V6] V6 Mode ENABLED - Using Phase0 chat3 components");
+      g_v6_mode_active = true;
+      return InitializeV6Mode();
+   }
+   
+   // Legacy mode initialization (original code)
+   return InitializeLegacyMode();
+}
+
+//+------------------------------------------------------------------+
+//| InitializeLegacyMode: Original ProgramC_Trader initialization    |
+//+------------------------------------------------------------------+
+int InitializeLegacyMode()
+{
+   Print("[LEGACY] Initializing Legacy Mode (V2.12)");
+   
+   // 0. Security (P9-2) — warning-only, non-fatal in development
+   g_security.Initialize();
+   if(!g_security.IsLicenseValid())
+      Print("[SECURITY] WARNING: License not valid (stub/degraded mode)");
+   else
+      Print("[SECURITY] License OK");
    
    // 1. Initialize ZMQ Hub (for SUB socket)
    if(!g_zmq_hub.Initialize(0, 0))
@@ -111,10 +178,24 @@ int OnInit()
    // 5. Initialize Council (Strategy Manager)
    g_council.Initialize();
    
-   // Add Grid Strategy
+   // 5a. Add Grid Strategy
    CStrategyGrid* grid = new CStrategyGrid();
    g_council.AddStrategy(grid);
    Print("✅ Grid Strategy added to Council");
+   
+   // ✅ FIX #2 & #3: เพิ่ม Spike Strategy ตำแหน่งถูกต้อง + ใช้ g_council
+   // 5b. Add Spike Hunter Strategy
+   CStrategySpike* spike = new CStrategySpike();
+   if(spike.Init())
+   {
+      g_council.AddStrategy(spike);  // ✅ เปลี่ยนจาก strategy_mgr เป็น g_council
+      Print("✅ Spike Hunter Strategy added to Council");
+   }
+   else
+   {
+      Print("❌ Failed to initialize Spike Hunter Strategy");
+      delete spike;
+   }
    
    // 6. Initialize Symbol Scanner
    g_scanner.SetMaxSpreadPercent(0.15);  // Max 0.15% spread
@@ -137,6 +218,7 @@ int OnInit()
    // 7. Start Timer (check for policies every 100ms)
    EventSetMillisecondTimer(100);
    
+   // 8. System Ready
    g_is_connected = true;
    
    // Display Symbol Formatting Configuration
@@ -164,18 +246,89 @@ int OnInit()
 }
 
 //+------------------------------------------------------------------+
+//| InitializeV6Mode: V6 Phase0 chat3 initialization                 |
+//+------------------------------------------------------------------+
+int InitializeV6Mode()
+{
+   Print("[V6] Initializing V6 Mode (P6-1)...");
+   Print("[V6] Server: ", V6_ServerIP, ":", V6_ServerPort);
+   Print("[V6] ClientID: ", V6_ClientID);
+
+   // 0. Security (P9-2)
+   g_security.Initialize();
+   if(!g_security.IsLicenseValid())
+      Print("[V6][SECURITY] WARNING: License not valid (stub/degraded mode)");
+   else
+      Print("[V6][SECURITY] License OK");
+
+   // 1. Symbol สำหรับ V6 (chart symbol หรือ default XAUUSD.tp)
+   string v6_symbol = (Symbol() != "") ? Symbol() : FormatSymbol("XAUUSD");
+
+   // 2. Init ConnectionMonitor (30s timeout, warn at 20s)
+   g_connection_monitor_v6.Init(V6_HeartbeatTimeout, 20);
+
+   // 3. Init ConfigReceiver (P6-1 full version) — ส่ง symbol เพื่อ filter multi-symbol ConfigPush
+   g_config_receiver_v6.Init(v6_symbol);
+
+   // 4. Subscribe ZMQ SUB socket ไปยัง Python Server (port 7778 PUB)
+   if(!g_zmq_hub.Initialize(0, 0))
+   {
+      Print("[V6] ❌ ZMQ Hub init failed");
+      return INIT_FAILED;
+   }
+   string sub_addr = "tcp://" + V6_ServerIP + ":" + IntegerToString(V6_ServerPort);
+   if(!g_zmq_hub.Subscribe(sub_addr, ""))
+   {
+      Print("[V6] ❌ ZMQ Subscribe failed: ", sub_addr);
+      return INIT_FAILED;
+   }
+   Print("[V6] ✅ Subscribed to ", sub_addr);
+
+   // 5. Register all 16 strategies
+   if(!g_strategy_manager_v6.RegisterAllStrategies(v6_symbol, PERIOD_M15))
+      Print("[V6] ⚠️  Some strategies failed Init — continuing with partial set");
+
+   // 6. Start in STANDALONE mode — load saved config ถ้ามี
+   g_v6_standalone_mode = true;
+   g_v6_online_mode     = false;
+   g_strategy_manager_v6.SetServerConnected(false);
+
+   if(!g_config_receiver_v6.LoadStandaloneConfig())
+   {
+      // ไม่มีไฟล์ → ใช้ default 7 standalone strategies
+      Print("[V6] No standalone config — enabling 7 SA strategies with defaults");
+      g_strategy_manager_v6.EnableAllStandalone();
+   }
+   else
+   {
+      // มีไฟล์ → apply saved config
+      SConfigData saved_cfg = g_config_receiver_v6.GetLastConfig();
+      g_strategy_manager_v6.ApplyConfig_V6(saved_cfg);
+      Print("[V6] Standalone config applied from file");
+   }
+
+   // 7. Start timer 100ms สำหรับ poll + strategy tick
+   EventSetMillisecondTimer(100);
+
+   Print("[V6] ✅ V6 Mode initialized | symbol=", v6_symbol,
+         " | strategies=", g_strategy_manager_v6.GetEnabledCount_V6(), "/16");
+
+   return INIT_SUCCEEDED;
+}
+
+//+------------------------------------------------------------------+
 //| Format Symbol with Prefix/Suffix                                 |
 //+------------------------------------------------------------------+
 string FormatSymbol(string base_symbol)
-  {
+{
    return SYMBOL_PREFIX + base_symbol + SYMBOL_SUFFIX;
-  }
+}
 
 //+------------------------------------------------------------------+
 //| Strip Symbol to Base (remove prefix/suffix)                      |
 //+------------------------------------------------------------------+
 string StripSymbol(string formatted_symbol)
-  {
+{
    string result = formatted_symbol;
    
    // Remove prefix
@@ -184,14 +337,14 @@ string StripSymbol(string formatted_symbol)
    
    // Remove suffix
    if(SYMBOL_SUFFIX != "" && StringFind(result, SYMBOL_SUFFIX) >= 0)
-     {
+   {
       int pos = StringFind(result, SYMBOL_SUFFIX);
       if(pos >= 0)
          result = StringSubstr(result, 0, pos);
-     }
+   }
    
    return result;
-  }
+}
 
 // ========== DEINITIALIZATION ==========
 void OnDeinit(const int reason)
@@ -201,9 +354,20 @@ void OnDeinit(const int reason)
    Print("   Trades executed: ", g_trades_executed);
    
    EventKillTimer();
-   g_zmq_hub.Shutdown();
-   g_pub_socket.close();
-   g_pub_context.shutdown();
+   
+   if(g_v6_mode_active)
+   {
+      Print("[V6] V6 Mode shutdown");
+      g_strategy_manager_v6.Deinit();
+      g_zmq_hub.Shutdown();  // P6-1: shutdown ZMQ SUB socket
+   }
+   else
+   {
+      // Legacy mode cleanup
+      g_zmq_hub.Shutdown();
+      g_pub_socket.close();
+      g_pub_context.shutdown();
+   }
    
    Print("✅ Shutdown complete");
 }
@@ -211,57 +375,79 @@ void OnDeinit(const int reason)
 // ========== TIMER EVENT (Main Loop) ==========
 void OnTimer()
 {
+   if(g_v6_mode_active)
+   {
+      OnTimer_V6();
+   }
+   else
+   {
+      OnTimer_Legacy();
+   }
+}
+
+//+------------------------------------------------------------------+
+//| OnTimer_Legacy: Original timer logic (V2.12)                     |
+//+------------------------------------------------------------------+
+void OnTimer_Legacy()
+{
    g_timer_calls++;
    
-   // DEBUG: Log every 100 timer calls (every 10 seconds at 100ms interval)
+   // Display status every 10 seconds (100 timer calls * 100ms = 10 sec)
    if(g_timer_calls % 100 == 0)
    {
       Print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      Print("🔍 DEBUG STATUS (every 10 seconds)");
+      Print("📊 STATUS UPDATE (", g_timer_calls / 100, " x 10 sec)");
       Print("   Timer calls: ", g_timer_calls);
       Print("   Poll attempts: ", g_poll_attempts);
       Print("   Poll success: ", g_poll_success);
       Print("   Poll failures: ", g_poll_failures);
       Print("   Policies received: ", g_policies_received);
-      Print("   Success rate: ", g_poll_attempts > 0 ? DoubleToString(100.0 * g_poll_success / g_poll_attempts, 2) : "0.00", "%");
+      Print("   Trades executed: ", g_trades_executed);
+      
+      int seconds_since_policy = (g_last_policy_time > 0) ? 
+                                  (int)(TimeCurrent() - g_last_policy_time) : -1;
+      if(seconds_since_policy >= 0)
+         Print("   Last policy: ", seconds_since_policy, " seconds ago");
+      else
+         Print("   Last policy: Never");
+      
+      Print("   Connection: ", (g_is_connected ? "✅ Connected" : "❌ Disconnected"));
       Print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
    }
    
-   // Periodic symbol scanner rescan (every 5 minutes)
+   // Rescan symbols periodically
    if(TimeCurrent() - g_last_scan_time >= g_scan_interval)
    {
-      Print("🔍 Rescanning symbols...");
+      Print("🔄 Re-scanning Market Watch...");
       g_scanner.ScanMarketWatch();
       g_last_scan_time = TimeCurrent();
    }
    
-   // Check for incoming policies from Python Brain
-   CheckForPolicies();
-   
-   // Also let Council do its own tick analysis (backup/standalone mode)
-   g_council.OnTickLogic();
-}
-
-// ========== CHECK FOR POLICIES FROM PYTHON ==========
-void CheckForPolicies()
-{
-   g_poll_attempts++;
-   
-   // Try to receive message using ZmqHub (non-blocking)
-   uchar recv_data[];
-   
-   // DEBUG: Log first 10 poll attempts
-   if(g_poll_attempts <= 10)
+   // Security: periodic DLL verification P9-2
+   if(!g_security.PeriodicVerification())
    {
-      Print("🔍 DEBUG: Poll attempt #", g_poll_attempts, " calling g_zmq_hub.Poll()...");
+      Print("[SECURITY] DLL verification failed — stopping EA");
+      ExpertRemove();
+      return;
    }
    
-   if(!g_zmq_hub.Poll(recv_data))
+   // Poll for messages from Python Brain
+   g_poll_attempts++;
+   
+   // Detailed logging for first 10 polls
+   if(g_poll_attempts <= 10)
    {
+      Print("🔍 Poll attempt #", g_poll_attempts, " (detailed mode)");
+   }
+   
+   uchar recv_data[];
+   if(!g_zmq_hub.Poll(recv_data))  // Poll without timeout parameter
+   {
+      // No message available
       g_poll_failures++;
       
-      // DEBUG: Log first 5 failures
-      if(g_poll_failures <= 5)
+      // Log first 10 failures
+      if(g_poll_attempts <= 10)
       {
          Print("   ❌ Poll returned false (no message) - attempt #", g_poll_attempts);
       }
@@ -327,6 +513,292 @@ void CheckForPolicies()
    
    // Execute policy
    ExecutePolicy(policy);
+}
+
+//+------------------------------------------------------------------+
+//| ProcessConfigPushV2: Handle CONFIG_PUSH V2 message              |
+//| Parses dynamic params and distributes to all registered         |
+//| strategies via StrategyManager_V6.                              |
+//| @param data  Raw MessagePack bytes from ZMQ                    |
+//| @param size  Byte count                                         |
+//+------------------------------------------------------------------+
+void ProcessConfigPushV2(uchar &data[], int size)
+{
+   // Step 1: Parse the incoming CONFIG_PUSH V2 data
+   if(!g_config_receiver_v6.ParseDynamicParams(data, size))
+   {
+      Print("[V6] ❌ CONFIG_PUSH V2 parse failed (", size, " bytes)");
+      return;
+   }
+   
+   // Step 2: Distribute parsed params per-strategy
+   // ConfigReceiver.GetDynamicParamsForStrategy(id) → each strategy gets its own bundle
+   for(int _i = 0; _i < TOTAL_STRATEGIES; _i++)
+   {
+      ENUM_STRATEGY_ID _id = (ENUM_STRATEGY_ID)_i;
+      SDynamicParams _dp = g_config_receiver_v6.GetDynamicParamsForStrategy(_id);
+      g_strategy_manager_v6.DistributeDynamicParams(_dp, _id);
+   }
+   
+   // Step 3: Log result
+   Print("[V6] ✅ CONFIG_PUSH V2 applied: ", g_config_receiver_v6.GetChangeSummary());
+}
+
+//+------------------------------------------------------------------+
+//| OnTimer_V6: V6 Mode timer logic (P6-1 Full Implementation)       |
+//+------------------------------------------------------------------+
+void OnTimer_V6()
+{
+   g_timer_calls++;
+
+   // Status update every 10 seconds (100 * 100ms = 10s)
+   if(g_timer_calls % 100 == 0)
+   {
+      Print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      Print("📊 V6 STATUS (", g_timer_calls / 100, " x 10 sec)");
+      Print("   Mode:        ", (g_v6_online_mode ? "ONLINE" : "STANDALONE"));
+      Print("   Strategies:  ", g_strategy_manager_v6.GetEnabledCount_V6(), "/", TOTAL_STRATEGIES);
+      Print("   Registered:  ", g_strategy_manager_v6.IsRegistered() ? "✅ YES" : "⚠️ NO");
+      Print("   Connection:  ", g_connection_monitor_v6.GetStatus());
+      Print("   Regime:      ", RegimeToString(g_config_receiver_v6.GetCurrentRegime()));
+      Print("   Configs recv:", g_config_receiver_v6.GetConfigCount());
+      if(g_config_receiver_v6.HasNewsEvent())
+         Print("   📰 NEWS: ", g_config_receiver_v6.GetNewsDescription());
+      Print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+   }
+
+   // ── P6-1: Poll all pending ZMQ messages ──
+   PollMessages_V6();
+
+   // ── Security: periodic DLL verification P9-2 ──
+   if(!g_security.PeriodicVerification())
+   {
+      Print("[V6][SECURITY] DLL verification failed — stopping EA");
+      ExpertRemove();
+      return;
+   }
+
+   // ── Strategy tick ──
+   MqlTick tick;
+   if(!SymbolInfoTick(_Symbol, tick)) return;
+   g_strategy_manager_v6.OnTick(tick);
+}
+
+// ========== P6-1: V6 MESSAGE POLLING & ROUTING ==========
+
+//+------------------------------------------------------------------+
+//| PollMessages_V6: Drain ZMQ SUB socket, route each message        |
+//| เรียกจาก OnTimer_V6() ทุก 100ms                                 |
+//+------------------------------------------------------------------+
+void PollMessages_V6()
+{
+   int max_per_poll = 20; // safety limit ต่อ timer call
+   int count = 0;
+
+   while(count < max_per_poll)
+   {
+      uchar raw[];
+      if(!g_zmq_hub.Poll(raw)) break; // ไม่มีข้อความแล้ว
+
+      int sz = ArraySize(raw);
+      if(sz > 0)
+      {
+         ProcessMessage_V6(raw, sz);
+         g_poll_success++;
+      }
+      count++;
+   }
+
+   // ── ตรวจ connection timeout ──────────────────────────────────────
+   bool still_connected = g_connection_monitor_v6.Check();
+
+   if(!still_connected && g_v6_online_mode)
+   {
+      // Timeout → switch to standalone
+      g_v6_online_mode     = false;
+      g_v6_standalone_mode = true;
+      g_strategy_manager_v6.SetServerConnected(false);
+      g_strategy_manager_v6.EnableAllStandalone(); // keep SA-capable only
+
+      PrintFormat("[V6] ⚠️  SERVER TIMEOUT (%ds) → STANDALONE MODE | disabled hybrid strategies",
+                  g_connection_monitor_v6.GetDisconnectDuration());
+   }
+   else if(still_connected && !g_v6_online_mode && g_v6_standalone_mode)
+   {
+      // Reconnected (heartbeat came back, online set inside ProcessMessage_V6)
+      // Nothing extra here — online flag set when CONFIG_PUSH/INITIAL_CONFIG received
+   }
+}
+
+//+------------------------------------------------------------------+
+//| ProcessMessage_V6: Route 1 raw message to correct handler        |
+//| ใช้ variable names ของไฟล์นี้ (_v6 suffix)                      |
+//+------------------------------------------------------------------+
+void ProcessMessage_V6(const uchar &data[], int size)
+{
+   if(size <= 0) return;
+
+   // Route ผ่าน ConfigReceiver (parse + store internally)
+   int msg_type = g_config_receiver_v6.ReceiveMessage(data, size);
+
+   // ทุก message จาก server → reset heartbeat timeout
+   if(msg_type > 0 && msg_type != MSG_V6_UNKNOWN)
+      g_connection_monitor_v6.UpdateHeartbeat();
+
+   switch(msg_type)
+   {
+      //---------------------------------------------------------------
+      // [10] CONFIG_PUSH: apply + distribute params + save standalone
+      //---------------------------------------------------------------
+      case MSG_CONFIG_PUSH:
+      {
+         SConfigData cfg = g_config_receiver_v6.GetLastConfig();
+         g_strategy_manager_v6.ApplyConfig_V6(cfg);
+
+         // Distribute dynamic params แต่ละ strategy
+         for(int i = 0; i < TOTAL_STRATEGIES; i++)
+         {
+            ENUM_STRATEGY_ID sid = (ENUM_STRATEGY_ID)i;
+            SDynamicParams dp = g_config_receiver_v6.GetDynamicParamsForStrategy(sid);
+            g_strategy_manager_v6.DistributeDynamicParams(dp, sid);
+         }
+
+         // Auto-save ทุกครั้งที่ได้ CONFIG_PUSH
+         g_config_receiver_v6.SaveStandaloneConfig();
+
+         // Switch → online ถ้ายังเป็น standalone
+         if(!g_v6_online_mode)
+         {
+            g_v6_online_mode     = true;
+            g_v6_standalone_mode = false;
+            g_strategy_manager_v6.SetServerConnected(true);
+            Print("[V6] ✅ Switched → ONLINE MODE (CONFIG_PUSH received)");
+         }
+
+         PrintFormat("[V6] CONFIG_PUSH: regime=%s | enabled=%d/16 | mm=%s",
+            RegimeToString(g_config_receiver_v6.GetCurrentRegime()),
+            g_strategy_manager_v6.GetEnabledCount_V6(),
+            cfg.mm_method);
+         break;
+      }
+
+      //---------------------------------------------------------------
+      // [12] INITIAL_CONFIG: same as CONFIG_PUSH, already saved inside ConfigReceiver
+      //---------------------------------------------------------------
+      case MSG_INITIAL_CONFIG:
+      {
+         SConfigData cfg = g_config_receiver_v6.GetLastConfig();
+         g_strategy_manager_v6.ApplyConfig_V6(cfg);
+
+         for(int i = 0; i < TOTAL_STRATEGIES; i++)
+         {
+            ENUM_STRATEGY_ID sid = (ENUM_STRATEGY_ID)i;
+            SDynamicParams dp = g_config_receiver_v6.GetDynamicParamsForStrategy(sid);
+            g_strategy_manager_v6.DistributeDynamicParams(dp, sid);
+         }
+
+         g_v6_online_mode     = true;
+         g_v6_standalone_mode = false;
+         g_strategy_manager_v6.SetServerConnected(true);
+         Print("[V6] ✅ INITIAL_CONFIG: ONLINE MODE | 16 strategies registered");
+         break;
+      }
+
+      //---------------------------------------------------------------
+      // [13] HEARTBEAT: UpdateHeartbeat already called above
+      //---------------------------------------------------------------
+      case MSG_HEARTBEAT:
+         break;
+
+      //---------------------------------------------------------------
+      // [30] NEWS_ALERT
+      //---------------------------------------------------------------
+      case MSG_NEWS_ALERT:
+      {
+         if(g_config_receiver_v6.HasUnreadNews())
+         {
+            PrintFormat("[V6] 📰 NEWS [%d★]: %s %s",
+               g_config_receiver_v6.GetLastNewsImpact(),
+               g_config_receiver_v6.GetLastNewsCurrency(),
+               g_config_receiver_v6.GetLastNewsName());
+            g_config_receiver_v6.MarkNewsAsRead();
+         }
+         break;
+      }
+
+      //---------------------------------------------------------------
+      // [31] REGIME_CHANGE
+      //---------------------------------------------------------------
+      case MSG_REGIME_CHANGE:
+         PrintFormat("[V6] ⚡ REGIME: %s → %s | method=%s",
+            RegimeToString(g_config_receiver_v6.GetPreviousRegime()),
+            RegimeToString(g_config_receiver_v6.GetCurrentRegime()),
+            g_config_receiver_v6.GetRegimeChangeMethod());
+         break;
+
+      //---------------------------------------------------------------
+      // [40] COMMAND
+      //---------------------------------------------------------------
+      case MSG_COMMAND:
+      {
+         if(!g_config_receiver_v6.HasPendingCommand()) break;
+
+         string cmd    = g_config_receiver_v6.GetPendingCommand();
+         string target = g_config_receiver_v6.GetCommandTarget();
+
+         // ถ้า target ระบุชื่อ client และไม่ใช่เรา → ไม่ต้องทำ
+         if(target != "" && target != V6_ClientID)
+         {
+            g_config_receiver_v6.ClearPendingCommand();
+            break;
+         }
+
+         PrintFormat("[V6] 📡 COMMAND: '%s'", cmd);
+
+         if(cmd == "STOP")
+            for(int _di=0;_di<TOTAL_STRATEGIES;_di++){IStrategy* _ds=g_strategy_manager_v6.GetStrategyByID((ENUM_STRATEGY_ID)_di);if(_ds!=NULL)_ds.Disable();}  // STOP: disable all
+         else if(cmd == "START")
+         {
+            SConfigData cfg = g_config_receiver_v6.GetLastConfig();
+            g_strategy_manager_v6.ApplyConfig_V6(cfg);
+         }
+         else if(cmd == "SWITCH_STANDALONE")
+         {
+            g_v6_online_mode     = false;
+            g_v6_standalone_mode = true;
+            g_strategy_manager_v6.SetServerConnected(false);
+            g_connection_monitor_v6.ForceDisconnect();
+            g_strategy_manager_v6.EnableAllStandalone(); // keep SA-capable, disable hybrid
+            Print("[V6] COMMAND=SWITCH_STANDALONE: standalone mode");
+         }
+         else if(cmd == "STATUS")
+         {
+            g_strategy_manager_v6.GetStrategyStatus();
+            Print("[V6] Connection: ", g_connection_monitor_v6.GetStatus());
+         }
+         else if(cmd == "CLOSE_ALL")
+         {
+            // TODO Phase P1+: close all positions
+            Print("[V6] COMMAND=CLOSE_ALL (Phase P1+ implementation)");
+         }
+
+         g_config_receiver_v6.ClearPendingCommand();
+         break;
+      }
+
+      //---------------------------------------------------------------
+      // [50] POLICY_UPDATE / [99] ERROR / unknown
+      //---------------------------------------------------------------
+      case MSG_POLICY_UPDATE:
+         break;
+      case MSG_ERROR:
+         break;
+      case MSG_V6_UNKNOWN:
+      default:
+         if(size > 0 && msg_type != 0)
+            PrintFormat("[V6] Unknown msg_type=%d (%d bytes)", msg_type, size);
+         break;
+   }
 }
 
 // ========== EXECUTE POLICY FROM PYTHON ==========
@@ -472,15 +944,18 @@ void SendFeedback(bool success, long ticket, double profit, string message)
    uchar feedback_data[];
    msgpack.GetData(feedback_data);
    
-   // Send via ZMQ PUB
-   int sent = g_pub_socket.send_bin(feedback_data, true);
-   if(sent > 0)
+   // Send via ZMQ PUB (only in legacy mode)
+   if(!g_v6_mode_active)
    {
-      Print("✅ Feedback sent (", sent, " bytes) - 12 fields format");
-   }
-   else
-   {
-      Print("⚠️  Failed to send feedback");
+      int sent = g_pub_socket.send_bin(feedback_data, true);
+      if(sent > 0)
+      {
+         Print("✅ Feedback sent (", sent, " bytes) - 12 fields format");
+      }
+      else
+      {
+         Print("⚠️  Failed to send feedback");
+      }
    }
 }
 

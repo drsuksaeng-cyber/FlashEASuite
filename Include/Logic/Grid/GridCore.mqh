@@ -289,6 +289,53 @@ public:
       m_swap_filter_enabled = enabled;
       Print("[Grid] ✅ Swap Filter: ", enabled ? "Enabled" : "Disabled");
      }
+   
+   //+------------------------------------------------------------------+
+   //| SetDynamicParams: Apply CONFIG_PUSH V2 params to Grid strategy   |
+   //| Entry point from StrategyManager_V6.DistributeDynamicParams()    |
+   //| Backward safe: if no params received, existing values unchanged  |
+   //+------------------------------------------------------------------+
+   void SetDynamicParams(SDynamicParams &params)
+     {
+      // 1. Apply to GridConfig layer (spacing, levels, thresholds)
+      ApplyDynamicParams(params);
+      
+      // 2. Sync ATR ratio threshold with the configurable member
+      if(params.HasParam("S15_ATR_RATIO"))
+         SetATRRatioThreshold(m_atr_ratio_thresh_dyn);
+      
+      // 3. Sync swap filter
+      if(params.HasParam("S15_SWAP_FILTER"))
+         SetSwapFilterEnabled(m_swap_filter_dyn);
+      
+      // 4. Risk multiplier from server regime analysis
+      if(params.risk_multiplier > 0.0)
+         m_python_risk_multiplier = params.risk_multiplier;
+      
+      PrintFormat("[Grid] SetDynamicParams complete: levels=%d step=%.0f elastic=%.2f confThresh=%.2f",
+                  m_max_grid_levels, m_base_elastic_step,
+                  m_elastic_factor, m_conf_threshold);
+     }
+   
+   //+------------------------------------------------------------------+
+   //| GetCurrentParams: Export current Grid params for TRADE_REPORT   |
+   //| StrategyManager calls this when building feedback messages       |
+   //+------------------------------------------------------------------+
+   SDynamicParams GetCurrentParams()
+     {
+      SDynamicParams p;
+      p.Reset();
+      p.risk_multiplier = m_python_risk_multiplier;
+      
+      p.SetParam("S15_MAX_ORDERS",     (double)m_max_grid_levels);
+      p.SetParam("S15_BASE_STEP",      m_base_elastic_step);
+      p.SetParam("S15_ELASTIC_FACTOR", m_elastic_factor);
+      p.SetParam("S15_CONF_THRESHOLD", m_conf_threshold);
+      p.SetParam("S15_ATR_RATIO",      m_atr_ratio_threshold);
+      p.SetParam("S15_SWAP_FILTER",    m_swap_filter_enabled ? 1.0 : 0.0);
+      
+      return p;
+     }
 
 private:
    //+------------------------------------------------------------------+

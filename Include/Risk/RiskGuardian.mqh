@@ -258,19 +258,43 @@ bool CRiskGuardian::ValidateNewTrade(string symbol,
         return false;
     }
     
-    // Check 3: Calculate Safe Lot Size
-    double safe_lot = CalculateSafeLotSize(symbol, entry_price, stop_loss);
+    // Check 3: Determine Final Lot Size
+    double final_lot;
     
-    if(safe_lot <= 0)
+    // 🎯 SPIKE STRATEGY: Use lot from Python (if provided)
+    // 📊 GRID STRATEGY: Calculate based on risk (standalone)
+    if(lot_size > 0)
     {
-        Print("❌ Trade rejected: Invalid lot size calculation");
-        m_rejections_count++;
-        m_rejection_stats.lot_size++;
-        return false;
+        // Lot provided by Python (Spike Strategy)
+        Print("🎯 Using lot size from policy: ", DoubleToString(lot_size, 2));
+        final_lot = lot_size;
+        
+        // Validate it's within broker limits
+        if(!m_position_sizing.ValidateLotSize(final_lot))
+        {
+            // Normalize to broker requirements
+            final_lot = m_position_sizing.NormalizeLotSize(final_lot);
+            Print("   Normalized to: ", DoubleToString(final_lot, 2));
+        }
+    }
+    else
+    {
+        // No lot provided - calculate based on risk (Grid/Standalone)
+        Print("📊 Calculating lot size based on risk...");
+        final_lot = CalculateSafeLotSize(symbol, entry_price, stop_loss);
+        
+        if(final_lot <= 0)
+        {
+            Print("❌ Trade rejected: Invalid lot size calculation");
+            m_rejections_count++;
+            m_rejection_stats.lot_size++;
+            return false;
+        }
+        Print("   Calculated lot: ", DoubleToString(final_lot, 2));
     }
     
     // Check 4: Exposure Limit
-    if(!CheckExposure(safe_lot))
+    if(!CheckExposure(final_lot))
     {
         Print("❌ Trade rejected: Exposure limit exceeded");
         m_rejections_count++;
@@ -279,7 +303,7 @@ bool CRiskGuardian::ValidateNewTrade(string symbol,
     }
     
     // All checks passed
-    lot_size = safe_lot;
+    lot_size = final_lot;
     
     Print("✅ Trade validated");
     Print("   Symbol: ", symbol);

@@ -1,0 +1,112 @@
+{
+  "_metadata": {
+    "version": "1.0.0",
+    "total_families": 6,
+    "total_params": 62,
+    "created_by": "P0.6-2",
+    "numbering_base": "Roadmap_V6"
+  },
+
+  "MM_RISK": {
+    "family_id": "MM_RISK",
+    "description_th": "Risk sizing parameters — กำหนดขนาด Risk% ต่อ trade",
+    "description_en": "Risk sizing parameters — control risk percentage per trade",
+    "mm_methods": ["MM01", "MM02", "MM04", "MM14"],
+    "members": [
+      "MM01_RISK_PCT", "MM01_EQUITY_TYPE", "MM01_MIN_LOT",
+      "MM02_RISK_PCT",
+      "MM04_ROLLING_WINDOW", "MM04_KELLY_FRACTION", "MM04_MAX_RISK_CAP", "MM04_MIN_TRADES",
+      "MM14_TIER1_BALANCE", "MM14_TIER1_RISK_PCT", "MM14_TIER2_BALANCE", "MM14_TIER2_RISK_PCT", "MM14_TIER3_RISK_PCT"
+    ],
+    "member_count": 13,
+    "co_optimize": true,
+    "optimization_direction": "conservative_first",
+    "optimization_notes_th": "ปรับค่า Risk ทั้ง family พร้อมกัน — ถ้าลด MM01 ต้องลด MM02/MM14 ด้วย",
+    "optimization_notes_en": "Adjust risk values together — reducing MM01 should also reduce MM02/MM14"
+  },
+
+  "MM_VOL": {
+    "family_id": "MM_VOL",
+    "description_th": "Volatility-based sizing — ปรับ Lot ตาม Volatility ของตลาด",
+    "description_en": "Volatility-based sizing — adjust lot by market volatility",
+    "mm_methods": ["MM03", "MM07", "MM16"],
+    "members": [
+      "MM03_ATR_PERIOD", "MM03_ATR_MULTIPLIER", "MM03_ATR_TIMEFRAME", "MM03_ATR_RATIO_MAX",
+      "MM07_TARGET_VOL_PCT", "MM07_VOL_LOOKBACK",
+      "MM16_VOL_LOOKBACK", "MM16_HIGH_VOL_PERCENTILE", "MM16_HIGH_VOL_REDUCE_PCT"
+    ],
+    "member_count": 9,
+    "co_optimize": true,
+    "optimization_direction": "same",
+    "optimization_notes_th": "ATR period และ Vol lookback ควรปรับไปทางเดียวกัน",
+    "optimization_notes_en": "ATR period and vol lookback should move in the same direction"
+  },
+
+  "MM_DD": {
+    "family_id": "MM_DD",
+    "description_th": "Drawdown control — ลด Risk ตาม DD%, Equity Curve, Session",
+    "description_en": "Drawdown and risk control — reduce risk by DD%, equity curve, session",
+    "mm_methods": ["MM09", "MM10", "MM11"],
+    "members": [
+      "MM09_EC_MA_PERIOD", "MM09_BELOW_MA_REDUCE_PCT", "MM09_MA_TYPE",
+      "MM10_DD_TIER1_PCT", "MM10_DD_TIER2_PCT", "MM10_DD_STOP_PCT", "MM10_RECOVERY_LAG_PCT",
+      "MM11_LONDON_RISK_PCT", "MM11_NY_RISK_PCT", "MM11_ASIAN_RISK_PCT", "MM11_OVERLAP_RISK_PCT"
+    ],
+    "member_count": 11,
+    "co_optimize": false,
+    "optimization_direction": "independent",
+    "optimization_notes_th": "MM09/MM10/MM11 ทำงานอิสระ — optimize แยก แต่ DD thresholds ต้องเรียงลำดับ (Tier1 < Tier2 < Stop)",
+    "optimization_notes_en": "MM09/MM10/MM11 operate independently but DD thresholds must maintain order"
+  },
+
+  "MM_REGIME": {
+    "family_id": "MM_REGIME",
+    "description_th": "Regime/correlation adjustment — ปรับ Risk ตาม Market Regime และ Correlation",
+    "description_en": "Regime and correlation adjustment — scale risk by market regime and pair correlation",
+    "mm_methods": ["MM13", "MM17"],
+    "members": [
+      "MM13_MAX_CORR_PAIRS", "MM13_CORR_THRESHOLD", "MM13_REDUCE_PER_CORR_PCT",
+      "MM17_TREND_MULTIPLIER", "MM17_RANGE_MULTIPLIER", "MM17_VOLATILE_MULTIPLIER", "MM17_CRISIS_MULTIPLIER", "MM17_CONFIRM_BARS"
+    ],
+    "member_count": 8,
+    "co_optimize": false,
+    "optimization_direction": "independent",
+    "optimization_notes_th": "MM13 (correlation) กับ MM17 (regime) ทำงานคนละมิติ — optimize แยก",
+    "optimization_notes_en": "MM13 (correlation) and MM17 (regime) work on different dimensions"
+  },
+
+  "MM_STREAK": {
+    "family_id": "MM_STREAK",
+    "description_th": "Win/loss streak scaling — ปรับ Lot ตาม Streak ชนะ/แพ้ + Pyramid",
+    "description_en": "Win/loss streak scaling — adjust lot by winning/losing streaks and pyramid adding",
+    "mm_methods": ["MM05", "MM06", "MM08", "MM15"],
+    "members": [
+      "MM05_LOT_MULTIPLIER", "MM05_MAX_LEVELS", "MM05_MAX_TOTAL_MULT", "MM05_BREAK_EVEN_CLOSE",
+      "MM06_STEP_UP_PCT", "MM06_MAX_RISK_CAP", "MM06_RESET_ON_LOSSES",
+      "MM08_INITIAL_SIZE_PCT", "MM08_ADD_TRIGGER_R", "MM08_LOT_DECAY_PCT",
+      "MM15_MIN_STREAK", "MM15_STEP_UP_PCT", "MM15_MAX_RISK_CAP"
+    ],
+    "member_count": 13,
+    "co_optimize": true,
+    "optimization_direction": "same",
+    "optimization_notes_th": "MM06 step_up กับ MM15 step_up ควรปรับไปทางเดียวกัน — MM05 (Martingale) optimize แยกเพราะตรงข้าม",
+    "optimization_notes_en": "MM06/MM15 step_up co-optimize — MM05 (Martingale) optimized separately as inverse logic"
+  },
+
+  "MM_PORT": {
+    "family_id": "MM_PORT",
+    "description_th": "Portfolio-level controls — ควบคุมระดับ Portfolio (EC Filter, Cap, Multi-Method)",
+    "description_en": "Portfolio-level controls — equity curve filter, portfolio cap, multi-method combining",
+    "mm_methods": ["MM12", "MM18", "MM19"],
+    "members": [
+      "MM12_EC_MA_PERIOD", "MM12_FILTER_MODE",
+      "MM18_PORTFOLIO_CAP_PCT", "MM18_PER_TRADE_MAX_PCT",
+      "MM19_PRIMARY_MM", "MM19_SECONDARY_MM", "MM19_TERTIARY_MM", "MM19_COMBINE_MODE"
+    ],
+    "member_count": 8,
+    "co_optimize": false,
+    "optimization_direction": "independent",
+    "optimization_notes_th": "MM18 cap ต้องสอดคล้องกับ Risk% ใน MM_RISK — MM19 เลือก method ตาม performance",
+    "optimization_notes_en": "MM18 cap must align with MM_RISK percentages — MM19 selects methods by performance"
+  }
+}

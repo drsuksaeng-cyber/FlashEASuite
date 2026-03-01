@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>S03 &mdash; Smart Money Concepts &lpar;SMC&rpar;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="s03--smart-money-concepts-smc">S03 — Smart Money Concepts (SMC)</h1>
+<h2 id="flasheasuite-v2--strategy-deep-dive-manual">FlashEASuite V2 | Strategy Deep Dive Manual</h2>
+<h3 id="generated-p9-5--2026-02-27--jimmi-deep-dive-edition">Generated: P9-5 | 2026-02-27 | Jimmi Deep-Dive Edition</h3>
+<hr>
+<h2 id="1-บทนำของกลยุทธ์-strategy-overview">1. บทนำของกลยุทธ์ (Strategy Overview)</h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+<th>คำอธิบายเชิงวิชาการเพิ่มเติม</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>รหัสกลยุทธ์</strong></td>
+<td>S03</td>
+<td>รหัสอ้างอิงลำดับที่สามในระบบมัลติกลยุทธ์ของ FlashEASuite V2 วางตำแหน่งหลังจาก S01 (Stat Arb) และ S02 (ML Ensemble) ในฐานะกลยุทธ์ Full MQL5 ตัวแรกของระบบ</td>
+</tr>
+<tr>
+<td><strong>ชื่อ</strong></td>
+<td>Smart Money Concepts (SMC)</td>
+<td>แนวคิดที่วิเคราะห์รอยเท้าพฤติกรรมของนักลงทุนสถาบัน (Institutional Investors) ผ่านโครงสร้างราคา (Price Structure) แทนที่จะพึ่งพาตัวชี้วัดทางเทคนิค (Indicators) ทั่วไป</td>
+</tr>
+<tr>
+<td><strong>ประเภท</strong></td>
+<td>Full MQL5</td>
+<td>การประมวลผลสัญญาณเทรดทั้งหมดเกิดขึ้นใน MQL5 โดยตรง Python Brain ทำหน้าที่เพียง Regime Classification และ Confidence Scoring ไม่ได้คำนวณสัญญาณ</td>
+</tr>
+<tr>
+<td><strong>Standalone Capable</strong></td>
+<td>❌ No (Server Only)</td>
+<td>ต้องการ CONFIG_PUSH จาก Python Brain ก่อนทำงาน มี ServerOnly Guard ใน Analyze(): <code>if(m_config.confidence &lt; 0.01) return;</code></td>
+</tr>
+<tr>
+<td><strong>Preferred Regime</strong></td>
+<td>TRENDING, VOLATILE</td>
+<td>สภาวะตลาดที่มีทิศทางชัดเจน (TRENDING) หรือมีการเคลื่อนไหวรุนแรง (VOLATILE) ทำให้เกิด Order Block, FVG และ BOS ได้อย่างชัดเจนและน่าเชื่อถือ</td>
+</tr>
+<tr>
+<td><strong>Poor Regimes</strong></td>
+<td>RANGING</td>
+<td>ตลาดที่ราคาแกว่งในกรอบแคบ ไม่มีทิศทาง BOS ที่ชัดเจน ทำให้ระบบ Triple Confluence ไม่สามารถยืนยันสัญญาณได้</td>
+</tr>
+<tr>
+<td><strong>MQL5 Class</strong></td>
+<td><code>CSMCV6</code></td>
+<td>คลาสหลักในภาษา MQL5 ที่ประสานงานระบบตรวจจับสามระบบ (OB, FVG, BOS) และตัดสินใจเปิดออเดอร์</td>
+</tr>
+<tr>
+<td><strong>Sub-Detectors</strong></td>
+<td><code>COrderBlockDetector</code>, <code>CFVGDetector</code>, <code>CBOSDetector</code></td>
+<td>สามคลาสย่อยที่ทำงานร่วมกันเป็น &quot;Triple Confluence Engine&quot; แต่ละตัวทำงานเป็น Direct Member (ไม่ใช้ pointer) เพื่อประสิทธิภาพสูงสุด</td>
+</tr>
+</tbody>
+</table>
+<h3 id="สรุปแนวคิด-summary-of-concepts">สรุปแนวคิด (Summary of Concepts)</h3>
+<p>S03 เป็นกลยุทธ์ที่ตั้งอยู่บนรากฐานของ <strong>Smart Money Concepts (SMC)</strong> — ปรัชญาการวิเคราะห์ตลาดที่มองว่า การเคลื่อนไหวของราคาทุกครั้งนั้นถูกขับเคลื่อนโดย <strong>&quot;เงินสถาบัน&quot; (Smart Money)</strong> ได้แก่ ธนาคารกลาง (Central Banks), กองทุนป้องกันความเสี่ยง (Hedge Funds), ธนาคารพาณิชย์ขนาดใหญ่ (Market Makers) และสถาบันการเงินที่มีปริมาณการซื้อขายมหาศาล</p>
+<p>ระบบใช้ <strong>สามตัวตรวจจับ</strong> ที่ทำงานร่วมกันในรูปแบบ Triple Confluence:</p>
+<ul>
+<li><strong>(1) Order Block (OB)</strong> — ตรวจจับแท่งเทียนที่สถาบันใช้สะสมหรือกระจาย position ก่อนที่จะ &quot;ดัน&quot; ราคาในทิศทางที่ต้องการ</li>
+<li><strong>(2) Fair Value Gap (FVG)</strong> — ตรวจจับช่องว่างสภาพคล่อง (Liquidity Gap) ที่เกิดจากการเคลื่อนไหวของราคาอย่างรวดเร็ว ทิ้งบริเวณที่ราคา &quot;ข้ามผ่าน&quot; โดยไม่มีการซื้อขายเพียงพอ</li>
+<li><strong>(3) Break of Structure (BOS)</strong> — ยืนยันทิศทางของตลาดผ่านการทำลาย Swing High หรือ Swing Low เดิม</li>
+</ul>
+<p>เป้าหมายของ S03 คือการ <strong>เข้า trade เมื่อราคากลับมาทดสอบโซน OB หรือ FVG หลังจากเกิด BOS</strong> — ซึ่งเป็นจุดที่สถาบันมักจะกลับมาเพิ่ม position อีกครั้ง ทำให้ราคาเด้งกลับอย่างรุนแรง</p>
+<hr>
+<h3 id="ทำไมต้องชื่อ-smart-money-concepts">ทำไมต้องชื่อ &quot;Smart Money Concepts&quot;?</h3>
+<p>คำว่า <strong>Smart Money</strong> ในโลกการเงินหมายถึงนักลงทุนที่มีข้อมูลและทรัพยากรที่เหนือกว่ามือปลีก (Retail Traders) เช่น ธนาคารพาณิชย์ กองทุนรวม และ Proprietary Trading Desks ที่สามารถเคลื่อนย้ายเงินทุนขนาดใหญ่ (หลักพันล้านดอลลาร์) ในครั้งเดียว</p>
+<p>ปัญหาของสถาบันเหล่านี้คือ: <strong>ขนาดของ Order นั้นใหญ่เกินไปสำหรับตลาดที่จะรับได้ในครั้งเดียว</strong> หากธนาคารต้องการซื้อ EURUSD มูลค่า $500 ล้านในราคา 1.0800 ทันที ราคาจะถูกดันขึ้นอย่างรวดเร็วก่อนที่ Order จะถูก Fill ทั้งหมด ทำให้ต้นทุนเฉลี่ยของธนาคารสูงกว่าที่ต้องการ</p>
+<p>ดังนั้น สถาบันจึงต้อง <strong>&quot;ซ่อน&quot; การเข้า position</strong> โดยใช้วิธีการหลายรูปแบบ รวมถึงการสะสม (Accumulation) ในช่วงที่ตลาดไม่มีทิศทาง จนกว่าจะได้ปริมาณที่พอใจ แล้วจึง &quot;ดัน&quot; ราคาในทิศทางที่ต้องการ การกระทำเหล่านี้ทิ้ง <strong>&quot;รอยเท้า&quot; ไว้บนกราฟราคา</strong> ในรูปแบบของ Order Block, Fair Value Gap และ Break of Structure ซึ่ง S03 ถูกออกแบบมาเพื่อ ตรวจจับและใช้ประโยชน์จากรอยเท้าเหล่านั้น</p>
+<hr>
+<h3 id="ธรรมชาติของเงินสถาบัน-institutional-behavior">ธรรมชาติของเงินสถาบัน (Institutional Behavior)</h3>
+<p>เพื่อให้เข้าใจว่าเหตุใด OB, FVG และ BOS จึงน่าเชื่อถือ ต้องเข้าใจกระบวนการทำงานของสถาบันก่อน:</p>
+<p><strong>วงจรชีวิตของราคา (Price Delivery Cycle) ตามหลัก SMC:</strong></p>
+<p><strong>ระยะที่ 1 — Accumulation (การสะสม):</strong>
+สถาบันต้องการ Long ตลาด จึงเข้าซื้อแบบค่อยเป็นค่อยไปในบริเวณที่ราคาไม่มีทิศทาง (Range) เพื่อไม่ให้ราคาขยับมากเกินไป การซื้อในระยะนี้จะทิ้งรอยไว้เป็น <strong>Demand Order Block</strong> — แท่งเทียนสีแดง (Bearish) ที่มีปริมาณซื้อขายสูงผิดปกติ เนื่องจากสถาบันซ่อนการซื้อไว้หลังแท่งขาลง เพื่อให้มือปลีกขายมาให้</p>
+<p><strong>ระยะที่ 2 — Markup (การดันราคา):</strong>
+เมื่อสถาบันสะสม position เพียงพอแล้ว จะ &quot;ดัน&quot; ราคาขึ้นอย่างรวดเร็ว การดันนี้มักเกิดขึ้นอย่างรวดเร็วจนทิ้ง <strong>Fair Value Gap</strong> — ช่องว่างระหว่างแท่งเทียน 3 แท่งที่ราคาวิ่งผ่านโดยไม่มีการ &quot;เติม&quot; สภาพคล่อง และการดันนี้จะทำลาย Swing High เดิม เกิดเป็น <strong>Break of Structure Bullish</strong></p>
+<p><strong>ระยะที่ 3 — Retracement to OB/FVG:</strong>
+หลัง BOS ราคามักจะ &quot;ดึงกลับ&quot; ไปทดสอบบริเวณ OB หรือ FVG เนื่องจากสถาบันต้องการเพิ่ม position อีกในราคาที่ต่ำกว่า นี่คือ <strong>จุดเข้า Trade ของ S03</strong></p>
+<p><strong>ระยะที่ 4 — Distribution (การกระจาย):</strong>
+สถาบันเริ่มขายทำกำไร ราคาถึงจุดสูงสุด</p>
+<hr>
+<h3 id="ตัวอย่างเหตุการณ์จริง-case-study">ตัวอย่างเหตุการณ์จริง (Case Study)</h3>
+<p>สมมติเหตุการณ์ ณ วันที่ 27 กุมภาพันธ์ 2026 บนกราฟ EURUSD H1:</p>
+<p><strong>สถานการณ์ตลาด:</strong></p>
+<ul>
+<li>ราคาแกว่งตัวในกรอบ 1.0780–1.0840 มาตลอดช่วงเช้า (Asian Session)</li>
+<li>Swing High ล่าสุดอยู่ที่ <strong>1.0845</strong> (เกิดขึ้น 5 ชั่วโมงก่อน)</li>
+<li>ATR 14 แท่งอยู่ที่ <strong>0.0020</strong> (20 pips)</li>
+</ul>
+<p><strong>เหตุการณ์ที่ 1 — Order Block ก่อตัว (09:00 น.):</strong>
+ที่เวลา 09:00 น. เกิดแท่งเทียน Bearish (แท่งแดง) ที่มีปริมาณการซื้อขายสูงผิดปกติ:</p>
+<ul>
+<li>Open: 1.0820 | Close: 1.0800 | High: 1.0825 | Low: 1.0795</li>
+<li>Volume = 2,450 ticks ≫ Average Volume = 1,200 ticks → Volume Ratio = 2.04 ≥ 1.5 ✅</li>
+<li>ระบบบันทึก <strong>Demand OB Zone: [1.0795, 1.0825]</strong></li>
+</ul>
+<p><strong>เหตุการณ์ที่ 2 — Impulse Move + FVG ก่อตัว (09:00–09:30 น.):</strong>
+ราคาพุ่งขึ้นอย่างรวดเร็วในสามแท่งถัดมา:</p>
+<ul>
+<li>แท่ง i+1 (09:00): High=1.0825</li>
+<li>แท่ง i   (09:15): เป็นแท่งพุ่ง (Impulse Candle)</li>
+<li>แท่ง i-1 (09:30): Low=1.0855</li>
+</ul>
+<p>FVG ก่อตัว: <code>bull_gap = next_low(1.0855) - prev_high(1.0825) = 0.0030</code>
+FVG Ratio = 0.0030 / 0.0020 = <strong>1.50</strong> ≥ 0.5 × ATR ✅
+FVG Zone: [Bottom=1.0825, Top=1.0855]</p>
+<p>สามแท่งหลังจาก OB (bar i-3): <code>next_close = 1.0855</code>
+<code>move_up = 1.0855 - 1.0825 = 0.0030 &gt; 0.5 × ATR (0.0010)</code> ✅ — OB ผ่านการกรอง</p>
+<p><strong>OB Strength = min(1.0, 0.0030 / (0.0020 × 3.0)) = min(1.0, 0.50) = 0.50</strong></p>
+<p><strong>เหตุการณ์ที่ 3 — Break of Structure (09:30 น.):</strong>
+ที่เวลา 09:30 น. แท่งที่ปิดที่ High=1.0858 ทำลาย Swing High เดิมที่ 1.0845:</p>
+<ul>
+<li><code>cur_high (1.0858) &gt; sh_price (1.0845)</code> ✅ → <strong>BOS_BULLISH ยืนยัน</strong></li>
+<li>ระบบบันทึก <code>m_bos_dir = BOS_DIR_BULLISH</code> และ <code>m_bos_active = true</code></li>
+</ul>
+<p><strong>เหตุการณ์ที่ 4 — Retracement และ Entry (10:00 น.):</strong>
+ราคาดึงกลับลงมา:</p>
+<ul>
+<li>ราคา bid/ask midpoint = <strong>1.0810</strong> (อยู่ในโซน OB [1.0795, 1.0825]) ✅</li>
+</ul>
+<p><strong>การคำนวณ Confidence:</strong></p>
+<pre><code>ob_strength  = 0.50
+c = ob_strength × 0.5 = 0.50 × 0.5 = 0.250
+
+fvg_ratio    = 1.50 (จาก FVGDetector)
+fvg_contrib  = min(0.3, (1.50 / 3.0) × 0.3) = min(0.3, 0.150) = 0.150
+c += 0.150 → c = 0.400
+
+BOS active   → c += 0.2 → c = 0.600
+Final conf   = min(1.0, 0.600) = 0.600 ≥ 0.45 ✅
+</code></pre>
+<p><strong>การเปิด Long Order:</strong></p>
+<ul>
+<li>Entry Price: 1.0810</li>
+<li>SL = ob.low - SL_ATRBuffer × ATR = 1.0795 - 0.3 × 0.0020 = <strong>1.0789</strong> (21 pips)</li>
+<li>TP = entry + TP_ATRMult × ATR = 1.0810 + 2.0 × 0.0020 = <strong>1.0850</strong> (40 pips)</li>
+<li>R:R Ratio = 40 / 21 ≈ <strong>1.90:1</strong></li>
+</ul>
+<p><strong>ผลลัพธ์:</strong> ราคาสะท้อนกลับจากโซน OB อย่างรุนแรงและวิ่งถึง TP ที่ 1.0850 ภายใน 2 ชั่วโมง</p>
+<hr>
+<h3 id="เหตุผลที่ราคาต้องกลับมาทดสอบ-obfvg-เสมอ">เหตุผลที่ราคาต้องกลับมาทดสอบ OB/FVG เสมอ</h3>
+<p>มีสองเหตุผลทางเศรษฐศาสตร์ที่รองรับปรากฏการณ์นี้:</p>
+<p><strong>เหตุผลที่ 1 — Unfinished Business ของสถาบัน:</strong>
+เมื่อสถาบันเริ่มสะสม position ใน OB แต่ยังไม่ได้ปริมาณที่ต้องการ (เนื่องจากราคาวิ่งขึ้นเร็วเกินไปหลัง Impulse) สถาบันจะ &quot;รอ&quot; ให้ราคากลับลงมา OB เพื่อเพิ่ม position ที่เหลืออีกครั้ง การกระทำของสถาบันในช่วงนี้จะสร้าง Buying Pressure ที่แข็งแกร่งใน OB Zone ทำให้ราคาเด้งกลับ</p>
+<p><strong>เหตุผลที่ 2 — Liquidity Hunt และ FVG Fill:</strong>
+FVG แสดงถึงบริเวณที่สภาพคล่องในตลาดมีไม่เพียงพอ (Price moved too fast, leaving an &quot;imbalance&quot;) ตลาดโดยธรรมชาติจะ &quot;ดึง&quot; ราคากลับมาเติมช่องว่างนี้เพื่อสร้างความสมดุลของสภาพคล่อง (Liquidity Balance) นี่เป็นเหตุผลว่าทำไม FVG จึงเป็นโซนแรงดึงดูดที่ทรงพลัง</p>
+<hr>
+<h2 id="2-ทฤษฎีหลัก-core-theory">2. ทฤษฎีหลัก (Core Theory)</h2>
+<h3 id="21-order-block-ob-detection--กลไกตรวจจับรอยเท้าสถาบัน">2.1 Order Block (OB) Detection — กลไกตรวจจับรอยเท้าสถาบัน</h3>
+<p><strong>นิยามทางคณิตศาสตร์:</strong></p>
+<p>Order Block คือแท่งเทียนที่ผ่านเงื่อนไขสองข้อพร้อมกัน:</p>
+<pre><code>เงื่อนไขที่ 1 — Volume Filter:
+  Volume[i] ≥ MinOBVolume × AvgVolume(lookback bars)
+  (ค่าเริ่มต้น: 1.5 × Average)
+
+เงื่อนไขที่ 2 — Impulse Confirmation:
+  สำหรับ Demand OB (แท่งขาลงก่อนขาขึ้น):
+    close[i] &lt; open[i]  (Bearish Candle)
+    AND close[i-3] - high[i] &gt; MinReversal × ATR  (ราคาดันขึ้นจาก High ≥ 0.5 ATR)
+
+  สำหรับ Supply OB (แท่งขาขึ้นก่อนขาลง):
+    close[i] &gt; open[i]  (Bullish Candle)
+    AND low[i] - close[i-3] &gt; MinReversal × ATR   (ราคาดิ่งจาก Low ≥ 0.5 ATR)
+</code></pre>
+<p><strong>การคำนวณ OB Strength:</strong></p>
+<p>ค่า Strength คือการวัดว่า &quot;แรงดัน&quot; ที่เกิดขึ้นหลัง OB นั้นรุนแรงเพียงใดเมื่อเทียบกับความผันผวนปกติ:</p>
+<pre><code>Demand OB: strength = min(1.0, move_up  / (ATR × 3.0))
+Supply OB: strength = min(1.0, move_down / (ATR × 3.0))
+
+เมื่อ: move_up   = close[i-3] - high[i]   (ระยะที่ราคาวิ่งขึ้นจาก OB high)
+       move_down = low[i] - close[i-3]     (ระยะที่ราคาดิ่งลงจาก OB low)
+       ATR       = Average True Range 14 แท่ง
+</code></pre>
+<p><strong>การแปลความหมาย OB Strength:</strong></p>
+<ul>
+<li>strength = 0.33: Impulse Move เท่ากับ ATR หนึ่งเท่า — แรงปานกลาง</li>
+<li>strength = 0.67: Impulse Move เท่ากับ ATR สองเท่า — แรงดี</li>
+<li>strength = 1.00: Impulse Move ≥ ATR สามเท่า — แรงสูงสุด (แรงดันของสถาบันสูงมาก)</li>
+</ul>
+<p><strong>OB Zone และการ Invalidate:</strong></p>
+<p>โซน OB ถูกกำหนดเป็น <code>[low[i], high[i]]</code> ของแท่งเทียน OB โดยระบบจะ Mark OB เป็น &quot;Inactive&quot; (ใช้แล้ว) เมื่อราคาเข้ามาใน zone นี้แล้วครั้งหนึ่ง เนื่องจากหลัง OB ถูก &quot;Fill&quot; แล้ว สถาบันมักจะไม่ใช้จุดเดิมอีก</p>
+<pre><code class="language-mql5">// MarkRetested() — เรียกทุก Tick
+void MarkRetested(double price) {
+    for each block in m_blocks:
+        if (block.is_active &amp;&amp; price &gt;= block.low &amp;&amp; price &lt;= block.high)
+            block.is_active = false  // OB ถูก consume แล้ว
+}
+</code></pre>
+<p>ระบบจัดเก็บ OB สูงสุด <strong>10 โซน</strong> (<code>MAX_OB_ZONES = 10</code>) โดยสแกนจาก <code>m_lookback</code> แท่ง (เริ่มจากแท่งที่ 50 ย้อนหลัง) และในแต่ละรอบ <code>Scan()</code> จะถูกรีเซ็ตและสแกนใหม่ทั้งหมด</p>
+<hr>
+<h3 id="22-fair-value-gap-fvg-detection--ช่องว่างสภาพคล่อง">2.2 Fair Value Gap (FVG) Detection — ช่องว่างสภาพคล่อง</h3>
+<p><strong>หลักการ 3 แท่งเทียน (3-Candle Imbalance):</strong></p>
+<p>FVG เกิดจากการที่ราคาเคลื่อนไหวเร็วเกินไปจนสร้างช่องว่างระหว่างแท่งเทียนที่ 1 และแท่งเทียนที่ 3:</p>
+<pre><code>แท่งเทียน i+1 (Previous) | แท่งเทียน i (Center) | แท่งเทียน i-1 (Next)
+
+Bullish FVG (ช่องว่างขาขึ้น):
+  next_low (Low[i-1]) &gt; prev_high (High[i+1])
+  → ช่องว่าง = [prev_high, next_low]
+  → bull_gap = next_low - prev_high
+
+Bearish FVG (ช่องว่างขาลง):
+  next_high (High[i-1]) &lt; prev_low (Low[i+1])
+  → ช่องว่าง = [next_high, prev_low]
+  → bear_gap = prev_low - next_high
+</code></pre>
+<p><strong>เงื่อนไขการยืนยัน:</strong></p>
+<pre><code>bull_gap &gt; MinFVGSize × ATR   (ค่าเริ่มต้น: 0.5 × ATR)
+bear_gap &gt; MinFVGSize × ATR
+</code></pre>
+<p><strong>FVG Size Ratio:</strong></p>
+<pre><code>size_ratio = gap_size / ATR
+
+ยิ่ง size_ratio สูง = ช่องว่างใหญ่กว่าความผันผวนปกติ
+                    = แรงดึงดูดของตลาดในการเติม Gap สูงขึ้น
+</code></pre>
+<p><strong>การ Invalidate FVG (MarkFilled):</strong></p>
+<p>FVG จะถูก Mark เป็น Inactive เมื่อราคาผ่านจุดกึ่งกลาง (Midpoint) ของช่องว่าง:</p>
+<pre><code>mid = (fvg.top + fvg.bottom) / 2
+
+Bullish FVG: inactive เมื่อ price ≤ mid  (ราคาลงมาต่ำกว่ากึ่งกลาง = FVG ถูก Fill ครึ่งหนึ่ง)
+Bearish FVG: inactive เมื่อ price ≥ mid
+</code></pre>
+<p>เหตุผลที่ใช้จุด Midpoint (ไม่ใช่ Bottom/Top): สถาบันมักจะ &quot;เติม&quot; FVG แค่ครึ่งหนึ่ง (50% Fill) แล้วราคาจะเด้งกลับ ซึ่งสอดคล้องกับหลักการ Partial Fill ของ SMC</p>
+<hr>
+<h3 id="23-break-of-structure-bos-detection--การยืนยันทิศทางตลาด">2.3 Break of Structure (BOS) Detection — การยืนยันทิศทางตลาด</h3>
+<p><strong>นิยาม Pivot High/Low:</strong></p>
+<p>ระบบค้นหา Pivot High และ Pivot Low ที่ &quot;แท้จริง&quot; (True Pivots) โดยใช้ SwingBars = 5 แท่งแต่ละด้าน:</p>
+<pre><code>Pivot High[i] = high[i] คือ Pivot ก็ต่อเมื่อ:
+  high[i] &gt; high[i+1], high[i+2], ..., high[i+swing_bars]  (แท่งก่อนหน้า)
+  high[i] &gt; high[i-1], high[i-2], ..., high[i-swing_bars]  (แท่งถัดไป)
+
+Pivot Low[i] = low[i] คือ Pivot ก็ต่อเมื่อ:
+  low[i] &lt; low[i+1], low[i+2], ..., low[i+swing_bars]
+  low[i] &lt; low[i-1], low[i-2], ..., low[i-swing_bars]
+</code></pre>
+<p><strong>เงื่อนไข BOS:</strong></p>
+<pre><code>BOS_BULLISH: High ของแท่งล่าสุด (bar[1]) &gt; Swing High สูงสุดในช่วง Lookback
+             AND Swing High นี้ต้องเป็น Swing High ใหม่ (ไม่ใช่ตัวเดิมที่เคยทำ BOS แล้ว)
+
+BOS_BEARISH: Low ของแท่งล่าสุด (bar[1]) &lt; Swing Low ต่ำสุดในช่วง Lookback
+             AND Swing Low นี้ต้องเป็น Swing Low ใหม่
+</code></pre>
+<p><strong>ทำไมใช้ bar[1] ไม่ใช่ bar[0]?</strong></p>
+<p>ระบบตรวจจับ BOS บนแท่งที่ปิดแล้ว (bar[1]) ไม่ใช่แท่งปัจจุบัน (bar[0]) เพื่อป้องกัน False BOS ที่เกิดจาก Wick หรือราคาที่ยังไม่ปิด หลักการนี้สอดคล้องกับแนวทาง SMC แบบ Professional ที่ยืนยัน BOS เฉพาะเมื่อ <strong>Close</strong> ทะลุผ่าน Swing Level เท่านั้น</p>
+<p><strong>การป้องกัน Duplicate BOS:</strong></p>
+<p>ระบบเก็บค่า <code>m_last_sh</code> และ <code>m_last_sl</code> เพื่อป้องกันการนับ BOS ซ้ำจาก Swing High/Low เดิม:</p>
+<pre><code>if (cur_high &gt; sh_price AND sh_price != m_last_sh) → BOS_BULLISH
+m_last_sh = sh_price  // บันทึก Swing High ที่ถูก break แล้ว
+</code></pre>
+<hr>
+<h3 id="24-entry-confluence--triple-confirmation-system">2.4 Entry Confluence — Triple Confirmation System</h3>
+<p>S03 จะสร้างสัญญาณเทรดก็ต่อเมื่อ <strong>ทั้งสามเงื่อนไข</strong> ผ่านพร้อมกัน:</p>
+<p><strong>สำหรับ SIGNAL_BUY (Long):</strong></p>
+<pre><code>เงื่อนไขที่ 1: m_bos_dir == BOS_DIR_BULLISH        (ยืนยันทิศทางขาขึ้น)
+เงื่อนไขที่ 2: price ∈ [ob.low, ob.high]           (ราคาอยู่ใน Demand OB)
+            OR  price ∈ [fvg.bottom, fvg.top]       (ราคาอยู่ใน Bullish FVG)
+เงื่อนไขที่ 3: confidence ≥ SMC_MinConfidence       (0.45 ค่าเริ่มต้น)
+
+คำนวณ:
+  SL = ob.low (หรือ fvg.bottom) - SL_ATRBuffer × ATR
+  TP = entry_price + TP_ATRMult × ATR
+</code></pre>
+<p><strong>สำหรับ SIGNAL_SELL (Short):</strong></p>
+<pre><code>เงื่อนไขที่ 1: m_bos_dir == BOS_DIR_BEARISH        (ยืนยันทิศทางขาลง)
+เงื่อนไขที่ 2: price ∈ [ob.low, ob.high]           (ราคาอยู่ใน Supply OB)
+            OR  price ∈ [fvg.bottom, fvg.top]       (ราคาอยู่ใน Bearish FVG)
+เงื่อนไขที่ 3: confidence ≥ SMC_MinConfidence
+
+คำนวณ:
+  SL = ob.high (หรือ fvg.top) + SL_ATRBuffer × ATR
+  TP = entry_price - TP_ATRMult × ATR
+</code></pre>
+<p><strong>เหตุผลที่ต้องการ Triple Confluence (ไม่ใช่ OB อย่างเดียว):</strong></p>
+<p>การใช้เพียง OB เพียงอย่างเดียวมี Win Rate ต่ำเพราะ:</p>
+<ul>
+<li>OB บางส่วนถูกสร้างโดยมือปลีก (False OB) ไม่ใช่สถาบัน</li>
+<li>ไม่มีการยืนยันทิศทาง → อาจเข้า trade สวนทิศทางหลัก</li>
+<li>ไม่มีการยืนยันโมเมนตัม → OB ที่ดีอาจเกิดในตลาด Ranging ซึ่ง SMC ทำงานไม่ดี</li>
+</ul>
+<p>การเพิ่ม FVG ยืนยันว่า &quot;ราคาเคลื่อนไหวอย่างมีพลังงาน&quot; (Impulse Confirmed) และ BOS ยืนยันว่า &quot;โครงสร้างตลาดเปลี่ยนทิศทางแล้ว&quot; ทำให้ Triple Confluence ลด False Signal ได้อย่างมีประสิทธิภาพ</p>
+<hr>
+<h2 id="3-ตรรกะการให้คะแนนความเชื่อมั่น-confidence-scoring">3. ตรรกะการให้คะแนนความเชื่อมั่น (Confidence Scoring)</h2>
+<p>ระบบใช้สูตรถ่วงน้ำหนักสามองค์ประกอบเพื่อคำนวณ Confidence Score สุดท้าย:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>น้ำหนักสูงสุด</th>
+<th>คำอธิบายรายละเอียด</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OB Strength</strong></td>
+<td>0.50</td>
+<td>วัดแรงดันของสถาบันที่อยู่เบื้องหลัง Order Block ยิ่ง Impulse Move หลัง OB ใหญ่ ยิ่งมีความน่าเชื่อถือสูง</td>
+</tr>
+<tr>
+<td><strong>FVG Ratio</strong></td>
+<td>สูงสุด 0.30</td>
+<td>วัดขนาดของช่องว่างสภาพคล่องเมื่อเทียบกับ ATR ยิ่งช่องว่างใหญ่ ยิ่งมีแรงดึงดูดให้ราคากลับมาเติม</td>
+</tr>
+<tr>
+<td><strong>BOS Bonus</strong></td>
+<td>0.20</td>
+<td>โบนัสคะแนนเต็มเมื่อ BOS ยืนยันทิศทางในแท่งล่าสุด ยืนยันว่าโครงสร้างตลาดสนับสนุนทิศทาง Trade</td>
+</tr>
+</tbody>
+</table>
+<p><strong>สูตรการคำนวณจริง (จากซอร์สโค้ด <code>_CalcConfidence()</code>):</strong></p>
+<pre><code>c = ob_strength × 0.5
+
+c += min(0.30,  (fvg_ratio / 3.0) × 0.30)
+
+if (m_bos_active):
+    c += 0.20
+
+confidence = min(1.0, c)
+</code></pre>
+<p><strong>ขยายความ FVG Component:</strong></p>
+<p>FVG Contribution ถูก Cap ไว้ที่ 0.30 โดยสูตร <code>min(0.30, (fvg_ratio/3.0) × 0.30)</code>:</p>
+<ul>
+<li>fvg_ratio = 0.50 → contrib = min(0.30, 0.050) = 0.050</li>
+<li>fvg_ratio = 1.00 → contrib = min(0.30, 0.100) = 0.100</li>
+<li>fvg_ratio = 2.00 → contrib = min(0.30, 0.200) = 0.200</li>
+<li>fvg_ratio = 3.00 → contrib = min(0.30, 0.300) = 0.300 ← ถึง Cap</li>
+<li>fvg_ratio = 5.00 → contrib = min(0.30, 0.500) = 0.300 ← ยังคง Cap ที่ 0.30</li>
+</ul>
+<p>การ Cap นี้ป้องกันการให้น้ำหนักกับ FVG มากเกินไป เพราะ FVG ขนาดใหญ่มากๆ บางครั้งเกิดจาก News Spike ที่ไม่ได้มี Pattern ที่น่าเชื่อถือ</p>
+<p><strong>ขยายความ BOS Bonus:</strong></p>
+<p>BOS Bonus คือ <strong>0.20 คะแนนเต็ม</strong> — ไม่มีค่ากลางๆ เพราะ BOS เป็น Binary Event (เกิดหรือไม่เกิด) การที่ระบบให้ 0.20 คะแนนกับ BOS สะท้อนความสำคัญของการยืนยันโครงสร้าง — ถ้าไม่มี BOS ค่า Confidence สูงสุดที่เป็นไปได้คือเพียง 0.80 ซึ่งแสดงว่าระบบต้องการ BOS เป็นองค์ประกอบสำคัญ</p>
+<p><strong>ตัวอย่างสถานการณ์ Confidence:</strong></p>
+<table>
+<thead>
+<tr>
+<th>สถานการณ์</th>
+<th>OB Str</th>
+<th>FVG Ratio</th>
+<th>BOS</th>
+<th>Confidence</th>
+<th>ผล</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>อ่อน — ไม่มี BOS</td>
+<td>0.30</td>
+<td>0.50</td>
+<td>❌</td>
+<td>0.150+0.050 = <strong>0.200</strong></td>
+<td>❌ ต่ำกว่า 0.45</td>
+</tr>
+<tr>
+<td>ปานกลาง — มี BOS</td>
+<td>0.40</td>
+<td>1.00</td>
+<td>✅</td>
+<td>0.200+0.100+0.200 = <strong>0.500</strong></td>
+<td>✅ ผ่าน</td>
+</tr>
+<tr>
+<td>ดี — FVG ใหญ่</td>
+<td>0.60</td>
+<td>2.00</td>
+<td>✅</td>
+<td>0.300+0.200+0.200 = <strong>0.700</strong></td>
+<td>✅ ผ่านดี</td>
+</tr>
+<tr>
+<td>ยอดเยี่ยม</td>
+<td>1.00</td>
+<td>3.00+</td>
+<td>✅</td>
+<td>0.500+0.300+0.200 = <strong>1.000</strong></td>
+<td>✅ ผ่านสูงสุด</td>
+</tr>
+<tr>
+<td>มี OB แต่ไม่มี FVG</td>
+<td>0.80</td>
+<td>0.00</td>
+<td>✅</td>
+<td>0.400+0.000+0.200 = <strong>0.600</strong></td>
+<td>✅ ผ่าน (OB+BOS พอ)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>จาก Case Study (ข้างต้น):</strong></p>
+<ul>
+<li>ob_strength=0.50, fvg_ratio=1.50, BOS active → Confidence = 0.250 + 0.150 + 0.200 = <strong>0.600</strong> ✅</li>
+</ul>
+<hr>
+<h2 id="4-โครงสร้างสถาปัตยกรรมระบบ-system-architecture">4. โครงสร้างสถาปัตยกรรมระบบ (System Architecture)</h2>
+<p>S03 เป็น <strong>Full MQL5 Strategy</strong> ซึ่งแตกต่างจาก S01/S02 ที่เป็น Hybrid อย่างมีนัยสำคัญ:</p>
+<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+│  S03 — FULL MQL5 | การแบ่งหน้าที่ระหว่าง Python Brain และ MQL5    │
+├──────────────────────────────────┬──────────────────────────────────┤
+│  Python Brain (Server)           │  MQL5 Trader — CSMCV6           │
+│  หน้าที่: Regime &amp; Scoring       │  หน้าที่: Pattern Detection      │
+├──────────────────────────────────┼──────────────────────────────────┤
+│  • Regime Classification         │  • COrderBlockDetector.Scan()   │
+│    (TRENDING/VOLATILE/RANGING)   │  • CFVGDetector.Scan()          │
+│  • Confidence Scoring            │  • CBOSDetector.Detect()        │
+│  • AI Council vote               │  • Triple Confluence check      │
+│  • Parameter optimization        │  • _CalcConfidence()            │
+│  • CONFIG_PUSH delivery          │  • Order placement              │
+│  • Regime bonus adjustment       │  • SL/TP calculation            │
+└──────────────────────────────────┴──────────────────────────────────┘
+</code></pre>
+<p><strong>ความแตกต่างสำคัญจาก S01/S02:</strong></p>
+<table>
+<thead>
+<tr>
+<th>ด้าน</th>
+<th>S01 (Stat Arb)</th>
+<th>S02 (ML Ensemble)</th>
+<th>S03 (SMC)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>สัญญาณ</td>
+<td>Python คำนวณ</td>
+<td>Python ML models</td>
+<td><strong>MQL5 คำนวณ</strong></td>
+</tr>
+<tr>
+<td>Python หน้าที่</td>
+<td>Beta, Cointegration</td>
+<td>LSTM/RF/XGB</td>
+<td>Regime เท่านั้น</td>
+</tr>
+<tr>
+<td>Latency</td>
+<td>สูง (Python round-trip)</td>
+<td>สูงมาก (ML inference)</td>
+<td><strong>ต่ำ (เฉพาะ Regime)</strong></td>
+</tr>
+<tr>
+<td>Standalone</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Pattern Detection</td>
+<td>Server-side</td>
+<td>Server-side</td>
+<td><strong>Client-side (MQL5)</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>เหตุผลที่ S03 ประมวลผล Pattern ใน MQL5:</strong></p>
+<p>OB, FVG และ BOS เป็น Pattern ที่ต้องตรวจสอบบนแท่งเทียนทุกแท่ง (bar-by-bar) และต้อง Mark Zone เป็น Active/Inactive ในระดับ Tick ด้วย หากส่งข้อมูลทุก Tick ไปให้ Python คำนวณ จะเกิด Latency สูงและ ZMQ Overhead ไม่จำเป็น การคำนวณ Pattern ใน MQL5 โดยตรงจึงมีประสิทธิภาพกว่ามาก</p>
+<hr>
+<h2 id="5-โครงสร้างการไหลของข้อมูล-full-system-dataflow">5. โครงสร้างการไหลของข้อมูล (Full System Dataflow)</h2>
+<pre><code>A: FeederEA (MQL5 Program)
+   ├── รวบรวม OHLCV Data ทุกแท่ง
+   ├── Pack ด้วย MessagePack Binary Protocol
+   └── ส่งออก ZMQ PUB → Port 7777
+                ↓
+B: Python Brain — core/ingestion.py
+   ├── รับข้อมูลจาก Port 7777 (ZMQ SUB)
+   ├── Unpack MessagePack
+   ├── บันทึกลง InfluxDB (time-series database)
+   └── ส่งต่อ OHLCV ให้ Regime Classifier
+                ↓
+C: Python Brain — core/strategy/analysis.py
+   ├── วิเคราะห์ Regime: TRENDING / VOLATILE / RANGING / SQUEEZE
+   ├── คำนวณ Regime Score สำหรับ S03
+   │   TRENDING  → bonus × 1.3  (สภาวะดีที่สุด)
+   │   VOLATILE  → bonus × 1.2  (สภาวะดี)
+   │   RANGING   → bonus × 0.4  (สภาวะแย่ — Score ต่ำมาก)
+   └── ส่งผล Regime ให้ Policy Engine
+                ↓
+D: Python Brain — core/strategy/policy.py
+   ├── AI Council: ถ่วงน้ำหนักด้วย hist_perf × regime_bonus
+   ├── หาก weighted_conf ≥ 0.50 → อนุมัติ S03
+   ├── Optimize Parameters (Lookback, OB Vol, FVG Size)
+   └── สร้าง CONFIG_PUSH (type=10)
+                ↓
+E: ZMQ PUSH → Port 7778
+   CONFIG_PUSH Array:
+   [10, timestamp, symbol, &quot;S03&quot;, entry, lot, max_orders,
+    tp, sl, confidence, risk_mult]
+   + SDynamicParams: SMC_LOOKBACK, SMC_MIN_OB_VOL, etc.
+                ↓
+F: MQL5 Trader — CSMCV6::SetDynamicParams()
+   ├── รับ CONFIG_PUSH
+   ├── อัพเดทพารามิเตอร์ (m_lookback, m_min_ob_vol, ...)
+   ├── เรียก _SetupDetectors() — reconfigure ทั้งสาม detectors
+   └── m_config.confidence ถูกตั้งค่า (&gt; 0.01 → ServerOnly Guard ผ่าน)
+                ↓
+G: CSMCV6::Analyze() — ทุก Tick
+   ├── ServerOnly Guard: if(m_config.confidence &lt; 0.01) return
+   ├── คำนวณ ATR 14 แท่ง
+   ├── ตรวจสอบ New Bar:
+   │   ├── COrderBlockDetector::Scan()   → สแกน 50 แท่ง หา OB
+   │   ├── CFVGDetector::Scan()          → สแกน 50 แท่ง หา FVG
+   │   └── CBOSDetector::Detect()        → หา Pivot High/Low + BOS
+   ├── ทุก Tick:
+   │   ├── COrderBlockDetector::MarkRetested(price)
+   │   └── CFVGDetector::MarkFilled(price)
+   ├── อ่าน BOS Direction:
+   │   ├── BOS_DIR_BULLISH → _EvaluateLong(price)
+   │   └── BOS_DIR_BEARISH → _EvaluateShort(price)
+   └── หาก Signal ≠ NONE → ส่งสัญญาณให้ Order Manager
+                ↓
+H: Order Manager — เปิด Position
+   ├── SIGNAL_BUY  → Buy Market Order
+   ├── SL = ob/fvg edge - ATRBuffer × ATR
+   ├── TP = entry + TPMult × ATR
+   └── Magic Number = 1003 (MAGIC_S03_SMC)
+                ↓
+I: ZMQ PUSH → Port 7779
+   TRADE_REPORT ส่งผล Trade กลับให้ Python Brain
+   (กำไร/ขาดทุน, ราคาเปิด/ปิด, confidence ที่ใช้)
+   → Python Brain ใช้ข้อมูลนี้ปรับ hist_perf ของ S03 ในรอบถัดไป
+</code></pre>
+<p><strong>ทำไม Scan() ทำงานเฉพาะ New Bar ไม่ใช่ทุก Tick?</strong></p>
+<p>การสแกน 50 แท่งย้อนหลังทุก Tick จะสิ้นเปลือง CPU อย่างมาก (50 × 3 operations = 150 iterations ต่อ Tick) ระบบจึงใช้ <code>static datetime s_last_bar</code> เปรียบเทียบกับ <code>iTime(m_symbol, m_timeframe, 0)</code> เพื่อรัน Scan เฉพาะเมื่อเกิดแท่งใหม่ ในขณะที่ <code>MarkRetested()</code> และ <code>MarkFilled()</code> ยังคงทำงานทุก Tick เพราะต้องตรวจสอบการเข้า Zone แบบ Real-time</p>
+<hr>
+<h2 id="6-ตารางอ้างอิงพารามิเตอร์-parameter-reference">6. ตารางอ้างอิงพารามิเตอร์ (Parameter Reference)</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Default</th>
+<th>Range</th>
+<th>คำอธิบายรายละเอียดเชิงลึก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SMC_LookbackBars</code></td>
+<td>50</td>
+<td>20–200</td>
+<td>จำนวนแท่งย้อนหลังที่สแกนหา OB, FVG และ BOS ค่าต่ำ (20) = ตอบสนองต่อ Pattern ล่าสุดเท่านั้น เหมาะกับ Timeframe ต่ำ / ค่าสูง (200) = รวม Pattern ระยะยาวด้วย เหมาะกับ H4+</td>
+</tr>
+<tr>
+<td><code>SMC_MinOBVolume</code></td>
+<td>1.5</td>
+<td>1.0–3.0</td>
+<td>ค่าตัวคูณ Volume ขั้นต่ำ OB Volume ต้องมากกว่าค่าเฉลี่ยอย่างน้อยเท่าตัวนี้ ค่า 1.0 = ยอมรับแท่งปริมาณปกติ (เพิ่ม Signal, เพิ่ม Noise) / ค่า 3.0 = เฉพาะแท่งปริมาณสูงมาก (Signal น้อยลงแต่คุณภาพสูง)</td>
+</tr>
+<tr>
+<td><code>SMC_MinFVGSize</code></td>
+<td>0.5</td>
+<td>0.2–2.0</td>
+<td>ขนาดขั้นต่ำของ FVG เมื่อเทียบกับ ATR ค่าน้อย (0.2) = ยอมรับ FVG เล็ก ซึ่งมักเกิดในตลาด Ranging / ค่ามาก (2.0) = เฉพาะ FVG ที่เกิดจาก Impulse Move ขนาดใหญ่จริงๆ</td>
+</tr>
+<tr>
+<td><code>SMC_SwingBars</code></td>
+<td>5</td>
+<td>3–10</td>
+<td>จำนวนแท่งแต่ละด้านในการพิจารณา Pivot High/Low ค่าน้อย (3) = Pivot เล็ก, BOS บ่อย / ค่ามาก (10) = Pivot ใหญ่, BOS นานๆ จะเกิด แต่มีความน่าเชื่อถือสูง</td>
+</tr>
+<tr>
+<td><code>SMC_SL_ATRBuffer</code></td>
+<td>0.3</td>
+<td>0.1–1.0</td>
+<td>ระยะห่างของ SL จากขอบ OB/FVG เป็นทวีคูณของ ATR ค่าน้อย (0.1) = SL แน่น, ถูก Stop Out ง่าย / ค่ามาก (1.0) = SL กว้าง, ลด R:R Ratio</td>
+</tr>
+<tr>
+<td><code>SMC_TP_ATRMult</code></td>
+<td>2.0</td>
+<td>1.5–5.0</td>
+<td>ระยะ Take Profit จาก Entry เป็นทวีคูณของ ATR ค่าต่ำ (1.5) = TP ใกล้, Win Rate สูงขึ้นแต่กำไรต่อไม้น้อย / ค่าสูง (5.0) = TP ไกล, กำไรต่อไม้สูงแต่ Hit Rate ต่ำลง</td>
+</tr>
+<tr>
+<td><code>SMC_MinConfidence</code></td>
+<td>0.45</td>
+<td>0.30–0.70</td>
+<td>คะแนน Confidence ขั้นต่ำในการสร้างสัญญาณ ค่าต่ำ (0.30) = Signal บ่อย, False Signal มาก / ค่าสูง (0.70) = Signal น้อยแต่คุณภาพสูง — Trade-off ระหว่าง Win Rate และ Frequency</td>
+</tr>
+</tbody>
+</table>
+<p><strong>CONFIG_PUSH Parameter Keys (ชื่อที่ใช้ใน Dynamic Params):</strong></p>
+<table>
+<thead>
+<tr>
+<th>CONFIG_PUSH Key</th>
+<th>MQL5 Parameter</th>
+<th>หมายเหตุ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SMC_LOOKBACK</code></td>
+<td><code>SMC_LookbackBars</code></td>
+<td>int, ส่งเป็น double แล้ว cast กลับ</td>
+</tr>
+<tr>
+<td><code>SMC_MIN_OB_VOL</code></td>
+<td><code>SMC_MinOBVolume</code></td>
+<td>double</td>
+</tr>
+<tr>
+<td><code>SMC_MIN_FVG_SIZE</code></td>
+<td><code>SMC_MinFVGSize</code></td>
+<td>double</td>
+</tr>
+<tr>
+<td><code>SMC_SWING_BARS</code></td>
+<td><code>SMC_SwingBars</code></td>
+<td>int, ส่งเป็น double แล้ว cast กลับ</td>
+</tr>
+<tr>
+<td><code>SMC_SL_ATR_BUFFER</code></td>
+<td><code>SMC_SL_ATRBuffer</code></td>
+<td>double</td>
+</tr>
+<tr>
+<td><code>SMC_TP_ATR_MULT</code></td>
+<td><code>SMC_TP_ATRMult</code></td>
+<td>double</td>
+</tr>
+<tr>
+<td><code>SMC_MIN_CONFIDENCE</code></td>
+<td><code>SMC_MinConfidence</code></td>
+<td>double</td>
+</tr>
+</tbody>
+</table>
+<p>หลังจากรับ CONFIG_PUSH ระบบจะเรียก <code>_SetupDetectors()</code> อีกครั้งทันที เพื่อให้ทั้งสามตรวจจับใช้พารามิเตอร์ใหม่ — นี่คือกลไก <strong>Hot-Reload</strong> ที่ไม่ต้อง Restart EA</p>
+<hr>
+<h2 id="7-โหมดเดี่ยว-vs-โหมดเซิร์ฟเวอร์-standalone-vs-server-mode">7. โหมดเดี่ยว vs โหมดเซิร์ฟเวอร์ (Standalone vs Server Mode)</h2>
+<h3 id="71-โหมดเดี่ยว-standalone-mode--ไม่รองรับ">7.1 โหมดเดี่ยว (Standalone Mode) — ไม่รองรับ</h3>
+<p>S03 <strong>ไม่มี Standalone Mode</strong> เนื่องจากการตัดสินใจที่ชัดเจนในการออกแบบ:</p>
+<p><strong>เหตุผลที่ 1 — ServerOnly Guard:</strong>
+ในฟังก์ชัน <code>Analyze()</code> มี Guard ป้องกัน:</p>
+<pre><code class="language-mql5">if(m_config.confidence &lt; 0.01) return;
+</code></pre>
+<p>ค่า <code>m_config.confidence</code> จะเป็น 0.0 จนกว่าจะได้รับ CONFIG_PUSH จาก Python Brain (Port 7778) ดังนั้น S03 จึง <strong>ไม่สามารถสร้างสัญญาณใดๆ</strong> หากไม่มีการเชื่อมต่อกับเซิร์ฟเวอร์</p>
+<p><strong>เหตุผลที่ 2 — Regime Dependency:</strong>
+Pattern OB, FVG และ BOS เกิดขึ้นในทุก Regime รวมถึง RANGING ซึ่งเป็นสภาวะที่ SMC ทำงานแย่ที่สุด หากไม่มี Python Brain กรอง Regime ออก S03 จะสร้าง False Signal จำนวนมากในตลาด Ranging ระบบจึงต้องพึ่งพา Server-side Regime Filter เป็นกลไกป้องกันหลัก</p>
+<p><strong>เหตุผลที่ 3 — Computational Load:</strong>
+การสแกน 50 แท่งสำหรับ OB + FVG + BOS ทุกแท่งมีภาระการคำนวณที่ไม่สมเหตุสมผลหากไม่มีการยืนยันจาก Server ว่าสภาวะตลาดเหมาะสม</p>
+<h3 id="72-โหมดเซิร์ฟเวอร์-server-mode--การทำงานเต็มรูปแบบ">7.2 โหมดเซิร์ฟเวอร์ (Server Mode) — การทำงานเต็มรูปแบบ</h3>
+<pre><code>Python Brain
+   ├── Regime: TRENDING หรือ VOLATILE
+   ├── S03 Confidence Score:
+   │   hist_perf × regime_bonus
+   │   TRENDING  → regime_bonus = 1.30
+   │   VOLATILE  → regime_bonus = 1.20
+   │   RANGING   → regime_bonus = 0.40 (มักต่ำกว่า threshold)
+   │
+   ├── AI Council: weighted_conf ≥ 0.50?
+   │   YES → อนุมัติ S03
+   │
+   ├── Parameter Optimization:
+   │   Trending Market  → เพิ่ม SwingBars (5→7) หา Pivot ที่ใหญ่ขึ้น
+   │                     เพิ่ม LookbackBars (50→80) รวม Pattern ระยะไกล
+   │   Volatile Market  → ลด MinOBVolume (1.5→1.2) ยอมรับ OB ที่เล็กลง
+   │                     เพิ่ม TP_ATRMult (2.0→3.0) เพราะ ATR สูง
+   │
+   └── CONFIG_PUSH → Port 7778 → CSMCV6::SetDynamicParams()
+</code></pre>
+<p><strong>ประโยชน์ของ Server Mode:</strong></p>
+<ul>
+<li>ป้องกันการเทรดใน RANGING (Regime Filter)</li>
+<li>ปรับพารามิเตอร์ให้เหมาะสมกับสภาวะตลาดปัจจุบัน (Dynamic Params)</li>
+<li>ใช้ประวัติประสิทธิภาพ (hist_perf) เพื่อปรับน้ำหนักของ S03 ใน Portfolio</li>
+<li>AI Council ช่วยลด Overtrading ในช่วงที่ Pattern คุณภาพต่ำ</li>
+</ul>
+<hr>
+<h2 id="8-ลำดับขั้นตอนการทำงานต่อหนึ่งแท่งเทียน-step-by-step-operational-flow">8. ลำดับขั้นตอนการทำงานต่อหนึ่งแท่งเทียน (Step-by-Step Operational Flow)</h2>
+<p>ขั้นตอนที่แน่ชัดที่ระบบทำงานในทุกแท่งเทียนใหม่บน Timeframe ที่กำหนด:</p>
+<p><strong>ขั้นที่ 1 — รับ CONFIG_PUSH (เกิดครั้งเดียวหรือทุก N วินาที):</strong></p>
+<ul>
+<li>Python Brain ส่ง CONFIG_PUSH (type=10) ผ่าน Port 7778</li>
+<li><code>SetDynamicParams()</code> รับพารามิเตอร์ใหม่ และเรียก <code>_SetupDetectors()</code></li>
+<li><code>m_config.confidence</code> ถูกตั้งค่าเป็น &gt; 0.01 → ServerOnly Guard ผ่าน</li>
+</ul>
+<p><strong>ขั้นที่ 2 — New Bar Detection:</strong></p>
+<ul>
+<li><code>Analyze()</code> เรียกทุก Tick</li>
+<li>เปรียบเทียบ <code>iTime(symbol, tf, 0)</code> กับ <code>s_last_bar</code></li>
+<li>หากเกิดแท่งใหม่ → ดำเนินการขั้นที่ 3–5</li>
+</ul>
+<p><strong>ขั้นที่ 3 — Triple Scan (เฉพาะ New Bar):</strong></p>
+<pre><code>COrderBlockDetector::Scan()
+   ↳ สแกน m_lookback แท่ง (ค่าเริ่มต้น 50)
+   ↳ คำนวณ AvgVolume และ ATR
+   ↳ เก็บ OB ที่ผ่านเงื่อนไข (สูงสุด 10 โซน)
+
+CFVGDetector::Scan()
+   ↳ สแกน m_lookback แท่ง
+   ↳ ค้นหา 3-Candle Imbalance ที่ขนาด ≥ MinFVGSize × ATR
+   ↳ เก็บ FVG ที่ผ่านเงื่อนไข (สูงสุด 10 โซน)
+
+CBOSDetector::Detect(m_lookback)
+   ↳ ค้นหา Pivot High/Low ที่แท้จริงใน Lookback range
+   ↳ เปรียบเทียบ High/Low ของ bar[1] กับ Swing High/Low
+   ↳ อัพเดท m_bos_dir และ m_bos_active
+</code></pre>
+<p><strong>ขั้นที่ 4 — Zone Invalidation (ทุก Tick):</strong></p>
+<pre><code>MarkRetested(mid_price) → OB ที่ราคาเข้ามาใน Zone → is_active = false
+MarkFilled(mid_price)   → FVG ที่ราคาข้ามจุด Midpoint → is_active = false
+</code></pre>
+<p><strong>ขั้นที่ 5 — Entry Evaluation (ทุก Tick):</strong></p>
+<pre><code>หาก BOS_DIR_BULLISH → _EvaluateLong(price)
+   ├── หา Demand OB ที่ Active ใกล้ราคาที่สุด (เบื้องล่างราคาปัจจุบัน)
+   ├── หา Bullish FVG ที่ Active ใกล้ราคาที่สุด
+   ├── ตรวจสอบ: price ∈ OB zone หรือ price ∈ FVG zone?
+   ├── คำนวณ _CalcConfidence(ob_str, fvg_ratio)
+   ├── หาก conf ≥ MinConfidence → SIGNAL_BUY
+   └── SL = ob/fvg edge - buffer×ATR, TP = entry + mult×ATR
+
+หาก BOS_DIR_BEARISH → _EvaluateShort(price)
+   └── (เหมือนกัน แต่ทิศทางตรงข้าม)
+</code></pre>
+<p><strong>ขั้นที่ 6 — Trade Report (Port 7779):</strong></p>
+<ul>
+<li>เมื่อออเดอร์ถูกเปิดหรือปิด</li>
+<li>EA ส่ง TRADE_REPORT กลับไปยัง Python Brain</li>
+<li>Brain อัพเดท <code>hist_perf[S03]</code> สำหรับรอบ AI Council ครั้งถัดไป</li>
+</ul>
+<hr>
+<h2 id="9-ลักษณะประสิทธิภาพ-performance-characteristics">9. ลักษณะประสิทธิภาพ (Performance Characteristics)</h2>
+<table>
+<thead>
+<tr>
+<th>ด้าน</th>
+<th>รายละเอียด</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>สภาวะตลาดที่ดีที่สุด</strong></td>
+<td>ตลาด Trending ที่มีการ Impulse และ Pullback ชัดเจน เช่น ช่วง London/NY Session Open</td>
+</tr>
+<tr>
+<td><strong>สภาวะตลาดที่แย่ที่สุด</strong></td>
+<td>ตลาด Ranging แคบ (ATR ต่ำ, ไม่มี BOS ชัดเจน) เช่น Asian Session ที่เงียบ</td>
+</tr>
+<tr>
+<td><strong>ความถี่สัญญาณ</strong></td>
+<td>ต่ำ–ปานกลาง: 2–5 สัญญาณต่อวันในตลาด Trending</td>
+</tr>
+<tr>
+<td><strong>Win Rate เป้าหมาย</strong></td>
+<td>55–65% (R:R สูงทดแทน Win Rate ที่ไม่สูงมาก)</td>
+</tr>
+<tr>
+<td><strong>R:R Ratio</strong></td>
+<td>TP 2.0 ATR / SL 0.3 ATR ≈ <strong>6.7:1</strong> (ต่อครั้งที่ SL/TP ถูก Touch)</td>
+</tr>
+<tr>
+<td><strong>ประเภทสัญญาณ</strong></td>
+<td>Bar-by-bar (Scan ทุกแท่ง) แต่ทดสอบ Zone ทุก Tick</td>
+</tr>
+<tr>
+<td><strong>Magic Number</strong></td>
+<td>1003</td>
+</tr>
+<tr>
+<td><strong>ATR Period</strong></td>
+<td>14 แท่ง (ใช้ iATR indicator handle)</td>
+</tr>
+<tr>
+<td><strong>OB Buffer</strong></td>
+<td>สูงสุด 10 โซน (MAX_OB_ZONES)</td>
+</tr>
+<tr>
+<td><strong>FVG Buffer</strong></td>
+<td>สูงสุด 10 โซน (MAX_FVG_ZONES)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>การคำนวณ R:R จริง (ตาม Case Study):</strong></p>
+<ul>
+<li>SL Distance = entry(1.0810) - SL(1.0789) = <strong>21 pips</strong></li>
+<li>TP Distance = TP(1.0850) - entry(1.0810) = <strong>40 pips</strong></li>
+<li>R:R = 40 / 21 ≈ <strong>1.90:1</strong></li>
+</ul>
+<p>หมายเหตุ: R:R ที่คำนวณด้านบน (6.7:1) เป็น Theoretical Maximum เมื่อ SL อยู่ที่ ATR × 0.3 พอดี ค่าจริงขึ้นอยู่กับตำแหน่งของ OB/FVG edge</p>
+<hr>
+<h2 id="10-ไฟล์อ้างอิง-files-reference">10. ไฟล์อ้างอิง (Files Reference)</h2>
+<table>
+<thead>
+<tr>
+<th>ไฟล์</th>
+<th>บทบาท</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Include/Logic/Strategies/S03_SMC.mqh</code></td>
+<td>คลาสหลัก CSMCV6 — ประสานงาน 3 Detectors</td>
+</tr>
+<tr>
+<td><code>Include/Logic/Strategies/SMC/OrderBlockDetector.mqh</code></td>
+<td><code>COrderBlockDetector</code> — ตรวจจับ OB (Demand/Supply)</td>
+</tr>
+<tr>
+<td><code>Include/Logic/Strategies/SMC/FVGDetector.mqh</code></td>
+<td><code>CFVGDetector</code> — ตรวจจับ Fair Value Gap</td>
+</tr>
+<tr>
+<td><code>Include/Logic/Strategies/SMC/BOSDetector.mqh</code></td>
+<td><code>CBOSDetector</code> — ตรวจจับ Break of Structure</td>
+</tr>
+<tr>
+<td><code>02_Brain/strategies/s03_smc_analyzer.py</code></td>
+<td>Python Regime Scoring สำหรับ S03</td>
+</tr>
+<tr>
+<td><code>Include/Logic/StrategyConstants.mqh</code></td>
+<td>ค่าคงที่: <code>S03_SMC</code> enum, <code>MAGIC_S03_SMC = 1003</code></td>
+</tr>
+<tr>
+<td><code>Include/Network/Protocol/Definitions.mqh</code></td>
+<td><code>SDynamicParams</code>, CONFIG_PUSH structure</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="11-quick-diagnostics">11. Quick Diagnostics</h2>
+<h3 id="ตรวจสอบว่า-s03-active">ตรวจสอบว่า S03 Active</h3>
+<pre><code>dashboard.py → Active Strategies → &quot;S03&quot; ปรากฏพร้อม confidence &gt; 0.45
+</code></pre>
+<h3 id="อ่าน-diagnostic-string-จาก-getdiagnostics">อ่าน Diagnostic String จาก GetDiagnostics()</h3>
+<pre><code>[S03] ATR:0.0020 OB:0.50 FVG:1.50 BOS:BULL Sig:BUY Conf:0.60
+         ↑ATR         ↑OB Str  ↑FVG ratio ↑ทิศทาง ↑สัญญาณ ↑confidence
+</code></pre>
+<h3 id="log-ที่ควรเห็นใน-mt5-experts-tab">Log ที่ควรเห็นใน MT5 Experts Tab</h3>
+<pre><code>[S03] Init OK | EURUSD PERIOD_H1
+[S03] BOS BULLISH: swing high broken at 1.08450
+[S03] SIGNAL_BUY conf=0.600 entry=1.08100 sl=1.07890 tp=1.08500
+</code></pre>
+<h3 id="กรณี-s03-ไม่สร้างสัญญาณ">กรณี S03 ไม่สร้างสัญญาณ</h3>
+<pre><code>สาเหตุที่ 1: m_config.confidence &lt; 0.01 → ยังไม่ได้รับ CONFIG_PUSH
+             แก้ไข: ตรวจสอบ Python Brain เชื่อมต่ออยู่ที่ Port 7778
+
+สาเหตุที่ 2: Regime = RANGING → Brain ไม่ส่ง CONFIG_PUSH ให้ S03
+             แก้ไข: รอสภาวะตลาดเปลี่ยน หรือตรวจสอบ dashboard.py Regime
+
+สาเหตุที่ 3: ไม่มี BOS (m_bos_dir = BOS_DIR_NONE)
+             แก้ไข: ลด SMC_SwingBars เพื่อให้ Pivot เล็กลง (BOS บ่อยขึ้น)
+
+สาเหตุที่ 4: Confidence &lt; MinConfidence
+             แก้ไข: ลด SMC_MinOBVolume เพื่อยอมรับ OB ที่ Volume น้อยลง
+                    หรือลด SMC_MinFVGSize เพื่อยอมรับ FVG ที่เล็กลง
+</code></pre>
+<hr>
+<h2 id="12-ข้อวิพากษ์และแนวทางการปรับปรุง-critiques--optimizations">12. ข้อวิพากษ์และแนวทางการปรับปรุง (Critiques &amp; Optimizations)</h2>
+<p><strong>ข้อจำกัดที่ 1 — False OB ในตลาด Choppy:</strong>
+Order Block ที่ระบบตรวจจับได้ไม่ใช่ทุกตัวที่สร้างโดยสถาบัน แท่งเทียนที่มีปริมาณสูงอาจเกิดจากมือปลีกจำนวนมาก (Retail Cluster) ไม่ใช่สถาบัน วิธีบรรเทา: ใช้ Server-side Regime Filter เพื่อยืนยันว่าตลาดอยู่ใน TRENDING ก่อน และเพิ่ม <code>SMC_MinOBVolume</code> ขึ้น (เช่น 2.0) เพื่อกรองเฉพาะ OB ที่ปริมาณสูงมากจริงๆ</p>
+<p><strong>ข้อจำกัดที่ 2 — BOS ที่เกิดจาก News Spike:</strong>
+ข่าวเศรษฐกิจสำคัญ (เช่น NFP, FOMC) อาจทำให้เกิด BOS พร้อม OB และ FVG ขนาดใหญ่อย่างเทียม Pattern เหล่านี้มักไม่เกิด Mean Reversion ปกติ แต่กลับ Run Away ต่อ วิธีบรรเทา: Python Brain ควรลด Regime Score ของ S03 ในช่วง High-Impact News เพื่อป้องกันการส่ง CONFIG_PUSH</p>
+<p><strong>ข้อจำกัดที่ 3 — Fixed TP ด้วย ATR:</strong>
+TP ที่คำนวณเป็น <code>entry + TP_ATRMult × ATR</code> อาจพลาดจุด Swing High/Low สำคัญถัดไป ซึ่งเป็น TP Target ที่ &quot;ธรรมชาติ&quot; กว่า วิธีบรรเทา: ปรับ <code>SMC_TP_ATRMult</code> ตาม Regime — TRENDING อาจใช้ 3.0–4.0, VOLATILE อาจลดเหลือ 1.5</p>
+<p><strong>ข้อจำกัดที่ 4 — OB Invalidation ใช้ Zone Touch (ไม่ใช่ Close):</strong>
+<code>MarkRetested()</code> จะ Mark OB เป็น Inactive เมื่อ Mid Price เข้า Zone ซึ่งอาจทำให้ OB ถูก Invalidate จาก Wick โดยไม่ได้รับ Fill ที่แท้จริง วิธีบรรเทา: พิจารณาเพิ่มเงื่อนไข &quot;Close must enter OB zone&quot; แทนเพียง Tick Price สำหรับ Invalidation</p>
+<p><strong>แนวทางการ Tune พารามิเตอร์ตามสภาวะตลาด:</strong></p>
+<table>
+<thead>
+<tr>
+<th>สภาวะ</th>
+<th>SMC_LookbackBars</th>
+<th>SMC_MinOBVolume</th>
+<th>SMC_SwingBars</th>
+<th>SMC_TP_ATRMult</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Strong Trend (TRENDING)</td>
+<td>80</td>
+<td>2.0</td>
+<td>7</td>
+<td>3.0</td>
+</tr>
+<tr>
+<td>Volatile (VOLATILE)</td>
+<td>30</td>
+<td>1.2</td>
+<td>3</td>
+<td>1.5</td>
+</tr>
+<tr>
+<td>Default</td>
+<td>50</td>
+<td>1.5</td>
+<td>5</td>
+<td>2.0</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><em>S03 SMC Manual — FlashEASuite V2 | Phase P9-5 | Jimmi Deep-Dive Edition | 2026-02-27</em></p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>

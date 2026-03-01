@@ -1,0 +1,284 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+FlashEASuite V2 V6 — Protocol Handler
+ZMQ + MessagePack communication layer for the Python Brain (Server).
+
+Manages 3 ZMQ sockets:
+  - PULL on port 7777: Receive from Feeder (TICK, OHLC, INDICATOR data)
+  - PUB  on port 7778: Broadcast to Clients (CONFIG_PUSH, HEARTBEAT, etc.)
+  - PULL on port 7779: Receive from Clients (CLIENT_HELLO, TRADE_REPORT, etc.)
+
+Author: Dr. Suksaeng Kukanok
+Version: 6.0.0
+Date: 2026-02-13
+"""
+
+import zmq
+import msgpack
+import time
+import logging
+from typing import Optional, Any
+
+from .message_types import (
+    MsgType, PortConfig, now_ms, parse_message,
+    ConfigPushMsg, InitialConfigMsg, HeartbeatMsg,
+    NewsAlertMsg, RegimeChangeMsg, CommandMsg, PolicyUpdateMsg, ErrorMsg,
+    TickDataMsg, OHLCDataMsg, IndicatorDataMsg,
+    ClientHelloMsg, TradeReportMsg, PositionUpdateMsg, PerformanceMetricsMsg,
+)
+
+logger = logging.getLogger("FlashEA.Protocol")
+
+
+class ProtocolHandler:
+    """
+    ZMQ + MessagePack protocol handler for the Brain (Server).
+
+    Architecture:
+        Feeder → [PUSH] ──→ [PULL port 7777] Server
+        Server  [PUB  port 7778] ──→ [SUB] Clients
+        Clients → [PUSH] ──→ [PULL port 7779] Server
+    """
+
+    def __init__(self,
+                 feeder_pull_addr: str = "tcp://127.0.0.1:7777",
+                 pub_addr: str = "tcp://*:7778",
+                 client_pull_addr: str = "tcp://127.0.0.1:7779",
+                 bind_feeder: bool = True,
+                 bind_pub: bool = True,
+                 bind_client: bool = True):
+        """
+        Initialize ZMQ context and sockets.
+
+        Args:
+            feeder_pull_addr: Address for PULL socket receiving from Feeder.
+            pub_addr: Address for PUB socket broadcasting to Clients.
+            client_pull_addr: Address for PULL socket receiving from Clients.
+            bind_feeder: True = bind (server side), False = connect (client side).
+            bind_pub: True = bind PUB socket.
+            bind_client: True = bind PULL socket for client messages.
+        """
+        self._feeder_pull_addr = feeder_pull_addr
+        self._pub_addr = pub_addr
+        self._client_pull_addr = client_pull_addr
+        self._bind_feeder = bind_feeder
+        self._bind_pub = bind_pub
+        self._bind_client = bind_client
+
+        self._context: Optional[zmq.Context] = None
+        self._feeder_pull: Optional[zmq.Socket] = None  # PULL from Feeder
+        self._pub: Optional[zmq.Socket] = None           # PUB to Clients
+        self._client_pull: Optional[zmq.Socket] = None   # PULL from Clients
+        self._initialized = False
+
+        # Stats
+        self._sent_count = 0
+        self._recv_count = 0
+
+    # ==================================================================
+    # Lifecycle
+    # ==================================================================
+    def initialize(self) -> bool:
+        """Initialize ZMQ context and all sockets. Returns True on success."""
+        try:
+            self._context = zmq.Context()
+
+            # --- Socket 1: PULL from Feeder (port 7777) ---
+            self._feeder_pull = self._context.socket(zmq.PULL)
+            self._feeder_pull.setsockopt(zmq.LINGER, 0)
+            self._feeder_pull.setsockopt(zmq.RCVTIMEO, 100)  # 100ms timeout
+            if self._bind_feeder:
+                self._feeder_pull.bind(self._feeder_pull_addr)
+                logger.info(f"PULL (Feeder) bound to {self._feeder_pull_addr}")
+            else:
+                self._feeder_pull.connect(self._feeder_pull_addr)
+                logger.info(f"PULL (Feeder) connected to {self._feeder_pull_addr}")
+
+            # --- Socket 2: PUB to Clients (port 7778) ---
+            self._pub = self._context.socket(zmq.PUB)
+            self._pub.setsockopt(zmq.LINGER, 0)
+            self._pub.setsockopt(zmq.SNDHWM, 1000)
+            if self._bind_pub:
+                self._pub.bind(self._pub_addr)
+                logger.info(f"PUB bound to {self._pub_addr}")
+            else:
+                self._pub.connect(self._pub_addr)
+                logger.info(f"PUB connected to {self._pub_addr}")
+
+            # --- Socket 3: PULL from Clients (port 7779) ---
+            self._client_pull = self._context.socket(zmq.PULL)
+            self._client_pull.setsockopt(zmq.LINGER, 0)
+            self._client_pull.setsockopt(zmq.RCVTIMEO, 100)  # 100ms timeout
+            if self._bind_client:
+                self._client_pull.bind(self._client_pull_addr)
+                logger.info(f"PULL (Client) bound to {self._client_pull_addr}")
+            else:
+                self._client_pull.connect(self._client_pull_addr)
+                logger.info(f"PULL (Client) connected to {self._client_pull_addr}")
+
+            self._initialized = True
+            logger.info("✅ ProtocolHandler initialized (3 sockets ready)")
+            return True
+
+        except zmq.ZMQError as e:
+            logger.error(f"❌ ZMQ initialization failed: {e}")
+            self.shutdown()
+            return False
+
+    def shutdown(self) -> None:
+        """Close all sockets and terminate context."""
+        for name, sock in [("feeder_pull", self._feeder_pull),
+                           ("pub", self._pub),
+                           ("client_pull", self._client_pull)]:
+            if sock is not None:
+                try:
+                    sock.close()
+                    logger.info(f"Socket {name} closed")
+                except Exception:
+                    pass
+
+        if self._context is not None:
+            try:
+                self._context.term()
+            except Exception:
+                pass
+
+        self._feeder_pull = None
+        self._pub = None
+        self._client_pull = None
+        self._context = None
+        self._initialized = False
+        logger.info("ProtocolHandler shutdown complete")
+
+    @property
+    def is_initialized(self) -> bool:
+        return self._initialized
+
+    # ==================================================================
+    # Low-level Send / Receive
+    # ==================================================================
+    def _send_pub(self, data: list) -> bool:
+        """Serialize and send data via PUB socket."""
+        if self._pub is None:
+            return False
+        try:
+            packed = msgpack.packb(data, use_bin_type=True)
+            self._pub.send(packed, zmq.NOBLOCK)
+            self._sent_count += 1
+            return True
+        except zmq.ZMQError as e:
+            logger.warning(f"PUB send failed: {e}")
+            return False
+
+    def _recv_from(self, socket: zmq.Socket) -> Optional[list]:
+        """Receive and deserialize data from a PULL socket."""
+        if socket is None:
+            return None
+        try:
+            raw = socket.recv(zmq.NOBLOCK)
+            data = msgpack.unpackb(raw, raw=False)
+            self._recv_count += 1
+            return data
+        except zmq.Again:
+            return None  # No message available (timeout)
+        except (msgpack.UnpackException, Exception) as e:
+            logger.warning(f"Receive/unpack error: {e}")
+            return None
+
+    # ==================================================================
+    # Receive Methods — from Feeder (port 7777)
+    # ==================================================================
+    def receive_from_feeder(self):
+        """
+        Poll Feeder PULL socket for incoming data.
+        Returns typed message object or None.
+        """
+        arr = self._recv_from(self._feeder_pull)
+        if arr is None:
+            return None
+        return parse_message(arr)
+
+    # ==================================================================
+    # Receive Methods — from Clients (port 7779)
+    # ==================================================================
+    def receive_from_client(self):
+        """
+        Poll Client PULL socket for incoming data.
+        Returns typed message object or None.
+        """
+        arr = self._recv_from(self._client_pull)
+        if arr is None:
+            return None
+        return parse_message(arr)
+
+    # ==================================================================
+    # Send Methods — Server → Clients (port 7778 PUB)
+    # ==================================================================
+    def send_config_push(self, msg: ConfigPushMsg) -> bool:
+        """Send CONFIG_PUSH (type 10) to all clients."""
+        msg.timestamp_ms = now_ms()
+        return self._send_pub(msg.to_array())
+
+    def send_initial_config(self, msg: InitialConfigMsg) -> bool:
+        """Send INITIAL_CONFIG (type 12) to a specific client."""
+        msg.timestamp_ms = now_ms()
+        return self._send_pub(msg.to_array())
+
+    def send_heartbeat(self, sequence: int = 0) -> bool:
+        """Send HEARTBEAT (type 13) from server."""
+        msg = HeartbeatMsg(
+            timestamp_ms=now_ms(),
+            source="SERVER",
+            sequence=sequence,
+            is_alive=True
+        )
+        return self._send_pub(msg.to_array())
+
+    def send_news_alert(self, msg: NewsAlertMsg) -> bool:
+        """Send NEWS_ALERT (type 30) to all clients."""
+        msg.timestamp_ms = now_ms()
+        return self._send_pub(msg.to_array())
+
+    def send_regime_change(self, msg: RegimeChangeMsg) -> bool:
+        """Send REGIME_CHANGE (type 31) to all clients."""
+        msg.timestamp_ms = now_ms()
+        return self._send_pub(msg.to_array())
+
+    def send_command(self, msg: CommandMsg) -> bool:
+        """Send COMMAND (type 40) to specific client or broadcast."""
+        msg.timestamp_ms = now_ms()
+        return self._send_pub(msg.to_array())
+
+    def send_policy_update(self, msg: PolicyUpdateMsg) -> bool:
+        """Send POLICY_UPDATE (type 50) to all clients."""
+        msg.timestamp_ms = now_ms()
+        return self._send_pub(msg.to_array())
+
+    def send_error(self, source: str, error_code: int, error_message: str) -> bool:
+        """Send ERROR (type 99)."""
+        msg = ErrorMsg(
+            timestamp_ms=now_ms(),
+            source=source,
+            error_code=error_code,
+            error_message=error_message
+        )
+        return self._send_pub(msg.to_array())
+
+    # ==================================================================
+    # Utility
+    # ==================================================================
+    def get_stats(self) -> dict:
+        """Return send/receive statistics."""
+        return {
+            "sent": self._sent_count,
+            "received": self._recv_count,
+            "initialized": self._initialized,
+        }
+
+    def __enter__(self):
+        self.initialize()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.shutdown()

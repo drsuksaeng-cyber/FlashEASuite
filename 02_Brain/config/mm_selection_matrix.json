@@ -1,0 +1,141 @@
+{
+  "_metadata": {
+    "version": "1.0.0",
+    "created_by": "P0.6-2",
+    "numbering_base": "Roadmap_V6",
+    "source": "Phase 3-4 MM Selection Matrix + Comprehensive MM Doc"
+  },
+
+  "default_mm_per_strategy": {
+    "S01": "MM04",
+    "S02": "MM01",
+    "S03": "MM01",
+    "S04": "MM01",
+    "S05": "MM01",
+    "S06": "MM08",
+    "S07": "MM01",
+    "S08": "MM01",
+    "S09": "MM01",
+    "S10": "MM08",
+    "S11": "MM01",
+    "S12": "MM01",
+    "S13": "MM01",
+    "S14": "MM03",
+    "S15": "MM03",
+    "S16": "MM01"
+  },
+
+  "volatile_mm_per_strategy": {
+    "S01": "MM07",
+    "S02": "MM17",
+    "S03": "MM17",
+    "S04": "MM17",
+    "S05": "MM17",
+    "S06": "MM16",
+    "S07": "MM07",
+    "S08": "MM17",
+    "S09": "MM17",
+    "S10": "MM16",
+    "S11": "MM17",
+    "S12": "MM17",
+    "S13": "MM07",
+    "S14": "MM07",
+    "S15": "MM17",
+    "S16": "MM01"
+  },
+
+  "dd_mm_per_strategy": {
+    "_comment": "เมื่อ DD > tier1 ทุก strategy บังคับเปลี่ยนเป็น MM10",
+    "S01": "MM10", "S02": "MM10", "S03": "MM10", "S04": "MM10",
+    "S05": "MM10", "S06": "MM10", "S07": "MM10", "S08": "MM10",
+    "S09": "MM10", "S10": "MM10", "S11": "MM10", "S12": "MM10",
+    "S13": "MM10", "S14": "MM10", "S15": "MM10", "S16": "MM10"
+  },
+
+  "strategy_mm_notes": {
+    "S01": "StatArb: Kelly (MM04) เพราะมี Win Rate สูงและ History เพียงพอ — Volatile→MM07 (Vol Target)",
+    "S06": "KAMA: Pyramid (MM08) เพราะเป็น Trend Following — Volatile→MM16 (Vol Percentile)",
+    "S07": "MeanRev: Fixed Conservative (MM01) เพราะ trade สั้น — Volatile→MM07",
+    "S10": "Turtle: Pyramid (MM08) เพราะ Trend Following ยาว — Volatile→MM16",
+    "S14": "BBSqueeze: ATR-Based (MM03) เพราะ Vol-Driven Strategy — Volatile→MM07",
+    "S15": "Grid: ATR-Based (MM03) เพราะ SL ปรับตาม Volatility — Volatile→MM17 (Regime)",
+    "S16": "Spike: Fixed Conservative (MM01) เพราะ Quick In-Out ไม่ต้อง Dynamic MM"
+  },
+
+  "regime_overrides": {
+    "TRENDING": {
+      "preferred_mm": ["MM03", "MM08", "MM17"],
+      "avoid": ["MM05"],
+      "risk_adjustment": 1.0,
+      "notes_th": "Trending: ใช้ ATR (MM03) หรือ Pyramid (MM08) — ห้ามใช้ Martingale (MM05)"
+    },
+    "RANGING": {
+      "preferred_mm": ["MM01", "MM04", "MM07"],
+      "avoid": ["MM08"],
+      "risk_adjustment": 1.0,
+      "notes_th": "Ranging: ใช้ Fixed (MM01) หรือ Kelly (MM04) — ห้ามใช้ Pyramid (MM08) เพราะไม่มี Trend"
+    },
+    "VOLATILE": {
+      "preferred_mm": ["MM10", "MM16", "MM17"],
+      "avoid": ["MM05", "MM06"],
+      "risk_adjustment": 0.5,
+      "notes_th": "Volatile: ลด Risk 50% — ใช้ DD Control (MM10) หรือ Vol% (MM16) — ห้ามเพิ่ม Size"
+    },
+    "CRISIS": {
+      "preferred_mm": ["MM10"],
+      "avoid": ["MM05", "MM06", "MM08"],
+      "risk_adjustment": 0.0,
+      "force_reduce": true,
+      "notes_th": "Crisis: หยุดเทรดทั้งหมด — ใช้ MM10 DD Control เท่านั้น — force_reduce=true"
+    }
+  },
+
+  "dd_overrides": {
+    "dd_10pct": {
+      "threshold_pct": 10.0,
+      "action": "reduce_50pct",
+      "switch_to": "MM10",
+      "notes_th": "DD 10%: ลด Risk ครึ่งหนึ่ง → บังคับใช้ MM10"
+    },
+    "dd_15pct": {
+      "threshold_pct": 15.0,
+      "action": "reduce_75pct",
+      "switch_to": "MM10",
+      "notes_th": "DD 15%: ลด Risk เหลือ 25% → บังคับใช้ MM10"
+    },
+    "dd_20pct": {
+      "threshold_pct": 20.0,
+      "action": "stop_new_trades",
+      "only_mm": "MM10",
+      "notes_th": "DD 20%: หยุดเปิด Trade ใหม่ทั้งหมด → ใช้ MM10 จัดการ Position ที่เปิดอยู่เท่านั้น"
+    }
+  },
+
+  "mm_method_info": {
+    "MM01": {"name": "Fixed Fractional Conservative", "type": "Anti-M", "complexity": "Low"},
+    "MM02": {"name": "Fixed Fractional Aggressive", "type": "Anti-M", "complexity": "Low"},
+    "MM03": {"name": "ATR-Based Dynamic", "type": "Anti-M", "complexity": "Medium"},
+    "MM04": {"name": "Kelly Criterion (Half-Kelly)", "type": "Anti-M", "complexity": "Medium"},
+    "MM05": {"name": "Martingale Controlled", "type": "Martingale", "complexity": "Medium"},
+    "MM06": {"name": "Anti-Martingale (Snowball)", "type": "Anti-M", "complexity": "Low"},
+    "MM07": {"name": "Percent Volatility", "type": "Vol-Target", "complexity": "Medium"},
+    "MM08": {"name": "Pyramid / Scale-In", "type": "Anti-M", "complexity": "Medium"},
+    "MM09": {"name": "Equity Curve Recovery", "type": "Adaptive", "complexity": "Medium"},
+    "MM10": {"name": "Drawdown-Based (Tiered)", "type": "Adaptive", "complexity": "Low"},
+    "MM11": {"name": "Session-Based Risk", "type": "Time-Based", "complexity": "Low"},
+    "MM12": {"name": "Equity Curve Filter", "type": "Adaptive", "complexity": "Medium"},
+    "MM13": {"name": "Correlation Adjusted", "type": "Dynamic", "complexity": "High"},
+    "MM14": {"name": "Tiered Risk (by Balance)", "type": "Step", "complexity": "Low"},
+    "MM15": {"name": "Adaptive Win-Streak", "type": "Anti-M", "complexity": "Medium"},
+    "MM16": {"name": "Volatility Percentile", "type": "Dynamic", "complexity": "High"},
+    "MM17": {"name": "Regime-Based Scaling", "type": "Dynamic", "complexity": "High"},
+    "MM18": {"name": "Portfolio Risk Cap", "type": "Cap", "complexity": "Low"},
+    "MM19": {"name": "Dynamic Multi-Method", "type": "Hybrid", "complexity": "High"}
+  },
+
+  "standalone_default": {
+    "_comment": "เมื่อไม่มี server connection ทุก strategy ใช้ MM01 (Fixed Fractional Conservative)",
+    "mm_method": "MM01",
+    "risk_pct": 1.0
+  }
+}

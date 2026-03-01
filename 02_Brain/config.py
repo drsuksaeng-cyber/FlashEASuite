@@ -1,107 +1,94 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-FlashEASuite V2 - Program B (The Brain)
-Configuration Module
+FlashEASuite V2 - Configuration
+Program B: The Brain
 
-Defines system-wide constants for ZMQ communication, 
-networking, and risk management parameters.
+All configurable parameters in one place.
+InfluxDB settings added for P0-4.
+
+Author: Dr. Suksaeng Kukanok
+Version: 2.1.0 (Added InfluxDB config)
+Date: 2025-12-06
 """
 
-# ============================================================================
-# ZMQ COMMUNICATION SETTINGS
-# ============================================================================
+import os
 
-# ZMQ Ports
-ZMQ_FEEDER_PORT = 7777          # Subscribe to MQL5 Feeder (Tick Data + Spread Zone)
-ZMQ_EXECUTION_PORT = 7778       # Publish to MQL5 Execution Client
+# =============================================================================
+# ZMQ Configuration (existing - DO NOT CHANGE)
+# =============================================================================
+ZMQ_FEEDER_ADDRESS = "tcp://127.0.0.1:7777"    # Feeder → Brain (SUB)
+ZMQ_POLICY_ADDRESS = "tcp://127.0.0.1:7778"    # Brain → Trader (PUB)
+ZMQ_FEEDBACK_ADDRESS = "tcp://127.0.0.1:7779"  # Trader → Brain (PULL)
 
-# Network Configuration
-ZMQ_FEEDER_ADDRESS = "tcp://*:7777"
-ZMQ_EXECUTION_ADDRESS = "tcp://*:7778"
+ZMQ_POLL_TIMEOUT_MS = 10       # Poll timeout in milliseconds
+ZMQ_RECONNECT_INTERVAL_MS = 5000
 
-# ZMQ Performance Settings
-ZMQ_SUB_HWM = 10000            # High Water Mark for SUB socket (prevent buffer overflow)
-ZMQ_PUB_HWM = 10000            # High Water Mark for PUB socket
-ZMQ_LINGER_MS = 1000           # Time to wait for pending messages on close (ms)
-ZMQ_RCVTIMEO_MS = 100          # Receive timeout (ms) - for non-blocking operations
-ZMQ_SNDTIMEO_MS = 100          # Send timeout (ms)
+# =============================================================================
+# System Configuration (existing - DO NOT CHANGE)
+# =============================================================================
+SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY", "XAUUSD"]
+MONITOR_INTERVAL_SEC = 5
+QUEUE_WARNING_SIZE = 100
 
-# Reconnection Settings
-ZMQ_RECONNECT_IVL_MS = 100     # Reconnection interval (ms)
-ZMQ_RECONNECT_IVL_MAX_MS = 5000  # Max reconnection interval (ms)
+# =============================================================================
+# Message Type IDs (existing - DO NOT CHANGE)
+# =============================================================================
+MSG_TICK_DATA = 1
+MSG_OHLC_DATA = 2
+MSG_INDICATOR_DATA = 3
+MSG_CONFIG_PUSH = 10
+MSG_CLIENT_HELLO = 11
+MSG_INITIAL_CONFIG = 12
+MSG_HEARTBEAT = 13
+MSG_TRADE_REPORT = 20
+MSG_POSITION_UPDATE = 21
+MSG_PERFORMANCE_METRICS = 22
+MSG_NEWS_ALERT = 30
+MSG_REGIME_CHANGE = 31
+MSG_COMMAND = 40
+MSG_POLICY_UPDATE = 50
+MSG_ERROR = 99
 
-# ============================================================================
-# MULTIPROCESSING SETTINGS
-# ============================================================================
+# =============================================================================
+# InfluxDB Configuration (NEW - P0-4)
+# =============================================================================
+INFLUXDB_URL = os.environ.get("INFLUXDB_URL", "http://localhost:8086")
+INFLUXDB_TOKEN = os.environ.get("INFLUXDB_TOKEN", "_2Rnkee4DHBmXjDe60pILHKHGkXZ_uiB47SG_UcGg658WP_wNRf3XH7hFNFYq7S5w0rH2Uc240b7LoGGZCu3XA==")
+INFLUXDB_ORG = os.environ.get("INFLUXDB_ORG", "flashea")
+INFLUXDB_BUCKET = os.environ.get("INFLUXDB_BUCKET", "trading")
 
-# Queue Sizes (to prevent memory issues)
-INGESTION_QUEUE_SIZE = 50000    # Max items in ingestion queue
-SIGNAL_QUEUE_SIZE = 10000       # Max items in signal queue
+# Retention policy
+DATA_RETENTION_DAYS = 180           # Total data retention
+TICK_RAW_RETENTION_DAYS = 7         # Keep raw ticks for 7 days
+                                     # After 7 days → downsample to OHLC M1
+                                     # OHLC kept for full 180 days
 
-# Worker Configuration
-INGESTION_WORKER_COUNT = 1      # Single ingestion worker (ZMQ serialization)
-STRATEGY_WORKER_COUNT = 1       # Single strategy worker for now
+# Write performance tuning
+INFLUXDB_BATCH_SIZE = 500           # Points per batch write
+INFLUXDB_FLUSH_INTERVAL_MS = 1000   # Auto-flush interval
+INFLUXDB_WRITE_TIMEOUT_MS = 10000   # Write timeout
 
-# ============================================================================
-# RISK MANAGEMENT CONSTANTS
-# ============================================================================
+# Query defaults
+INFLUXDB_DEFAULT_LOOKBACK_BARS = 500  # Default bars for ML features
 
-# Position Sizing
-MAX_POSITION_SIZE = 1.0         # Maximum lot size per trade
-MIN_POSITION_SIZE = 0.01        # Minimum lot size per trade
-DEFAULT_POSITION_SIZE = 0.1     # Default position size
+# =============================================================================
+# Measurement Names (InfluxDB)
+# =============================================================================
+MEASUREMENT_TICKS = "ticks"
+MEASUREMENT_OHLC = "ohlc"
+MEASUREMENT_INDICATORS = "indicators"
 
-# Risk Limits
-MAX_DAILY_LOSS = 1000.0         # Maximum daily loss in account currency
-MAX_DRAWDOWN_PCT = 10.0         # Maximum drawdown percentage
-MAX_OPEN_POSITIONS = 5          # Maximum concurrent open positions
+# =============================================================================
+# Supported Timeframes
+# =============================================================================
+TIMEFRAMES = ["M1", "M5", "M15", "H1", "H4", "D1"]
 
-# Spread Filtering
-MAX_SPREAD_POINTS = 20          # Maximum spread in points to accept trades
-SPREAD_MULTIPLIER = 1.5         # Multiplier for dynamic spread filtering
-
-# ============================================================================
-# STRATEGY PARAMETERS
-# ============================================================================
-
-# Timeframes (for future multi-timeframe analysis)
-PRIMARY_TIMEFRAME = "M5"
-SECONDARY_TIMEFRAME = "M15"
-
-# Signal Confidence Thresholds
-MIN_SIGNAL_CONFIDENCE = 0.65    # Minimum confidence to generate signal
-HIGH_CONFIDENCE_THRESHOLD = 0.85  # Threshold for high-confidence trades
-
-# ============================================================================
-# LOGGING CONFIGURATION
-# ============================================================================
-
-LOG_LEVEL = "INFO"              # DEBUG, INFO, WARNING, ERROR, CRITICAL
-LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-LOG_FILE = "logs/flashea_brain.log"
-
-# Performance Monitoring
-ENABLE_PERFORMANCE_LOGGING = True
-PERFORMANCE_LOG_INTERVAL = 60   # Log performance metrics every N seconds
-
-# ============================================================================
-# SYSTEM CONSTANTS
-# ============================================================================
-
-# Symbols (can be expanded)
-SUPPORTED_SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY", "XAUUSD"]
-
-# Shutdown
-GRACEFUL_SHUTDOWN_TIMEOUT = 5.0  # Seconds to wait for graceful shutdown
-
-# Health Check
-HEARTBEAT_INTERVAL = 10         # Send heartbeat every N seconds
-WATCHDOG_TIMEOUT = 30           # Consider process dead after N seconds
-
-# ============================================================================
-# FEATURE FLAGS
-# ============================================================================
-
-ENABLE_AI_PREDICTIONS = True    # Enable AI-based predictions (future)
-ENABLE_RISK_MANAGEMENT = True   # Enable risk management checks
-ENABLE_SIGNAL_FILTERING = True  # Enable signal quality filtering
-ENABLE_PERFORMANCE_TRACKING = True  # Enable detailed performance tracking
+# =============================================================================
+# Derived Indicator Settings
+# =============================================================================
+INDICATOR_RSI_PERIOD = 14
+INDICATOR_ATR_PERIOD = 14
+INDICATOR_ADX_PERIOD = 14
+INDICATOR_BB_PERIOD = 20
+INDICATOR_BB_STD = 2.0

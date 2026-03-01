@@ -1,0 +1,243 @@
+  FlashEASuite V2 — Deep Dive Analysis                                            
+                                                                                    Strategy × Money Management Interaction Architecture                                                                                                                ---                                                                               1. MM01: The Universal Baseline Authority                                       
+
+  Why MM01 is the Fallback
+
+  MM01 (CMM01_FixedConservative) is the simplest and most reliable MM method — it 
+  needs only AccountBalance × 1% and an SL distance. No rolling history, no ATR   
+  handle, no external data. This makes it the only method that can never fail.    
+
+  CMMManager hardcodes MM01 as the fallback in three layers:
+
+  ┌─────────────────────┬──────────────────────┬─────────────────────────────┐    
+  │        Layer        │      Condition       │           Result            │    
+  ├─────────────────────┼──────────────────────┼─────────────────────────────┤    
+  │ Standalone mode     │ No server connection │ All 16 strategies → MM01    │    
+  ├─────────────────────┼──────────────────────┼─────────────────────────────┤    
+  │ Strategy default    │ S07, S16, S08, S09,  │ default_mm = MM01           │    
+  │                     │ S11-S13              │                             │    
+  ├─────────────────────┼──────────────────────┼─────────────────────────────┤    
+  │ MM04 insufficient   │ trade_count < 30     │ MM04 returns fallback 1%    │    
+  │ history             │                      │ (same as MM01)              │    
+  └─────────────────────┴──────────────────────┴─────────────────────────────┘    
+
+  Priority chain in SelectMM():
+  1. Standalone/No-Server  →  MM01 (absolute fallback)
+  2. Server Override        →  whatever Brain commanded
+  3. DD ≥ 10%              →  MM10 (DrawdownBased)
+  4. VOLATILE/SQUEEZE       →  strategy's volatile_mm
+  5. Normal                 →  strategy's default_mm
+
+  ---
+  2. CMMManager — Selection Logic Detail
+
+  MMManager.mqh maintains a 16-element selection matrix (SMMSelection[16]):       
+
+  struct SMMSelection {
+      int  default_mm;       // Normal conditions
+      int  volatile_mm;      // VOLATILE or SQUEEZE regime
+      int  dd_mm;            // DD ≥ 10% (always MM10)
+      int  active_mm;        // Currently active
+      bool server_override;  // Brain has forced an override
+  };
+
+  Per-strategy defaults from the matrix:
+
+  ┌───────────────────────────┬───────────────┬────────────────────┬───────────┐  
+  │         Strategy          │    Normal     │  Volatile/Squeeze  │ DD (≥10%) │  
+  ├───────────────────────────┼───────────────┼────────────────────┼───────────┤  
+  │ S01 StatArb               │ MM04 Kelly    │ MM07 PctVol        │ MM10      │  
+  ├───────────────────────────┼───────────────┼────────────────────┼───────────┤  
+  │ S06 KAMA                  │ MM08 Pyramid  │ MM16 VolPercentile │ MM10      │  
+  ├───────────────────────────┼───────────────┼────────────────────┼───────────┤  
+  │ S07 MeanRev               │ MM01          │ MM07 PctVol        │ MM10      │  
+  ├───────────────────────────┼───────────────┼────────────────────┼───────────┤  
+  │ S10 Turtle                │ MM08 Pyramid  │ MM16 VolPercentile │ MM10      │  
+  ├───────────────────────────┼───────────────┼────────────────────┼───────────┤  
+  │ S14 BBSqueeze             │ MM03 ATRBased │ MM07 PctVol        │ MM10      │  
+  ├───────────────────────────┼───────────────┼────────────────────┼───────────┤  
+  │ S15 Grid                  │ MM03 ATRBased │ MM17 RegimeBased   │ MM10      │  
+  ├───────────────────────────┼───────────────┼────────────────────┼───────────┤  
+  │ S16 Spike                 │ MM01          │ MM01 (unchanged)   │ MM10      │  
+  ├───────────────────────────┼───────────────┼────────────────────┼───────────┤  
+  │ S02-S05, S08-S09, S11-S13 │ MM01          │ MM17 RegimeBased   │ MM10      │  
+  └───────────────────────────┴───────────────┴────────────────────┴───────────┘  
+
+  Server override is applied via ApplyConfig(strategy_idx, mm_id):
+  - mm_id > 0 → sets server_override = true and locks active_mm
+  - mm_id = 0 → clears override, reverts to matrix auto-select
+  - ApplyConfigAll(mm_id) — forces same MM across all 16 strategies
+
+  ---
+  3. MultiStrategyOptimizer — MM Scanning Process
+
+  02_Brain/core/optimization/multi_strategy_optimizer.py scans MM methods in      
+  _compute_mm_selection():
+
+  Step 1 — DD override check (highest priority):
+  if dd_pct >= 10.0:
+      rec = mm_analyzer.get_dd_override_recommendation(dd_pct)
+      if rec["override_active"]:
+          selection[sid] = rec["switch_to"]  # always "MM10"
+          continue
+
+  Step 2 — Regime-based selection via MMAnalyzer:
+  best = mm_analyzer.get_best_mm_for_regime(sid, regime)
+  The MMAnalyzer stores historical win rate and PnL-to-DD ratio for each
+  strategy×MM×regime combination. It returns the MM with the highest historical   
+  score.
+
+  Step 3 — Fallback to parameter repository matrix if no history.
+
+  Symbol/Timeframe prioritization (symbol_configs scanning):
+  - The optimizer ranks symbols by: Liquidity × Spread × Regime alignment factor  
+  - GetRegimeAlignmentFactor(strategy_id, regime) returns 1.5 (perfect), 1.2      
+  (alt), 1.0 (neutral), 0.5 or 0.3 (poor)
+  - Highest-scoring symbol+TF combination gets the primary CONFIG_PUSH slot       
+  - Multi-tenant: each connected MT5 instance receives a tailored push filtered to
+   its own symbol
+
+  ---
+  4. CONFIG_PUSH (Type 10) — Full Deconstruction
+
+  The payload is a MessagePack array encoded on port 7778 (Brain → Trader):       
+
+  [msg_type=10, timestamp_ms, regime_str, symbol_count,
+    [symbol_name, strategy_count,
+      [strat_id, strat_name, enabled, confidence, timeframe, mm_method],
+      ...
+    ],
+    ...
+  ]
+
+  mm_method field (e.g., "MM04", "MM10") in each strategy slot:
+
+  1. Parsed in ConfigReceiver._ParseConfigPush() → stored in
+  StrategyConfig.mm_method
+  2. Persisted to standalone_config.dat via SaveStandaloneConfig() — survives
+  Brain disconnection
+  3. Applied via CMMManager.ApplyConfig(strategy_idx, mm_id) → sets
+  server_override = true
+  4. Retrieved per strategy via GetMMMethodForStrategy(ENUM_STRATEGY_ID) → falls  
+  back to GetDefaultMM() if empty
+
+  This means Brain can hot-switch any strategy from MM01 to MM19 without
+  restarting the EA, and the selection persists offline.
+
+  ---
+  5. Trigger Mechanism — DD Threshold Switching
+
+  Three thresholds defined in MMManager.mqh:
+
+  ┌───────────┬───────────────────┬────────────────────────────────────────────┐  
+  │ Threshold │     Constant      │                   Action                   │  
+  ├───────────┼───────────────────┼────────────────────────────────────────────┤  
+  │ DD ≥ 10%  │ MMGR_DD_TIER1_PCT │ SelectMM() immediately returns dd_mm       │  
+  │           │                   │ (MM10) for every strategy                  │  
+  ├───────────┼───────────────────┼────────────────────────────────────────────┤  
+  │ DD ≥ 15%  │ MMGR_DD_TIER2_PCT │ Monitored; additional position/size        │  
+  │           │                   │ restrictions at Strategy Manager level     │  
+  ├───────────┼───────────────────┼────────────────────────────────────────────┤  
+  │ DD ≥ 20%  │ MMGR_DD_STOP_PCT  │ Circuit breaker — IsEmergencyMode() =      │  
+  │           │                   │ true; no new trades                        │  
+  └───────────┴───────────────────┴────────────────────────────────────────────┘  
+
+  SAccountState is updated every tick:
+  void UpdateFromAccount() {
+      equity = AccountInfoDouble(ACCOUNT_EQUITY);
+      if(equity > peak_equity) peak_equity = equity;
+      drawdown_pct = (peak_equity - equity) / peak_equity * 100.0;
+  }
+
+  MM10 itself then provides internal hysteresis (2%) so the tier doesn't flicker  
+  at the boundary.
+
+  ---
+  6. Step-by-Step Technical Manual
+
+  BOOT:
+    1. EA OnInit() → InitStrategyTable() → InitMMManager()
+    2. MMManager populates 16-entry selection matrix with defaults
+    3. ConfigReceiver tries LoadStandaloneConfig() — loads persisted mm_method    
+
+  EACH TICK:
+    4. ZmqHub.Poll() → if CONFIG_PUSH received:
+         a. Parse mm_method per strategy
+         b. CMMManager.ApplyConfig(idx, mm_id) — server_override = true
+         c. SaveStandaloneConfig() — persist offline
+    5. SAccountState.UpdateFromAccount() — refresh equity & DD%
+
+  PER STRATEGY SIGNAL:
+    6. CMMManager.SelectMM(strategy_idx, acct):
+         IF standalone OR no server → return MM01
+         IF server_override → return active_mm
+         IF dd_pct ≥ 10%   → return MM10
+         IF regime VOLATILE → return volatile_mm
+         ELSE               → return default_mm
+    7. CalculateLot(selected_mm, sl_pips)
+    8. Place order with computed lot
+
+  PYTHON BRAIN (background, 5-min cycle):
+    9. MultiStrategyOptimizer.optimize_all(symbol, regime, dd_pct)
+         a. Scan all 19 MMs × 16 strategies × historical win rates
+         b. _compute_mm_selection() → picks best MM per strategy
+         c. Encode CONFIG_PUSH (Type 10) with mm_method fields
+         d. ZMQ PUSH to Port 7778
+
+  ---
+  7. Mermaid Flowchart
+
+  flowchart TD
+      A([Market Tick Received]) --> B[SAccountState.UpdateFromAccount]
+      B --> C{DD% Check}
+
+      C -->|DD ≥ 20%| D[🚨 IsEmergencyMode = true\nBlock all new trades]
+      C -->|10% ≤ DD < 20%| E[SelectMM → MM10\nDrawdownBased sizing]
+      C -->|DD < 10%| F{Server Override?}
+
+      F -->|Yes — Brain sent mm_method| G[Use server_override MM\nApplyConfig     
+  active]
+      F -->|No / Standalone| H{Standalone Mode?}
+
+      H -->|Yes| I[MM01 Fixed Conservative\nUniversal Fallback]
+      H -->|No| J{Regime?}
+
+      J -->|VOLATILE / SQUEEZE| K[volatile_mm\ne.g. MM07/MM16/MM17]
+      J -->|TRENDING / RANGING| L[default_mm\ne.g. MM01/MM03/MM04/MM08]
+
+      G & K & L & E --> M[CalculateLot\nsl_pips × pip_value]
+      M --> N[Place Order / Signal]
+
+      subgraph PythonBrain [Python Brain — 5min cycle, Port 7778]
+          P1[MultiStrategyOptimizer] --> P2{dd_pct ≥ 10%?}
+          P2 -->|Yes| P3[All strategies → MM10]
+          P2 -->|No| P4[MMAnalyzer.get_best_mm_for_regime\nScan win rate × 19 MMs 
+  × regime]
+          P4 --> P5[Pick highest PnL/DD ratio MM]
+          P3 & P5 --> P6[Encode CONFIG_PUSH Type 10\nwith mm_method per strategy] 
+          P6 --> P7[ZMQ PUSH → Port 7778]
+      end
+
+      P7 -->|ConfigReceiver parses| F
+
+      subgraph Persistence [Offline Resilience]
+          Q1[SaveStandaloneConfig.dat\nmm_method persisted]
+          Q2[LoadStandaloneConfig on Boot\nSurvives Brain disconnect]
+      end
+
+      P7 --> Q1
+      Q1 --> Q2
+
+  ---
+  Key Takeaways:
+
+  - MM01 is the only zero-dependency method — it is always the last line of       
+  defense
+  - DD ≥ 10% is the single most important trigger — it overrides regime and server
+   settings
+  - Server override (mm_method in CONFIG_PUSH) is the normal live-trading path —  
+  Brain decides optimal MM per strategy per regime
+  - Persistence (standalone_config.dat) ensures the last Brain instruction        
+  survives disconnection
+  - The 19 MMs are ranked by MMAnalyzer using historical win rate and PnL/DD ratio
+   per strategy+regime combination, not hardcoded rules

@@ -1,0 +1,361 @@
+# 🎯 7 Prompts แยกกัน - พร้อมใช้ทันที
+
+**วิธีใช้:** Copy prompt ข้อใดก็ได้ → ถามในแชทใหม่ → รอคำตอบ
+
+---
+
+## 📌 PROMPT 1: Overview 14-Month Plan
+
+```
+ผมต้องการภาพรวมแผนพัฒนา FlashEASuite V2 ใน 14 เดือน
+
+CURRENT STATUS:
+- มี 2/5 strategies (Grid, Spike)
+- ยังไม่มี: Auto-optimization, ML pipeline, Advanced analytics
+- เป้าหมาย: แข่งกับ Muramasa และ Renaissance Technologies
+
+WHAT I NEED:
+สรุปภาพรวมแผน 14 เดือน แบบ high-level
+
+OUTPUT:
+Month 1-2: [Phase name] → [Main goal]
+Month 3-4: [Phase name] → [Main goal]
+...
+Month 13-14: [Phase name] → [Main goal]
+
+Total deliverables:
+- X strategies
+- Y ML models
+- Z features
+
+แค่ overview ครับ ยังไม่ต้องลงรายละเอียด
+ตอบเป็นภาษาไทย
+```
+
+---
+
+## 📌 PROMPT 2: Detailed Phase Breakdown
+
+```
+ผมต้องการรายละเอียดของ [ระบุ Phase] ใน FlashEASuite V2 Roadmap
+
+CONTEXT:
+จาก 14-month plan ผมเลือก Phase นี้มาทำ:
+[Phase X: Complete Core Strategies / ML Foundation / etc.]
+
+WHAT I NEED:
+แตกเป็น week-by-week plan
+
+OUTPUT:
+Week 1:
+  Task 1: [Name]
+    - Action: [What to do]
+    - Dependency: [Need what first]
+    - Output: [File/module created]
+    - Success: [How to verify]
+  Task 2: ...
+
+Week 2:
+  ...
+
+Deliverables:
+- [List all files/modules]
+
+Handoff:
+- [What to pass to next phase]
+
+ต้องการ actionable plan ที่ทำตามได้เลย
+ตอบเป็นภาษาไทย
+```
+
+---
+
+## 📌 PROMPT 3: Strategy Deep Dive
+
+```
+ผมต้องการข้อมูลเชิงลึกของ [ระบุ Strategy] สำหรับ FlashEASuite V2
+
+STRATEGY OPTIONS:
+1. Turtle Strategy (Donchian Breakout)
+2. Mean Reversion (RSI + Bollinger)
+3. Statistical Arbitrage (Pairs Trading)
+4. Smart Money Concepts (Order Blocks, FVG)
+5. Multi-Strategy Voting (AI Council)
+
+WHAT I NEED:
+1. Strategy คืออะไร (definition, use case)
+2. Renaissance Technologies / Citadel ใช้อย่างไร
+3. Components หลัก (indicators, entry/exit, risk)
+4. Advanced techniques (ML enhancement, adaptive)
+5. Implementation roadmap for FlashEASuite
+
+OUTPUT FORMAT:
+Overview: [ย่อๆ]
+World-class usage: [How top firms use it]
+Components: [Technical details]
+For us: [How to implement, difficulty, time]
+
+เลือก 1 strategy ต่อ 1 prompt
+ตอบเป็นภาษาไทย พร้อม source อ้างอิง
+ยังไม่ต้องเขียนโค้ด - เน้นวิจัยก่อน
+```
+
+---
+
+## 📌 PROMPT 4: Money Management Research
+
+```
+ผมต้องการวิจัย Money Management methods ระดับโลก
+
+METHODS ที่สนใจ:
+1. Kelly Criterion
+2. Optimal F (Ralph Vince)
+3. Risk Parity
+4. Volatility Targeting
+5. Dynamic Position Sizing
+
+WHAT I NEED:
+1. Method คืออะไร (formula, concept)
+2. Top funds ใช้อย่างไร (Renaissance, Bridgewater, AQR)
+3. Pros/Cons
+4. Implementation สำหรับ FlashEASuite (difficulty, time)
+5. Expected impact (risk reduction, return improvement)
+
+OUTPUT FORMAT:
+Method: [Name]
+Formula: [Math]
+World-class usage: [Who uses it, how]
+For us: [How to implement]
+Comparison: [vs current 0.5x-2.0x multiplier]
+Recommendation: [Should use? Why?]
+
+เลือก 1-2 methods ต่อ prompt
+ตอบเป็นภาษาไทย พร้อมตัวอย่างคำนวณ
+ยังไม่ต้องเขียนโค้ด - เน้นวิจัยก่อน
+```
+
+---
+
+## 📌 PROMPT 5: Competitive Analysis
+
+```
+ผมต้องการเปรียบเทียบ FlashEASuite V2 กับระบบ Top 2 ของโลก
+
+TARGET COMPARISON:
+- Rank 1: Renaissance Technologies (Medallion Fund)
+- Rank 2: Two Sigma
+
+DIMENSIONS:
+1. Strategies (number, types, integration)
+2. Machine Learning (models, features, training)
+3. Risk Management (sizing, control, leverage)
+4. Optimization (backtesting, walk-forward, Monte Carlo)
+5. Infrastructure (communication, latency, execution)
+6. Analytics (metrics, visualization, reporting)
+
+WHAT I NEED:
+เลือก 1-2 dimensions เปรียบเทียบ
+
+OUTPUT FORMAT:
+DIMENSION: [Name]
+
+Renaissance Tech:
+  What: [Current capability]
+  How: [Approach]
+  Why: [Why it works]
+
+FlashEASuite V2:
+  Current: [What we have]
+  Gap: [What we lack]
+  Advantage: [Where we're better]
+
+Action:
+  Must add: [Critical]
+  Timeline: [Months]
+
+Score:
+  Renaissance: [X/10]
+  Us (current): [Y/10]
+  Us (after): [Z/10]
+
+เลือก 1-2 dimensions ต่อครั้ง ไม่งั้นจะยาวเกิน
+ตอบเป็นภาษาไทย
+```
+
+---
+
+## 📌 PROMPT 6: Integrated Master Plan
+
+```
+ผมต้องการรวม Strategy + Money Management + Infrastructure เป็นแผนเดียว
+
+CONTEXT:
+เราวิจัยมาหลายด้านแล้ว:
+- Strategies ที่ต้องเพิ่ม (จาก PROMPT 3)
+- MM methods ที่ดีที่สุด (จาก PROMPT 4)
+- Gap vs top funds (จาก PROMPT 5)
+
+WHAT I NEED:
+สร้าง integrated 14-month plan ที่:
+1. รวมทุกอย่างเข้าด้วยกัน
+2. จัดลำดับความสำคัญใหม่
+3. หา synergies (ทำพร้อมกันได้)
+4. Optimize timeline (ทำให้เร็วที่สุด)
+
+OUTPUT FORMAT:
+Month 1:
+  Track A (Strategy): [Task]
+  Track B (MM): [Task]
+  Track C (Infra): [Task]
+  Synergy: [How they connect]
+
+Critical Path: [Must do in sequence]
+Parallel Paths: [Can do simultaneously]
+Bottlenecks: [Risks]
+
+Expected Outcome (Month 14):
+  Strategies: [X strategies]
+  Rank: [Position in world]
+  Performance: [Metrics]
+
+ต้องการ optimized plan ที่ทำได้จริง
+ตอบเป็นภาษาไทย
+```
+
+---
+
+## 📌 PROMPT 7: Generate Implementation Prompts
+
+```
+จากแผน 14 เดือน ให้สร้าง prompts สำหรับแต่ละแชทที่จะพัฒนา
+
+CONTEXT:
+เรามีแผนใหญ่แล้ว ตอนนี้ต้องการแยกเป็น prompts สำหรับ:
+- แต่ละ Phase (6 phases)
+- แต่ละ Strategy (5 strategies)
+- แต่ละ Component (MM, ML, Analytics, etc.)
+
+WHAT I NEED:
+สร้าง 10-15 prompts ที่ครอบคลุม 14 เดือน
+
+PROMPT FORMAT:
+```
+=== CHAT: [Phase/Component Name] ===
+
+TASK:
+[Specific task]
+
+DEPENDENCIES:
+- [File from previous chat]
+- [Module needed]
+
+DELIVERABLES:
+1. [File 1]
+2. [File 2]
+
+HANDOFF:
+- [File X] → Chat [Y]
+
+START:
+[First step]
+```
+```
+
+สร้างให้ครบทุก phases
+แต่ละ prompt ต้องพร้อมใช้ได้เลย
+ตอบเป็นภาษาไทย
+```
+
+---
+
+# 📊 แผนการใช้งาน
+
+## วิธีที่ 1: ถามทีละข้อในแชทเดียว
+
+```
+เริ่ม → PROMPT 1 → รอคำตอบ → บันทึก
+     → PROMPT 2 (Phase 1) → รอคำตอบ → บันทึก
+     → PROMPT 3 (Turtle) → รอคำตอบ → บันทึก
+     ...
+```
+
+**Pros:** บริบทต่อเนื่อง  
+**Cons:** Token จะหมดเร็ว (~20-30K tokens per answer)
+
+---
+
+## วิธีที่ 2: แยกเป็นหลายแชท
+
+```
+CHAT 1: PROMPT 1 + 2
+  Output: Detailed roadmap
+
+CHAT 2: PROMPT 3 (5 strategies)
+  Output: Strategy research
+
+CHAT 3: PROMPT 4 (MM methods)
+  Output: Money management research
+
+CHAT 4: PROMPT 5 (Comparison)
+  Output: Competitive analysis
+
+CHAT 5: PROMPT 6 + 7
+  Output: Final plan + Implementation prompts
+```
+
+**Pros:** Token อยู่รอด, จัดการง่าย  
+**Cons:** ต้อง handoff files
+
+---
+
+## วิธีที่ 3: เลือกตามต้องการ
+
+```
+ถ้าต้องการเฉพาะ:
+- ภาพรวม → PROMPT 1
+- ลงลึก Phase X → PROMPT 2
+- วิจัย Strategy → PROMPT 3
+- วิจัย MM → PROMPT 4
+- เปรียบเทียบ → PROMPT 5
+- รวมแผน → PROMPT 6
+- สร้าง prompts → PROMPT 7
+```
+
+**Pros:** ยืดหยุ่นที่สุด  
+**Cons:** ต้องจัดการเอง
+
+---
+
+# ✅ สรุป
+
+**7 Prompts พร้อมใช้:**
+1. Overview 14 เดือน
+2. รายละเอียดแต่ละ Phase
+3. Strategy Research (ทีละ strategy)
+4. Money Management Research (ทีละ method)
+5. Competitive Analysis (ทีละ dimension)
+6. Integrated Plan
+7. Implementation Prompts
+
+**Token Efficiency:**
+- แทนที่จะตอบพร้อมกัน ~80K tokens
+- แยกเป็น 7 ข้อ ~10K tokens each
+- ผู้ใช้เลือกถามตามต้องการ
+
+**พร้อมใช้ทันที:**
+- Copy prompt → ถาม → รอคำตอบ
+- ไม่ต้องแก้ไขอะไร
+
+---
+
+# 🚀 เริ่มต้นที่ไหนดี?
+
+**แนะนำ:**
+1. เริ่มที่ PROMPT 1 (Overview) → เห็นภาพใหญ่
+2. จากนั้น PROMPT 3 (Strategy) → วิจัย Turtle ก่อน (ง่ายที่สุด)
+3. จากนั้น PROMPT 4 (MM) → วิจัย Kelly Criterion (standard)
+4. จากนั้น PROMPT 5 (Comparison) → เห็น gap
+5. สุดท้าย PROMPT 6 (Integration) → รวมแผน
+
+**หรือ:**
+ถ้าอยากเริ่มทำเลย → ใช้ PROMPT 7 สร้าง implementation prompts ก่อน

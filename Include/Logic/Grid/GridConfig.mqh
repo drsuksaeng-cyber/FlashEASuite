@@ -6,6 +6,7 @@
 #property strict
 
 #include "../../Logic/StrategyBase.mqh"  // For CStrategyBase inheritance
+#include "../../Logic/IStrategy.mqh"      // For SDynamicParams struct
 #include "../../Network/Protocol/Definitions.mqh"  // For ENUM_GRID_DIRECTION
 
 //+------------------------------------------------------------------+
@@ -33,6 +34,12 @@ protected:
    double            m_lot_progression[5];
    double            m_base_elastic_step;
    double            m_current_elastic_step;
+   
+   // Dynamic parameter slots (overridable via CONFIG_PUSH V2)
+   double            m_elastic_factor;       // default 1.5 — multiplier for ATR step scaling
+   double            m_conf_threshold;       // default 0.65 — min confidence to open grid
+   double            m_atr_ratio_thresh_dyn; // default 0.8 — ATR H1/D1 ratio threshold
+   bool              m_swap_filter_dyn;      // default true — enable swap filter
    
    // Multi-Symbol Support (NEW)
    string            m_target_symbol;  // Target symbol for trading
@@ -73,6 +80,12 @@ public:
       
       m_max_grid_levels = 5;
       m_base_lot = 0.01;
+      
+      // Dynamic config defaults (match StrategyConstants.GetStrategyDefaults S15)
+      m_elastic_factor        = 1.5;
+      m_conf_threshold        = 0.65;
+      m_atr_ratio_thresh_dyn  = 0.8;
+      m_swap_filter_dyn       = true;
       
       // Multi-Symbol Support
       m_target_symbol = _Symbol;  // Default to chart symbol
@@ -142,6 +155,34 @@ public:
      { 
       m_base_elastic_step = (step > 0.0) ? step : 100.0;
       m_current_elastic_step = m_base_elastic_step;
+     }
+   
+   //+------------------------------------------------------------------+
+   //| ApplyDynamicParams: Override config with server-supplied values  |
+   //| Called via SetDynamicParams() chain from StrategyManager_V6      |
+   //| Falls back to current member value as default if param missing   |
+   //+------------------------------------------------------------------+
+   void ApplyDynamicParams(SDynamicParams &params)
+     {
+      // Save old values for change log
+      int    old_max_orders = m_max_grid_levels;
+      double old_base_step  = m_base_elastic_step;
+      
+      // Apply params (use existing value as default so no regression)
+      m_max_grid_levels   = (int)params.GetParam("S15_MAX_ORDERS",     m_max_grid_levels);
+      m_base_elastic_step = params.GetParam("S15_BASE_STEP",           m_base_elastic_step);
+      m_elastic_factor    = params.GetParam("S15_ELASTIC_FACTOR",      m_elastic_factor);
+      m_conf_threshold    = params.GetParam("S15_CONF_THRESHOLD",      m_conf_threshold);
+      m_atr_ratio_thresh_dyn = params.GetParam("S15_ATR_RATIO",        m_atr_ratio_thresh_dyn);
+      m_swap_filter_dyn   = (params.GetParam("S15_SWAP_FILTER", 1.0) >= 1.0);
+      
+      // Keep elastic step in sync
+      m_current_elastic_step = m_base_elastic_step;
+      
+      PrintFormat("[GridConfig] Dynamic params applied: MaxOrders=%d→%d BaseStep=%.0f→%.0f ElasticFactor=%.2f ConfThresh=%.2f",
+                  old_max_orders, m_max_grid_levels,
+                  old_base_step,  m_base_elastic_step,
+                  m_elastic_factor, m_conf_threshold);
      }
   };
 //+------------------------------------------------------------------+

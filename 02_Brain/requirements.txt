@@ -1,14 +1,28 @@
-# FlashEASuite V2 - Program B (The Brain)
-# Python Dependencies
+# FlashEASuite V2 — 02_Brain/requirements.txt
+# Python >= 3.10
 
-# Core dependencies
-pyzmq>=25.1.0          # ZeroMQ Python bindings for high-performance messaging
-msgpack>=1.0.5         # MessagePack serialization (binary, compact)
+# ── ZeroMQ + Serialization ────────────────────────────────────────
+pyzmq>=25.0.0
+msgpack>=1.0.5
 
-# Future dependencies (for AI components)
-# numpy>=1.24.0
-# pandas>=2.0.0
-# scikit-learn>=1.3.0
-# tensorflow>=2.13.0
-# fastapi>=0.100.0
-# uvicorn>=0.23.0
+# ── InfluxDB ─────────────────────────────────────────────────────
+influxdb-client>=3.6.0
+
+# ── Security / Crypto ────────────────────────────────────────────
+cryptography>=41.0.0
+
+# ── Data / Numerics ──────────────────────────────────────────────
+numpy>=1.24.0
+pandas>=2.0.0
+
+# ── Machine Learning ─────────────────────────────────────────────
+scikit-learn>=1.3.0
+hmmlearn>=0.3.0          # Layer 3: Hidden Markov Model (P4-1)
+xgboost>=2.0.0           # S02 ML Ensemble (P4-7)
+
+# ── Deep Learning (optional — for LSTM in P4-7) ──────────────────
+# tensorflow>=2.13.0    # uncomment when implementing LSTM
+# torch>=2.0.0          # alternative: PyTorch
+
+# ── Visualization / Reports ──────────────────────────────────────
+matplotlib>=3.7.0        # charts in reports

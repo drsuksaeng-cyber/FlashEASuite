@@ -1,0 +1,117 @@
+FlashEASuite_V2/
+├── 00_Common/                          ← เหมือนเดิม
+├── 01_Feeder/Src/FeederEA.mq5         ← เหมือนเดิม
+├── 02_Brain/                          ← Python (เพิ่ม subfolder ตาม V6)
+│   ├── main.py
+│   ├── config.py
+│   ├── core/
+│   │   ├── ingestion.py → data_ingestion.py (upgrade)
+│   │   ├── intelligence/              ← มีอยู่แล้ว → ขยาย
+│   │   │   ├── regime_classifier.py   ★ NEW
+│   │   │   ├── strategy_council.py    ★ NEW
+│   │   │   ├── portfolio_diversifier.py ★ NEW
+│   │   │   ├── mm_optimizer.py        ★ NEW
+│   │   │   ├── performance_tracker.py ★ NEW
+│   │   │   ├── symbol_scorer.py       ← มีอยู่แล้ว
+│   │   │   └── spike_analyzer.py      ← มีอยู่แล้ว
+│   │   ├── strategy/                  ← มีอยู่แล้ว
+│   │   │   ├── engine.py              ← มีอยู่แล้ว
+│   │   │   ├── analysis.py            ← มีอยู่แล้ว
+│   │   │   └── policy.py              ← มีอยู่แล้ว
+│   │   ├── policy/                    ← มีอยู่แล้ว
+│   │   └── risk_management/           ← มีอยู่แล้ว
+│   ├── strategies/                    ★ NEW — 16 Python analyzers
+│   │   ├── base_analyzer.py
+│   │   ├── s01_stat_arb_analyzer.py ... s16_spike_analyzer.py
+│   │   └── ml_models/
+│   │       ├── random_forest_model.py
+│   │       ├── lstm_model.py
+│   │       ├── xgboost_model.py
+│   │       ├── kmeans_model.py
+│   │       └── hmm_model.py
+│   ├── explainable/                   ★ NEW
+│   │   ├── reasoning_builder.py
+│   │   ├── decision_logger.py
+│   │   └── retrain_feedback.py
+│   ├── config_push/                   ★ NEW
+│   │   ├── config_builder.py
+│   │   └── config_pusher.py
+│   ├── data/                          ★ NEW
+│   │   └── influxdb_client.py
+│   └── reports/                       ← มีอยู่แล้ว → ขยาย
+│
+├── 03_Trader/                         ← Main EA อยู่ที่นี่
+│   ├── ProgramC_Trader.mq5           ← rename เป็น FlashEA_V6.mq5
+│   └── Src/
+│
+├── 04_DLL/                            ← เหมือนเดิม
+│
+├── Include/                           ← จุดเดียวสำหรับทุก .mqh
+│   ├── Logic/                         ← มีอยู่แล้ว
+│   │   ├── StrategyBase.mqh           ← → เปลี่ยนเป็น IStrategy.mqh
+│   │   ├── StrategyManager.mqh        ← upgrade สำหรับ 16 strategies
+│   │   ├── StrategyConstants.mqh      ★ NEW (16 strategies enum/magic)
+│   │   ├── Strategy_Grid.mqh          ← มีอยู่แล้ว (wrapper)
+│   │   ├── Strategy_Spike.mqh         ← มีอยู่แล้ว
+│   │   ├── Grid/                      ← มีอยู่แล้ว
+│   │   │   ├── GridConfig.mqh
+│   │   │   ├── GridCore.mqh
+│   │   │   ├── GridState.mqh
+│   │   │   └── GridStandalone/        ← มีอยู่แล้ว
+│   │   ├── Spike/                     ← มีอยู่แล้ว
+│   │   │   ├── ADXFilter.mqh
+│   │   │   ├── ROCCalculator.mqh
+│   │   │   └── VolumeAnalyzer.mqh
+│   │   ├── Strategies/                ★ NEW — 14 strategies ใหม่
+│   │   │   ├── S01_StatArb.mqh
+│   │   │   ├── S02_ML_Ensemble.mqh
+│   │   │   ├── S03_SMC.mqh
+│   │   │   ├── S04_MarketProfile.mqh
+│   │   │   ├── S05_SupplyDemand.mqh
+│   │   │   ├── S06_KAMA.mqh
+│   │   │   ├── S07_MeanReversion.mqh
+│   │   │   ├── S08_Intermarket.mqh
+│   │   │   ├── S09_SessionBreakout.mqh
+│   │   │   ├── S10_Turtle.mqh
+│   │   │   ├── S11_Ichimoku.mqh
+│   │   │   ├── S12_PriceAction.mqh
+│   │   │   ├── S13_FibStoch.mqh
+│   │   │   └── S14_BBSqueeze.mqh
+│   │   ├── MM/                        ★ NEW — 19 MM methods
+│   │   │   ├── IMoneyManager.mqh
+│   │   │   ├── MMManager.mqh
+│   │   │   ├── MMConstants.mqh
+│   │   │   └── MM01_FixedConservative.mqh ... MM19_DynamicMulti.mqh
+│   │   ├── Standalone/                ★ NEW
+│   │   │   ├── StandaloneSelector.mqh
+│   │   │   ├── SimpleRegime.mqh
+│   │   │   └── StandaloneConfig.mqh
+│   │   └── Common/                    ★ NEW — universal modules
+│   │       ├── HiddenTPSL.mqh
+│   │       └── TrailingStop.mqh
+│   │
+│   ├── Network/                       ← มีอยู่แล้ว
+│   │   ├── Protocol.mqh               ← upgrade สำหรับ 15 msg types
+│   │   ├── Protocol/
+│   │   │   ├── Definitions.mqh        ← มีอยู่แล้ว → upgrade
+│   │   │   └── Serialization.mqh      ← มีอยู่แล้ว → upgrade
+│   │   ├── ConfigReceiver.mqh         ★ NEW
+│   │   ├── ConnectionMonitor.mqh      ★ NEW
+│   │   ├── NonceManager.mqh           ← มีอยู่แล้ว
+│   │   ├── PolicyVerifier.mqh         ← มีอยู่แล้ว
+│   │   └── SequenceTracker.mqh        ← มีอยู่แล้ว
+│   │
+│   ├── Risk/                          ← มีอยู่แล้ว
+│   │   ├── RiskGuardian.mqh
+│   │   ├── DailyLossLimit.mqh
+│   │   ├── PositionSizingManager.mqh
+│   │   └── TransferToGrid.mqh         ★ NEW (shared emergency)
+│   │
+│   ├── Security/                      ← มีอยู่แล้ว (เหมือนเดิม)
+│   ├── Utils/                         ← มีอยู่แล้ว
+│   ├── Zmq/                           ← มีอยู่แล้ว
+│   ├── MqlMsgPack.mqh                 ← มีอยู่แล้ว
+│   └── Security.mqh                   ← มีอยู่แล้ว
+│
+├── Tester/                            ← มีอยู่แล้ว → เพิ่ม V6 tests
+└── docs/guides/                       ← Roadmap V6 อยู่ที่นี่แล้ว
