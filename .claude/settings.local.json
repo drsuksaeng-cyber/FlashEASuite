@@ -10,7 +10,12 @@
       "Bash(git:*)",
       "Bash(python:*)",
       "Bash(PYTHONIOENCODING=utf-8 python:*)",
-      "Bash(timeout 5 python:*)"
+      "Bash(timeout 5 python:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(timeout 8 python:*)",
+      "Bash(netstat:*)",
+      "Bash(tasklist:*)",
+      "Bash(powershell:*)"
     ]
   }
 }
