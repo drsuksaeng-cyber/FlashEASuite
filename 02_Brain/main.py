@@ -28,6 +28,12 @@ import signal
 import sys
 import time
 import logging
+
+# Windows cp874/cp1252 terminals can't print emoji — reconfigure to UTF-8
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 from typing import Optional
 
 # Existing workers

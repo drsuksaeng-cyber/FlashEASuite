@@ -1,268 +1,206 @@
-# 🚀 FlashEASuite V2 - Complete Refactoring Package v2
+# FlashEASuite V2
 
-**Version:** 2.0  
-**Date:** December 6, 2025  
-**Status:** ✅ Production Ready
+**Algorithmic Trading System — "Smart Server, Powerful Client"**
+
+Version: 2.1.0 | Phase: P9-5 (Production Ready) | Updated: 2026-03-01
+Author: Dr. Suksaeng Kukanok
 
 ---
 
-## 📦 **Package Contents**
+## ภาพรวม
+
+FlashEASuite V2 คือระบบเทรดอัลกอริทึมที่แบ่งความรับผิดชอบระหว่าง **Python Brain** (วิเคราะห์ตลาด) กับ **MQL5 Trader** (execute คำสั่ง) โดยสื่อสารกันผ่าน ZeroMQ บน localhost
 
 ```
-FlashEA_Refactored_Complete_v2.zip (40 KB)
+FeederEA.mq5  ──PUB 7777──▶  main.py (Brain)  ──PUB 7778──▶  ProgramC_Trader.mq5
+                                    ▲                                    │
+                                    └────────────PUSH 7779───────────────┘
+```
+
+| Program | ภาษา | บทบาท |
+|---------|------|------|
+| **FeederEA.mq5** | MQL5 | ส่ง tick data 4 symbols @ 50ms |
+| **main.py** | Python 3 | วิเคราะห์ตลาด, คำนวณ policy, monitor risk |
+| **ProgramC_Trader.mq5** | MQL5 | รับ policy, execute trades, ส่ง feedback |
+
+---
+
+## ฟีเจอร์หลัก
+
+- **16 Strategies** ครอบคลุม 4 market regimes (Trending / Ranging / Volatile / Squeeze)
+- **19 Money Managers** ปรับ lot size แบบ dynamic
+- **Feedback Loop** — `risk_multiplier` ปรับอัตโนมัติตามผลการเทรด
+- **Emergency System** — 9 conditions, 4 levels (NORMAL / WARNING / PAUSE / HALT)
+- **Standalone Mode** — 7 strategies ทำงานได้แม้ Brain ไม่อยู่
+- **Hot-reload parameters** — Brain ส่ง params ใหม่โดยไม่ต้อง restart EA
+- **MessagePack protocol** — ~60-80 bytes/message (เร็วกว่า JSON 10×)
+
+---
+
+## โครงสร้าง Project
+
+```
+FlashEASuite_V2/
 │
-├── 📄 README.md                           # This file
-├── 📄 QUICK_START_THAI.md                 # เริ่มต้นด่วน (ภาษาไทย)
-├── 📄 COMPLETE_INSTALLATION_GUIDE.md      # Full installation guide
-├── 📄 REFACTORING_COMPLETE.md             # Detailed documentation
-├── 📄 PROJECT_RESTRUCTURE_PROPOSAL.md     # Technical analysis
+├── 01_Feeder/
+│   └── Src/FeederEA.mq5              # Program A — ส่ง tick
 │
-├── 🔧 cleanup_project_v2.bat              # Cleanup script
-├── 🔧 install_modules.bat                 # Installation script
+├── 02_Brain/
+│   ├── main.py                       # Program B — Orchestrator (6 threads)
+│   ├── requirements.txt
+│   └── core/
+│       ├── ingestion.py              # Worker 1: รับ tick ZMQ SUB :7777
+│       ├── execution_listener.py     # Worker 3: รับ feedback ZMQ PULL :7779
+│       ├── emergency_system.py       # Worker 4: monitor ทุก 1s
+│       ├── system_monitor.py         # Worker 5: CPU/RAM/latency
+│       └── strategy/
+│           ├── engine.py             # Worker 2: score + policy (v2.3)
+│           ├── analysis.py           # Market analysis
+│           └── policy.py             # Policy generator
 │
-├── 🐍 python_strategy/                    # Python modules (5 files)
-│   ├── __init__.py
-│   ├── engine.py
-│   ├── analysis.py
-│   ├── feedback.py
-│   └── policy.py
+├── 03_Trader/
+│   └── ProgramC_Trader.mq5           # Program C — Execute (v2.13)
 │
-├── ⚙️ mql_protocol/                       # MQL5 Protocol (3 files)
-│   ├── Definitions.mqh
-│   ├── Serialization.mqh
-│   └── Protocol.mqh
+├── Include/
+│   ├── Logic/
+│   │   ├── StrategyConstants.mqh     # 16 strategies table + regime map
+│   │   ├── ConnectionMonitor.mqh     # Heartbeat tracking (timeout 30s)
+│   │   └── ConfigReceiver.mqh        # รับ policy จาก Brain
+│   ├── Network/Protocol/
+│   │   └── Definitions.mqh           # SDynamicParams, enums, V6 structs
+│   ├── Risk/
+│   │   └── RiskGuardian.mqh          # 4-gate trade validation
+│   └── Zmq/                          # ZMQ bindings for MQL5
 │
-└── ⚙️ mql_grid/                           # MQL5 Grid (4 files)
-    ├── GridConfig.mqh
-    ├── GridState.mqh
-    ├── GridCore.mqh
-    └── Strategy_Grid.mqh
-```
-
-**Total:** 21 files, ~151 KB uncompressed
-
----
-
-## 🎯 **What This Does**
-
-This refactoring package transforms your FlashEASuite V2 project:
-
-### **Before:**
-- ❌ Large monolithic files (400-577 lines)
-- ❌ Cluttered project structure (~120 files)
-- ❌ Test files mixed with production
-- ❌ Hard to maintain
-
-### **After:**
-- ✅ Modular files (avg 160 lines)
-- ✅ Clean structure (~50 production files)
-- ✅ No test/junk files
-- ✅ Easy to maintain
-- ✅ Production ready
-
----
-
-## 🚀 **Quick Start** (3 Steps)
-
-### **ไทย:** อ่าน [QUICK_START_THAI.md](QUICK_START_THAI.md)
-### **English:** Read [COMPLETE_INSTALLATION_GUIDE.md](COMPLETE_INSTALLATION_GUIDE.md)
-
-### **Super Quick:**
-
-```batch
-# Step 1: Extract to project root
-unzip FlashEA_Refactored_Complete_v2.zip -d FlashEASuite_V2/
-
-# Step 2: Clean
-cd FlashEASuite_V2
-cleanup_project_v2.bat
-
-# Step 3: Install
-install_modules.bat
-```
-
-**Done!** ✅
-
----
-
-## 📚 **Documentation**
-
-| File | Description | Language |
-|------|-------------|----------|
-| **QUICK_START_THAI.md** | เริ่มต้นด่วน | 🇹🇭 Thai |
-| **COMPLETE_INSTALLATION_GUIDE.md** | Full installation guide | 🇬🇧 English |
-| **REFACTORING_COMPLETE.md** | Detailed refactoring documentation | 🇬🇧 English |
-| **PROJECT_RESTRUCTURE_PROPOSAL.md** | Technical analysis & proposal | 🇬🇧 English |
-
----
-
-## ✨ **What's New in v2**
-
-Compared to the original refactoring package:
-
-1. ✅ **Automated Cleanup Script** - `cleanup_project_v2.bat`
-   - Deletes .git folder
-   - Removes test files
-   - Organizes documentation
-   - Creates verification file
-
-2. ✅ **Automated Installation Script** - `install_modules.bat`
-   - Backups old files
-   - Installs all modules
-   - Creates installation report
-   - Provides next steps
-
-3. ✅ **Verification Files**
-   - `VERIFICATION.txt` - Before/after cleanup
-   - `INSTALLATION_REPORT.txt` - Installation details
-
-4. ✅ **Better Documentation**
-   - Thai language quick start
-   - Detailed troubleshooting
-   - Step-by-step guides
-
----
-
-## 🎨 **Architecture Overview**
-
-### **Python Strategy (Modularized)**
-```
-strategy.py (549 lines)  →  5 modules (avg 145 lines)
-├── engine.py         # Main threading engine
-├── analysis.py       # Market analysis
-├── feedback.py       # Feedback processing
-└── policy.py         # Policy publishing
-```
-
-### **MQL5 Protocol (Modularized)**
-```
-Protocol.mqh (577 lines)  →  3 modules
-├── Definitions.mqh      # Types & structs
-└── Serialization.mqh    # Binary protocol
-```
-
-### **MQL5 Grid (Modularized)**
-```
-Strategy_Grid.mqh (483 lines)  →  4 modules
-├── GridConfig.mqh      # Configuration
-├── GridState.mqh       # State management
-└── GridCore.mqh        # Core logic
+└── docs/                             # เอกสารทั้งหมด → ดู docs/README.md
 ```
 
 ---
 
-## ✅ **Features**
+## เริ่มต้นใช้งาน
 
-- ✅ **100% Backward Compatible** - No code changes needed
-- ✅ **Production Ready** - Tested and working
-- ✅ **Easy to Maintain** - Small, focused files
-- ✅ **Easy to Test** - Modular components
-- ✅ **Clean Structure** - Professional organization
-- ✅ **Automated Setup** - Batch scripts included
+### 1. ติดตั้ง Python dependencies
 
----
-
-## 🔧 **Requirements**
-
-- Windows OS (for batch scripts)
-- Python 3.8+
-- MetaTrader 5
-- FlashEASuite V2 project
-
----
-
-## 📊 **Improvements**
-
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| **Largest File** | 577 lines | 489 lines | -15% |
-| **Average File** | 536 lines | 160 lines | -70% |
-| **Total Files** | ~120 files | ~50 files | -58% |
-| **Junk Files** | ~60 files | 0 files | -100% |
-| **Structure** | ❌ Messy | ✅ Clean | ✨ |
-| **Maintainability** | ❌ Hard | ✅ Easy | ✨ |
-
----
-
-## 🎯 **Installation Time**
-
-- **Manual:** ~30 minutes
-- **With Scripts:** ~5 minutes ⚡
-
----
-
-## 🆘 **Support**
-
-**If something goes wrong:**
-
-1. Check `VERIFICATION.txt` (created by cleanup)
-2. Check `INSTALLATION_REPORT.txt` (created by install)
-3. Read [Troubleshooting](COMPLETE_INSTALLATION_GUIDE.md#troubleshooting)
-4. Review folder structure
-
-**Common Issues:**
-
-| Problem | Solution |
-|---------|----------|
-| Import error | Re-run install_modules.bat |
-| Compile error | Check folder structure |
-| No ticks | Restart in order: Python → Feeder → Trader |
-
----
-
-## 📝 **License**
-
-Same as original FlashEASuite V2 project.
-
----
-
-## 👨‍💻 **Author**
-
-- **Project:** FlashEASuite V2
-- **Refactoring:** Claude (Anthropic)
-- **Date:** December 6, 2025
-- **Version:** 2.0
-
----
-
-## 🎉 **Success Criteria**
-
-After installation, you should see:
-
-### **Python:**
 ```bash
-$ python -c "from core.strategy import create_strategy_engine_threaded"
-# No errors = ✅ Success
+cd 02_Brain
+pip install -r requirements.txt
+# หลัก: pyzmq, msgpack, psutil
 ```
 
-### **MQL5:**
+### 2. เปิด MetaTrader 5
+
+- Compile `01_Feeder/Src/FeederEA.mq5`
+- Compile `03_Trader/ProgramC_Trader.mq5`
+
+### 3. เปิดระบบ (ลำดับสำคัญ)
+
 ```
-Compile ProgramC_Trader.mq5
-→ 0 errors, 0 warnings = ✅ Success
+1. รัน Brain ก่อน:
+   cd 02_Brain
+   python main.py
+
+2. Attach FeederEA บน chart ใดก็ได้ใน MT5
+
+3. Attach ProgramC_Trader บน chart ใดก็ได้ใน MT5
 ```
 
-### **Runtime:**
+### 4. ตรวจสอบการทำงาน
+
 ```
-Python Console:
-📥 INGESTION: Bound to tcp://127.0.0.1:7777
-📤 STRATEGY: Publishing policies on tcp://127.0.0.1:7778
-Ticks processed: 145
-✅ Trading active
+Python console ควรแสดง:
+  ✅ Ingestion Worker  → tcp://127.0.0.1:7777
+  ✅ Strategy Engine   → tcp://127.0.0.1:7778
+  ✅ Execution Listener← tcp://127.0.0.1:7779
+  ✅ Emergency Monitor (check every 1.0s)
+  ✅ All 3 worker threads started
+
+MT5 Experts log ควรแสดง:
+  [ConnectionMonitor] Initialized | timeout=30s
+  [Trader] Switching to STANDALONE mode   ← รอ Brain connect
+  [Trader] RECONNECTED — Online Mode      ← Brain connect แล้ว
 ```
 
 ---
 
-## 🚀 **Get Started**
+## ZMQ Ports
 
-1. **อ่านภาษาไทย:** [QUICK_START_THAI.md](QUICK_START_THAI.md)
-2. **Read English:** [COMPLETE_INSTALLATION_GUIDE.md](COMPLETE_INSTALLATION_GUIDE.md)
-
----
-
-**Status:** 🟢 **PRODUCTION READY**  
-**Compatibility:** ✅ **100% Backward Compatible**  
-**Quality:** ⭐⭐⭐⭐⭐ **Professional Grade**
+| Port | Pattern | Direction | ข้อมูล |
+|------|---------|-----------|--------|
+| **7777** | PUB / SUB | Feeder → Brain | Tick `Array[7]` msgpack |
+| **7778** | PUB / SUB | Brain → Trader | Policy `Array[11]` msgpack |
+| **7779** | PUSH / PULL | Trader → Brain | Feedback `Array[12]` msgpack |
 
 ---
 
-**Happy Trading!** 🎊✨
+## 16 Strategies
+
+| ID | Magic | ชื่อ | Standalone | Best Regime |
+|----|-------|------|------------|-------------|
+| S01 | 1001 | Statistical Arbitrage | ✅ | RANGING |
+| S02 | 1002 | ML Ensemble | ❌ | ALL |
+| S03 | 1003 | Smart Money Concepts | ❌ | TRENDING |
+| S04 | 1004 | Market Profile | ❌ | RANGING |
+| S05 | 1005 | Supply & Demand | ❌ | RANGING |
+| S06 | 1006 | KAMA Adaptive MA | ✅ | TRENDING |
+| S07 | 1007 | Mean Reversion | ✅ | RANGING |
+| S08 | 1008 | Intermarket Analysis | ❌ | TRENDING |
+| S09 | 1009 | Session Breakout | ❌ | VOLATILE |
+| S10 | 1010 | Turtle Trading | ✅ | TRENDING |
+| S11 | 1011 | Ichimoku Cloud | ❌ | TRENDING |
+| S12 | 1012 | Price Action | ❌ | TRENDING |
+| S13 | 1013 | Fibonacci + Stochastic | ❌ | RANGING |
+| S14 | 1014 | BB Squeeze | ✅ | SQUEEZE |
+| S15 | 1015 | Grid Trading | ✅ | RANGING |
+| S16 | 1016 | Spike Momentum | ✅ | VOLATILE |
+
+---
+
+## Emergency Thresholds
+
+| Condition | ค่า | ผลลัพธ์ |
+|-----------|-----|---------|
+| Max Drawdown | > 20% | HALT |
+| Daily Loss | > 5% | HALT |
+| Consecutive Losses | ≥ 5 trades | PAUSE 60 นาที |
+| CPU หรือ RAM | > 90% | WARNING |
+| Heartbeat Timeout | > 30s | → Standalone Mode |
+
+---
+
+## เอกสาร
+
+ดู **[docs/README.md](docs/README.md)** สำหรับ index เอกสารทั้งหมด
+
+| เอกสาร | ลิงก์ |
+|--------|------|
+| ภาพรวมสถาปัตยกรรม | [docs/SECTION1_SYSTEM_ARCHITECTURE.md](docs/SECTION1_SYSTEM_ARCHITECTURE.md) |
+| Brain Logic (Python) | [docs/SECTION2_BRAIN_LOGIC.md](docs/SECTION2_BRAIN_LOGIC.md) |
+| Execution (MQL5) | [docs/SECTION3_EXECUTION_STRATEGY.md](docs/SECTION3_EXECUTION_STRATEGY.md) |
+| ปรัชญาการออกแบบ | [docs/SECTION4_PHILOSOPHY.md](docs/SECTION4_PHILOSOPHY.md) |
+| Diagrams (Mermaid) | [docs/SECTION5_DIAGRAM_READY_SUMMARY.md](docs/SECTION5_DIAGRAM_READY_SUMMARY.md) |
+| คู่มือติดตั้ง | [docs/INSTALLATION_GUIDE.md](docs/INSTALLATION_GUIDE.md) |
+| คู่มือการใช้งาน | [docs/guides/05_OperationManual.md](docs/guides/05_OperationManual.md) |
+| แก้ปัญหา | [docs/guides/08_TroubleshootingGuide.md](docs/guides/08_TroubleshootingGuide.md) |
+| Emergency Procedures | [docs/guides/09_EmergencyProcedures.md](docs/guides/09_EmergencyProcedures.md) |
+
+---
+
+## Requirements
+
+| ส่วน | Requirement |
+|------|------------|
+| OS | Windows 10/11 |
+| Python | 3.8+ |
+| MetaTrader | MetaTrader 5 (build 3000+) |
+| Python packages | `pyzmq`, `msgpack`, `psutil` |
+| MQL5 libs | ZMQ bindings (`Include/Zmq/`) |
+
+---
+
+## Status
+
+```
+Phase P9-5: COMPLETE (2026-02-27)
+Validation:  56/57 PASS
+Production:  Ready ✅
+```

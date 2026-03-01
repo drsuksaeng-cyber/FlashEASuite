@@ -7,7 +7,10 @@
       "Bash(__NEW_LINE_d7cee781cc735d88__ echo:*)",
       "Bash(__NEW_LINE_0eb76103e452a6fe__ echo:*)",
       "Bash(__NEW_LINE_5a5ee7cd1db8aa32__ echo \"=== Moving remaining ZIPs from subdirectories ===\")",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(python:*)",
+      "Bash(PYTHONIOENCODING=utf-8 python:*)",
+      "Bash(timeout 5 python:*)"
     ]
   }
 }
