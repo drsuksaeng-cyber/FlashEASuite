@@ -1,0 +1,18 @@
+; S01 StatArb — Optimization Setup
+; Expert   : Opt_S01_StatArb
+; Symbol   : AUDUSD.tp | Timeframe: H1 | Period: 2022-2024
+; Passes   : 960 = Period(5) × EntryZ(3) × StopZ(4) × RiskPct(4) × MinConf(4)
+; Criterion: Custom max — score = PF × WinRate × sqrt(Trades) / MaxDD%
+; Pair     : AUDUSD.tp (Pair A) / NZDUSD.tp (Pair B) — best cointegrated pair
+; ----------------------------------------------------------------
+[Inputs]
+StatArb_Period=20||15|5|35|Y
+StatArb_EntryZ=2.00000||2.00000|0.25000|2.50000|Y
+StatArb_StopZ=3.00000||3.00000|0.25000|3.75000|Y
+StatArb_Pair1=AUDUSD.tp||AUDUSD.tp|||N
+StatArb_Pair2=NZDUSD.tp||NZDUSD.tp|||N
+Inp_RiskPct=0.50000||0.25000|0.25000|1.00000|Y
+Inp_MinConfidence=0.40000||0.30000|0.10000|0.60000|Y
+Inp_MaxPositions=1||1|1|4|N
+Inp_Slippage=10||10|5|30|N
+Inp_UseOnTester=true||true|||N

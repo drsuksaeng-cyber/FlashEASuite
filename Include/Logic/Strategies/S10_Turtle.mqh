@@ -8,7 +8,7 @@
 //|  Entry Long     : Close > Upper Donchian + ATR*0.1              |
 //|  Entry Short    : Close < Lower Donchian - ATR*0.1              |
 //|  Pyramiding     : Add up to 4 units, each 0.5*ATR apart         |
-//|  Exit           : 10-bar opposite Donchian channel              |
+//|  Exit           : 20-bar opposite Donchian channel              |
 //|  SL             : 2*ATR from entry                              |
 //|  Confidence     = (breakout_strength / ATR) * trend_consistency |
 //+------------------------------------------------------------------+
@@ -22,13 +22,14 @@
 #include "..\IStrategy.mqh"
 
 //--- Input Parameters
-input int    Turtle_EntryPeriod = 20;   // Entry Donchian channel period
-input int    Turtle_ExitPeriod  = 10;   // Exit Donchian channel period
+// Optimized: XAUUSD.tp H4 2022-2024 | Custom=0.1027 | PF=1.384 DD=23.7% Trades=84/3y
+input int    Turtle_EntryPeriod = 15;   // Entry Donchian channel period
+input int    Turtle_ExitPeriod  = 30;   // Exit Donchian channel period
 input int    Turtle_ATR_Period  = 20;   // ATR period (classic Turtle = 20)
 input double Turtle_BreakoutBuf = 0.1;  // ATR buffer beyond Donchian edge
 input int    Turtle_MaxUnits    = 4;    // Max pyramid units
 input double Turtle_UnitSpacing = 0.5;  // ATR spacing between pyramid units
-input double Turtle_RiskPct     = 1.0;  // Risk % per unit
+input double Turtle_RiskPct     = 0.5;  // Risk % per unit
 
 //+------------------------------------------------------------------+
 //| CTurtle — Modernized Turtle Trading Strategy                     |

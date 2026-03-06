@@ -26,6 +26,7 @@ enum ENUM_MSG_TYPE_V6
    MSG_CONFIG_PUSH         = 10,  // Strategy/MM configuration + reasoning
    MSG_INITIAL_CONFIG      = 12,  // First-time config + standalone fallback
    MSG_HEARTBEAT           = 13,  // Keep-alive (10s interval, 30s timeout)
+   MSG_DYNAMIC_PARAMS      = 14,  // Brain→Trader: hot-reload strategy parameters
    MSG_NEWS_ALERT          = 30,  // Economic calendar alert
    MSG_REGIME_CHANGE       = 31,  // Market regime shift
    MSG_COMMAND             = 40,  // Manual command (stop, start, etc.)

@@ -398,21 +398,23 @@ double CRiskGuardian::CalculateSafeLotSize(string symbol,
 //+------------------------------------------------------------------+
 double CRiskGuardian::CalculateCurrentExposure(void)
 {
+    // Only count THIS EA's active Grid positions (magic=999000, comment starts "Grid_L")
+    // Counting all 257 account positions would massively inflate exposure % and block trades.
     double total_exposure = 0;
-    
+
     for(int i = PositionsTotal() - 1; i >= 0; i--)
     {
         ulong ticket = PositionGetTicket(i);
-        if(ticket > 0)
-        {
-            double lots = PositionGetDouble(POSITION_VOLUME);
-            double open_price = PositionGetDouble(POSITION_PRICE_OPEN);
-            
-            // Simple exposure calculation
-            total_exposure += lots * open_price;
-        }
+        if(ticket == 0) continue;
+        if(PositionGetInteger(POSITION_MAGIC) != 999000) continue;
+        string comment = PositionGetString(POSITION_COMMENT);
+        if(StringFind(comment, "Grid_L") != 0) continue;
+
+        double lots = PositionGetDouble(POSITION_VOLUME);
+        double open_price = PositionGetDouble(POSITION_PRICE_OPEN);
+        total_exposure += lots * open_price;
     }
-    
+
     return total_exposure;
 }
 
@@ -421,7 +423,21 @@ double CRiskGuardian::CalculateCurrentExposure(void)
 //+------------------------------------------------------------------+
 int CRiskGuardian::CountOpenPositions(void)
 {
-    return PositionsTotal();
+    // Count only active Grid positions opened by ProgramC_Trader.
+    // Filter by BOTH magic=999000 AND comment prefix "Grid_L"
+    // (old test positions from GridStandalone/GridTester use different comments
+    //  like "TransferToGrid_DRAWDOWN" and must NOT be counted here).
+    int count = 0;
+    for(int i = PositionsTotal() - 1; i >= 0; i--)
+    {
+        ulong ticket = PositionGetTicket(i);
+        if(ticket == 0) continue;
+        if(PositionGetInteger(POSITION_MAGIC) != 999000) continue;
+        string comment = PositionGetString(POSITION_COMMENT);
+        if(StringFind(comment, "Grid_L") == 0)
+            count++;
+    }
+    return count;
 }
 
 //+------------------------------------------------------------------+

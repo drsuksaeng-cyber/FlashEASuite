@@ -23,12 +23,13 @@
 #include "..\IStrategy.mqh"
 
 //--- Input Parameters
-input int    KAMA_Period     = 10;   // KAMA lookback period
+// Optimized: USDJPY.tp H4 2022-2024 | Custom=17.23 | PF=3.27 DD=1.24% Trades=54/3y
+input int    KAMA_Period     = 13;   // KAMA lookback period
 input int    KAMA_Fast       = 2;    // Fast EMA period
 input int    KAMA_Slow       = 30;   // Slow EMA period
-input double KAMA_ER_Thresh  = 0.3;  // Efficiency Ratio threshold for entry
-input double KAMA_TP_ATR     = 3.0;  // Take Profit multiplier (x ATR)
-input double KAMA_SL_ATR     = 1.0;  // Stop Loss multiplier (x ATR)
+input double KAMA_ER_Thresh  = 0.90; // Efficiency Ratio threshold for entry
+input double KAMA_TP_ATR     = 4.7;  // Take Profit multiplier (x ATR)
+input double KAMA_SL_ATR     = 2.3;  // Stop Loss multiplier (x ATR)
 input int    KAMA_ATR_Period = 14;   // ATR calculation period
 
 //+------------------------------------------------------------------+
@@ -55,9 +56,12 @@ private:
     int     m_atr_handle;
 
     //--- Last computed values
-    double  m_er;
-    double  m_atr;
-    double  m_slope;
+    double   m_er;
+    double   m_atr;
+    double   m_slope;
+
+    //--- Bar tracking (KAMA must update once per bar, not every tick)
+    datetime m_last_bar_time;
 
     //=================================================================
     //  PRIVATE HELPERS
@@ -139,6 +143,7 @@ public:
         m_atr          = 0.0;
         m_slope        = 0.0;
         m_atr_handle   = INVALID_HANDLE;
+        m_last_bar_time = 0;
     }
 
     ~CKAMATrend()
@@ -195,13 +200,27 @@ public:
     {
         if(!m_initialized || !m_enabled) return;
 
-        double price = (tick.bid + tick.ask) * 0.5;
+        // ── Update KAMA buffer ONCE PER BAR using previous bar close ────
+        // Using tick prices would make KAMA_Period mean "ticks", not "bars"
+        datetime current_bar = iTime(m_symbol, m_timeframe, 0);
+        if(current_bar != m_last_bar_time && current_bar > 0)
+        {
+            m_last_bar_time = current_bar;
+            double bar_close = iClose(m_symbol, m_timeframe, 1);  // previous completed bar
+            if(bar_close > 0)
+            {
+                _ShiftBuffer(bar_close);
+                _UpdateKAMA();
+            }
+        }
+
+        if(m_kama_current == 0.0) return;  // not yet initialised
 
         m_atr = _GetATR();
         if(m_atr < 1e-10) return;
 
-        _ShiftBuffer(price);
-        _UpdateKAMA();
+        // Signal uses current tick mid-price vs bar-based KAMA
+        double price = (tick.bid + tick.ask) * 0.5;
 
         m_state.last_confidence = _CalcConfidence(price);
         m_state.last_signal_time = TimeCurrent();

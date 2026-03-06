@@ -1,0 +1,16 @@
+; S15 Grid — Optimization Setup
+; Expert   : Opt_S15_Grid
+; Symbol   : EURUSD.tp | Timeframe: H1 | Period: 2022-2024
+; Passes   : 1024 = RiskPct(4) × MinConf(4) × MaxPositions(4) × TP_ATR(4) × SL_ATR(4)
+; Criterion: Custom max — score = PF × WinRate × sqrt(Trades) / MaxDD%
+; Grid: เน้น DD ต่ำ + consistent income (MaxDD <= 20%)
+; ----------------------------------------------------------------
+[Inputs]
+Inp_RiskPct=0.50000||0.25000|0.25000|1.00000|Y
+Inp_MinConfidence=0.30000||0.20000|0.10000|0.50000|Y
+Inp_MaxPositions=5||3|2|9|Y
+Inp_Slippage=10||10|5|30|N
+Inp_UseOnTester=true||true|||N
+Inp_TP_ATR_Mult=2.00000||1.50000|0.50000|3.00000|Y
+Inp_SL_ATR_Mult=1.50000||1.00000|0.50000|2.50000|Y
+Inp_TrailEnabled=false||false|||N

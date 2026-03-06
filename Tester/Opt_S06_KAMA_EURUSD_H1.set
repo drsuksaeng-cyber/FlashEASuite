@@ -1,0 +1,20 @@
+; S06 KAMA — Optimization Setup
+; Expert   : Opt_S06_KAMA
+; Symbol   : EURUSD.tp | Timeframe: H1 | Period: 2022-2024
+; Passes   : 400 = Period(5) × ER_Thresh(4) × TP_ATR(5) × SL_ATR(4)
+; Criterion: Custom max — score = PF × WinRate × sqrt(Trades) / MaxDD%
+; ----------------------------------------------------------------
+[Inputs]
+KAMA_Period=10||5|5|25|Y
+KAMA_Fast=2||2|1|5|N
+KAMA_Slow=30||30|5|50|N
+KAMA_ER_Thresh=0.30000||0.20000|0.10000|0.50000|Y
+KAMA_TP_ATR=3.00000||2.00000|0.50000|4.00000|Y
+KAMA_SL_ATR=1.00000||0.50000|0.50000|2.00000|Y
+KAMA_ATR_Period=14||14|2|20|N
+Inp_RiskPct=1.00000||1.00000|0.50000|2.00000|N
+Inp_MinConfidence=0.30000||0.30000|0.10000|0.60000|N
+Inp_MaxPositions=1||1|1|4|N
+Inp_Slippage=10||10|5|30|N
+Inp_UseOnTester=true||true|||N
+Inp_UseKAMAExit=true||true|||N

@@ -1,0 +1,403 @@
+{
+  "S06": {
+    "EURUSD": {
+      "strategy": "S06",
+      "symbol": "EURUSD",
+      "interval": "1h",
+      "overall_best": {
+        "params": {
+          "S06_KAMA_PERIOD": 12,
+          "S06_ER_THRESH": 0.6,
+          "S06_TP_ATR": 3.0,
+          "S06_SL_ATR": 2.9
+        },
+        "score": 0.8757008011842661
+      },
+      "per_regime_best": {
+        "TRENDING": {
+          "params": {
+            "S06_KAMA_PERIOD": 25,
+            "S06_ER_THRESH": 0.5,
+            "S06_TP_ATR": 3.5,
+            "S06_SL_ATR": 2.6
+          },
+          "score": 2.06906477377114,
+          "weighted_score": 1.3123772659929873
+        },
+        "RANGING": {
+          "params": {
+            "S06_KAMA_PERIOD": 24,
+            "S06_ER_THRESH": 0.5,
+            "S06_TP_ATR": 3.0,
+            "S06_SL_ATR": 2.4
+          },
+          "score": 3.040625257159876,
+          "weighted_score": 0.7510648670358298
+        },
+        "SQUEEZE": {
+          "params": {
+            "S06_KAMA_PERIOD": 20,
+            "S06_ER_THRESH": 0.35,
+            "S06_TP_ATR": 2.1,
+            "S06_SL_ATR": 2.0
+          },
+          "score": 2.706290916791994,
+          "weighted_score": 0.21996457781101636
+        }
+      },
+      "regime_distribution": {
+        "TRENDING": 0.6342852493694573,
+        "RANGING": 0.24701000732243106,
+        "SQUEEZE": 0.0812789846228948,
+        "VOLATILE": 0.037425758685216824
+      },
+      "n_bars": 12291,
+      "score_stats": {
+        "max": 0,
+        "mean": 0.0,
+        "n_nonzero": 0
+      }
+    },
+    "GBPUSD": {
+      "strategy": "S06",
+      "symbol": "GBPUSD",
+      "interval": "1h",
+      "overall_best": {
+        "params": {
+          "S06_KAMA_PERIOD": 29,
+          "S06_ER_THRESH": 0.35,
+          "S06_TP_ATR": 4.2,
+          "S06_SL_ATR": 2.2
+        },
+        "score": 0.6453800238518673
+      },
+      "per_regime_best": {
+        "TRENDING": {
+          "params": {
+            "S06_KAMA_PERIOD": 15,
+            "S06_ER_THRESH": 0.65,
+            "S06_TP_ATR": 2.4,
+            "S06_SL_ATR": 1.6
+          },
+          "score": 0.8591363305177242,
+          "weighted_score": 0.5326882869280155
+        },
+        "RANGING": {
+          "params": {
+            "S06_KAMA_PERIOD": 8,
+            "S06_ER_THRESH": 0.4,
+            "S06_TP_ATR": 3.3,
+            "S06_SL_ATR": 3.0
+          },
+          "score": 1.3544966935231626,
+          "weighted_score": 0.35732797340727374
+        },
+        "SQUEEZE": {
+          "params": {
+            "S06_KAMA_PERIOD": 26,
+            "S06_ER_THRESH": 0.15,
+            "S06_TP_ATR": 4.1,
+            "S06_SL_ATR": 2.7
+          },
+          "score": 4.492829401969855,
+          "weighted_score": 0.368402508515872
+        }
+      },
+      "regime_distribution": {
+        "TRENDING": 0.6200276580167575,
+        "RANGING": 0.26380867160172455,
+        "SQUEEZE": 0.08199788497518913,
+        "VOLATILE": 0.03416578540632881
+      },
+      "n_bars": 12293,
+      "score_stats": {
+        "max": 0,
+        "mean": 0.0,
+        "n_nonzero": 0
+      }
+    },
+    "XAUUSD": {
+      "strategy": "S06",
+      "symbol": "XAUUSD",
+      "interval": "1h",
+      "overall_best": {
+        "params": {
+          "S06_KAMA_PERIOD": 13,
+          "S06_ER_THRESH": 0.5,
+          "S06_TP_ATR": 4.7,
+          "S06_SL_ATR": 2.3
+        },
+        "score": 3.092174320812199,
+        "_note": "overridden to TRENDING per_regime_best \u2014 XAUUSD 69% TRENDING, original overall_best had TP=1.3/SL=0.7 too tight"
+      },
+      "per_regime_best": {
+        "TRENDING": {
+          "params": {
+            "S06_KAMA_PERIOD": 13,
+            "S06_ER_THRESH": 0.5,
+            "S06_TP_ATR": 4.7,
+            "S06_SL_ATR": 2.3
+          },
+          "score": 3.092174320812199,
+          "weighted_score": 2.135750675323764
+        },
+        "RANGING": {
+          "params": {
+            "S06_KAMA_PERIOD": 11,
+            "S06_ER_THRESH": 0.45,
+            "S06_TP_ATR": 2.9,
+            "S06_SL_ATR": 1.9
+          },
+          "score": 3.2826708628443324,
+          "weighted_score": 0.678815916389278
+        },
+        "SQUEEZE": {
+          "params": {
+            "S06_KAMA_PERIOD": 5,
+            "S06_ER_THRESH": 0.4,
+            "S06_TP_ATR": 3.1,
+            "S06_SL_ATR": 2.4
+          },
+          "score": 3.2875610743346146,
+          "weighted_score": 0.23612317108480657
+        }
+      },
+      "regime_distribution": {
+        "TRENDING": 0.6906954310269228,
+        "RANGING": 0.2067876874506709,
+        "SQUEEZE": 0.0718232044198895,
+        "VOLATILE": 0.030693677102516883
+      },
+      "n_bars": 11403,
+      "score_stats": {
+        "max": 0,
+        "mean": 0.0,
+        "n_nonzero": 0
+      }
+    }
+  },
+  "S14": {
+    "EURUSD": {
+      "strategy": "S14",
+      "symbol": "EURUSD",
+      "interval": "1h",
+      "overall_best": {
+        "params": {
+          "S14_BB_PERIOD": 30,
+          "S14_BB_DEV": 2.0,
+          "S14_KC_PERIOD": 20,
+          "S14_KC_ATR_MULT": 1.5,
+          "S14_SQUEEZE_MIN": 8,
+          "S14_BREAKOUT_MOM": 0.5,
+          "S14_SL_ATR": 4.0,
+          "S14_TP_ATR": 4.5
+        },
+        "score": 1.4112716489540418
+      },
+      "per_regime_best": {
+        "TRENDING": {
+          "params": {
+            "S14_BB_PERIOD": 32,
+            "S14_BB_DEV": 2.0,
+            "S14_KC_PERIOD": 20,
+            "S14_KC_ATR_MULT": 1.8,
+            "S14_SQUEEZE_MIN": 7,
+            "S14_BREAKOUT_MOM": 0.5,
+            "S14_SL_ATR": 1.9,
+            "S14_TP_ATR": 3.9
+          },
+          "score": 2.1098837703689175,
+          "weighted_score": 1.3382681534290195
+        },
+        "RANGING": {
+          "params": {
+            "S14_BB_PERIOD": 18,
+            "S14_BB_DEV": 2.0,
+            "S14_KC_PERIOD": 20,
+            "S14_KC_ATR_MULT": 1.1,
+            "S14_SQUEEZE_MIN": 4,
+            "S14_BREAKOUT_MOM": 0.5,
+            "S14_SL_ATR": 1.8,
+            "S14_TP_ATR": 2.1
+          },
+          "score": 1.4565920965062369,
+          "weighted_score": 0.3597928244238008
+        },
+        "SQUEEZE": {
+          "params": {
+            "S14_BB_PERIOD": 12,
+            "S14_BB_DEV": 2.0,
+            "S14_KC_PERIOD": 20,
+            "S14_KC_ATR_MULT": 2.5,
+            "S14_SQUEEZE_MIN": 5,
+            "S14_BREAKOUT_MOM": 0.5,
+            "S14_SL_ATR": 2.9,
+            "S14_TP_ATR": 3.0
+          },
+          "score": 2.133236066701196,
+          "weighted_score": 0.1733872614624111
+        }
+      },
+      "regime_distribution": {
+        "TRENDING": 0.6342852493694573,
+        "RANGING": 0.24701000732243106,
+        "SQUEEZE": 0.0812789846228948,
+        "VOLATILE": 0.037425758685216824
+      },
+      "n_bars": 12291,
+      "score_stats": {
+        "max": 0,
+        "mean": 0.0,
+        "n_nonzero": 0
+      }
+    },
+    "GBPUSD": {
+      "strategy": "S14",
+      "symbol": "GBPUSD",
+      "interval": "1h",
+      "overall_best": {
+        "params": {
+          "S14_BB_PERIOD": 36,
+          "S14_BB_DEV": 2.0,
+          "S14_KC_PERIOD": 20,
+          "S14_KC_ATR_MULT": 1.4,
+          "S14_SQUEEZE_MIN": 4,
+          "S14_BREAKOUT_MOM": 0.5,
+          "S14_SL_ATR": 2.5,
+          "S14_TP_ATR": 4.5
+        },
+        "score": 3.054941815239894
+      },
+      "per_regime_best": {
+        "TRENDING": {
+          "params": {
+            "S14_BB_PERIOD": 10,
+            "S14_BB_DEV": 2.0,
+            "S14_KC_PERIOD": 20,
+            "S14_KC_ATR_MULT": 2.1,
+            "S14_SQUEEZE_MIN": 3,
+            "S14_BREAKOUT_MOM": 0.5,
+            "S14_SL_ATR": 3.2,
+            "S14_TP_ATR": 5.9
+          },
+          "score": 0.7194226558580333,
+          "weighted_score": 0.4460619444358521
+        },
+        "RANGING": {
+          "params": {
+            "S14_BB_PERIOD": 26,
+            "S14_BB_DEV": 2.0,
+            "S14_KC_PERIOD": 20,
+            "S14_KC_ATR_MULT": 2.7,
+            "S14_SQUEEZE_MIN": 5,
+            "S14_BREAKOUT_MOM": 0.5,
+            "S14_SL_ATR": 3.4,
+            "S14_TP_ATR": 3.8
+          },
+          "score": 1.4057765689796935,
+          "weighted_score": 0.37085604923136306
+        },
+        "SQUEEZE": {
+          "params": {
+            "S14_BB_PERIOD": 14,
+            "S14_BB_DEV": 2.0,
+            "S14_KC_PERIOD": 20,
+            "S14_KC_ATR_MULT": 2.5,
+            "S14_SQUEEZE_MIN": 3,
+            "S14_BREAKOUT_MOM": 0.5,
+            "S14_SL_ATR": 2.1,
+            "S14_TP_ATR": 4.0
+          },
+          "score": 0.7710905275462291,
+          "weighted_score": 0.06322779238319359
+        }
+      },
+      "regime_distribution": {
+        "TRENDING": 0.6200276580167575,
+        "RANGING": 0.26380867160172455,
+        "SQUEEZE": 0.08199788497518913,
+        "VOLATILE": 0.03416578540632881
+      },
+      "n_bars": 12293,
+      "score_stats": {
+        "max": 0,
+        "mean": 0.0,
+        "n_nonzero": 0
+      }
+    },
+    "XAUUSD": {
+      "strategy": "S14",
+      "symbol": "XAUUSD",
+      "interval": "1h",
+      "overall_best": {
+        "params": {
+          "S14_BB_PERIOD": 30,
+          "S14_BB_DEV": 2.0,
+          "S14_KC_PERIOD": 20,
+          "S14_KC_ATR_MULT": 1.2,
+          "S14_SQUEEZE_MIN": 7,
+          "S14_BREAKOUT_MOM": 0.5,
+          "S14_SL_ATR": 3.4,
+          "S14_TP_ATR": 3.4
+        },
+        "score": 4.4482394048429015
+      },
+      "per_regime_best": {
+        "TRENDING": {
+          "params": {
+            "S14_BB_PERIOD": 28,
+            "S14_BB_DEV": 2.0,
+            "S14_KC_PERIOD": 20,
+            "S14_KC_ATR_MULT": 1.4,
+            "S14_SQUEEZE_MIN": 4,
+            "S14_BREAKOUT_MOM": 0.5,
+            "S14_SL_ATR": 1.8,
+            "S14_TP_ATR": 5.9
+          },
+          "score": 4.323268110786511,
+          "weighted_score": 2.9861787889043625
+        },
+        "RANGING": {
+          "params": {
+            "S14_BB_PERIOD": 10,
+            "S14_BB_DEV": 2.0,
+            "S14_KC_PERIOD": 20,
+            "S14_KC_ATR_MULT": 2.8,
+            "S14_SQUEEZE_MIN": 8,
+            "S14_BREAKOUT_MOM": 0.5,
+            "S14_SL_ATR": 3.5,
+            "S14_TP_ATR": 5.9
+          },
+          "score": 1.5210210885371052,
+          "weighted_score": 0.31450085292620955
+        },
+        "SQUEEZE": {
+          "params": {
+            "S14_BB_PERIOD": 14,
+            "S14_BB_DEV": 2.0,
+            "S14_KC_PERIOD": 20,
+            "S14_KC_ATR_MULT": 3.0,
+            "S14_SQUEEZE_MIN": 5,
+            "S14_BREAKOUT_MOM": 0.5,
+            "S14_SL_ATR": 2.6,
+            "S14_TP_ATR": 2.9
+          },
+          "score": 0.9873053431295974,
+          "weighted_score": 0.07090521536505964
+        }
+      },
+      "regime_distribution": {
+        "TRENDING": 0.6907225534900036,
+        "RANGING": 0.20676955454226587,
+        "SQUEEZE": 0.0718169063486496,
+        "VOLATILE": 0.030690985619081023
+      },
+      "n_bars": 11404,
+      "score_stats": {
+        "max": 0,
+        "mean": 0.0,
+        "n_nonzero": 0
+      }
+    }
+  }
+}

@@ -787,6 +787,44 @@ void ProcessMessage_V6(const uchar &data[], int size)
       }
 
       //---------------------------------------------------------------
+      // [14] MSG_DYNAMIC_PARAMS — Adaptive param hot-reload from Brain
+      //---------------------------------------------------------------
+      case MSG_DYNAMIC_PARAMS:
+      {
+         string  adapt_symbol = "";
+         string  adapt_sid    = "";
+         SDynamicParams adapt_dp;
+         adapt_dp.Reset();
+
+         if(g_config_receiver_v6.ParseAdaptiveParams14(data, size,
+                                                        adapt_symbol,
+                                                        adapt_sid,
+                                                        adapt_dp))
+         {
+            // Map strategy_id string "SXX" → ENUM_STRATEGY_ID index
+            int sid_num = (int)StringToInteger(StringSubstr(adapt_sid, 1));
+            ENUM_STRATEGY_ID target_sid = (ENUM_STRATEGY_ID)(sid_num - 1);
+
+            if(sid_num >= 1 && sid_num <= 16)
+            {
+               g_strategy_manager_v6.DistributeDynamicParams(adapt_dp, target_sid);
+               PrintFormat("[BRAIN-ADAPT] %s %s | %d params applied",
+                           adapt_symbol, adapt_sid,
+                           adapt_dp.strategy_param_count);
+            }
+            else
+            {
+               PrintFormat("[BRAIN-ADAPT] Invalid strategy_id: %s", adapt_sid);
+            }
+         }
+         else
+         {
+            PrintFormat("[BRAIN-ADAPT] Parse failed (%d bytes)", size);
+         }
+         break;
+      }
+
+      //---------------------------------------------------------------
       // [50] POLICY_UPDATE / [99] ERROR / unknown
       //---------------------------------------------------------------
       case MSG_POLICY_UPDATE:
@@ -821,10 +859,14 @@ void ExecutePolicy(PolicyMessage &policy)
       Print("⚠️  Grid strategy not found in Council");
    }
    
-   // Skip HOLD actions (AFTER updating Grid)
+   // Grid policies arrive as action=0; derive direction from grid_direction (1=BUY,2=SELL)
+   if(policy.action == 0 && (policy.grid_direction == 1 || policy.grid_direction == 2))
+      policy.action = policy.grid_direction;
+
+   // Skip if still HOLD (no direction)
    if(policy.action == 0)
    {
-      Print("⏸️  Action is HOLD - Skipping execution (Grid already updated)");
+      Print("⏸️  Action is HOLD (no direction) - Skipping execution");
       return;
    }
    

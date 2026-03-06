@@ -2,13 +2,20 @@
 # -*- coding: utf-8 -*-
 """
 Strategy Engine - DEBUG VERSION with CORRECT MessagePack Format
-Version: 2.3 (Fixed Spike Detection)
+Version: 2.4 (Adaptive Parameter Tuning)
 
 แก้ไข v2.3:
 - FIX #1: Normalize symbol key (strip .tp/.m/_m suffix) → merge tick_history
 - FIX #2: Spike score window 20 → 50 ticks
 - FIX #3: Spike debug log ทุก tick (ไม่ใช่แค่ทุก N ticks)
 - FIX #4: MIN_TICKS_REQUIRED 50 → 30
+
+แก้ไข v2.4 (Adaptive Params):
+- Added PerformanceTracker — records trade results from feedback_queue
+- Added AdaptiveParamManager — adjusts strategy params based on performance
+- _process_feedback(): drains feedback_queue every iteration (non-blocking)
+- _check_adaptive_params(): runs every 60s, pushes type=14 MSG_DYNAMIC_PARAMS
+- _send_dynamic_params(): publishes [14, ts, symbol, sid, {params}] via ZMQ PUB
 """
 
 import time
@@ -19,6 +26,9 @@ import msgpack
 from datetime import datetime
 from collections import defaultdict, deque
 from typing import Dict, List, Optional, Tuple
+
+from .performance_tracker import PerformanceTracker
+from .adaptive_params import AdaptiveParamManager
 
 # ========================================================================
 # CONFIGURATION
@@ -183,8 +193,13 @@ class StrategyEngineThreaded:
         
         # Risk multiplier
         self.risk_multiplier = 1.0
-        
-        print("🔍 DEBUG MODE: Strategy Engine v2.3 (Fixed Spike Detection)")
+
+        # ── Adaptive parameter tuning ─────────────────────────────────
+        self.perf_tracker  = PerformanceTracker()
+        self.param_manager = AdaptiveParamManager()
+        self._last_adapt_check = 0.0   # wall-clock time of last _check_adaptive_params
+
+        print("🔍 DEBUG MODE: Strategy Engine v2.4 (Adaptive Params)")
         print(f"   - Min Spike Score: {self.config.MIN_SPIKE_SCORE}")
         print(f"   - Min Grid Confidence: {self.config.MIN_GRID_CONFIDENCE}")
         print(f"   - Min Ticks Required: {self.config.MIN_TICKS_REQUIRED}")
@@ -195,6 +210,7 @@ class StrategyEngineThreaded:
         print("   - ✅ FIX #2: Spike window 50 ticks")
         print("   - ✅ FIX #3: Spike debug logging")
         print("   - ✅ FIX #4: MIN_TICKS_REQUIRED = 30")
+        print("   - ✅ v2.4: Adaptive param tuning (PerformanceTracker + AdaptiveParamManager)")
     
     def setup_zmq(self):
         """Setup ZMQ publisher"""
@@ -445,6 +461,9 @@ class StrategyEngineThreaded:
         try:
             # Use normalized symbol to look up tick history
             lookup_key = normalized_symbol or normalize_symbol(symbol, self.config.SUFFIX_PATTERNS)
+            # Send base symbol in policy — Trader's FormatSymbol adds the suffix back.
+            # Sending the raw broker symbol (e.g. "EURUSD.tp") caused double-suffix ".tp.tp"
+            send_symbol = lookup_key
             
             history = list(self.tick_history[lookup_key])
             if not history:
@@ -459,38 +478,49 @@ class StrategyEngineThreaded:
             # Calculate trading parameters
             lot_size = 0.01 * self.risk_multiplier
             
+            # Compute grid_direction from recent price trend for Trader's GridCore
+            # [6] must be 1=BUY or 2=SELL — GRID_DIR_NONE(0) blocks all Grid orders
+            # Mean-reversion logic: price rising → expect reversion down → SELL(2)
+            #                       price falling → expect reversion up  → BUY(1)
+            if len(history) >= 5:
+                recent_prices = [t.get('bid', 0.0) for t in history[-5:]]
+                price_trend = recent_prices[-1] - recent_prices[0]
+                grid_direction = 2 if price_trend > 0 else 1  # 1=BUY, 2=SELL
+            else:
+                grid_direction = 1  # Default BUY
+
             if strategy == "Grid":
-                max_orders = 5
                 tp_distance = current_price * 0.002  # 0.2% TP
                 sl_distance = current_price * 0.001  # 0.1% SL
-                
+
                 policy_msg = [
                     2,                          # type: POLICY
                     int(time.time() * 1000),   # timestamp (milliseconds)
-                    symbol,                     # symbol (RAW with suffix)
+                    send_symbol,               # base symbol — Trader adds suffix via FormatSymbol
                     strategy,                   # strategy name
                     current_price,              # entry_price
                     lot_size,                   # lot_size
-                    max_orders,                 # max_orders
+                    grid_direction,             # [6] grid_direction: 1=BUY, 2=SELL
                     current_price + tp_distance,  # tp
                     current_price - sl_distance,  # sl
                     score / 100.0,              # confidence (0.0-1.0)
                     self.risk_multiplier        # risk_multiplier
                 ]
-            
+
             elif strategy == "Spike":
-                max_orders = 3
+                # Spike direction: same mean-reversion logic (sharp move → expect reversal)
+                spike_direction = grid_direction
                 tp_distance = current_price * 0.005  # 0.5% TP
                 sl_distance = current_price * 0.002  # 0.2% SL
-                
+
                 policy_msg = [
                     2,                          # type: POLICY
                     int(time.time() * 1000),   # timestamp (milliseconds)
-                    symbol,                     # symbol (RAW with suffix)
+                    send_symbol,               # base symbol — Trader adds suffix via FormatSymbol
                     strategy,                   # strategy name
                     current_price,              # entry_price
                     lot_size,                   # lot_size
-                    max_orders,                 # max_orders
+                    spike_direction,            # [6] grid_direction: 1=BUY, 2=SELL
                     current_price + tp_distance,  # tp
                     current_price - sl_distance,  # sl
                     score / 100.0,              # confidence (0.0-1.0)
@@ -517,37 +547,138 @@ class StrategyEngineThreaded:
             traceback.print_exc()
             return False
     
+    # ====================================================================
+    # ADAPTIVE PARAMETER FEEDBACK LOOP (v2.4)
+    # ====================================================================
+
+    def _process_feedback(self) -> None:
+        """
+        Drain feedback_queue (non-blocking) and record each closed trade
+        in PerformanceTracker.
+
+        Expected feedback format (12 fields from ProgramC_Trader SendFeedback):
+          [100, ts_ms, ticket, symbol, type, volume, open_px,
+           sl, tp, profit, magic, comment]
+        """
+        while True:
+            try:
+                result = self.feedback_queue.get_nowait()
+            except queue.Empty:
+                break
+
+            try:
+                # Support both list/tuple and dict formats
+                if isinstance(result, (list, tuple)) and len(result) >= 11:
+                    symbol_raw = str(result[3])
+                    profit     = float(result[9])
+                    magic      = int(result[10])
+                elif isinstance(result, dict):
+                    symbol_raw = str(result.get('symbol', ''))
+                    profit     = float(result.get('profit', 0))
+                    magic      = int(result.get('magic', 0))
+                else:
+                    continue
+
+                sid = PerformanceTracker.magic_to_strategy_id(magic)
+                if sid is None:
+                    continue
+
+                sym = normalize_symbol(symbol_raw, self.config.SUFFIX_PATTERNS)
+
+                self.perf_tracker.record_trade(sym, sid, profit, result)
+
+                print(f"[FEEDBACK] {sym} {sid} | profit={profit:.2f} | "
+                      f"magic={magic} | WR={self.perf_tracker.get_win_rate(sym, sid):.2f}")
+
+            except Exception as e:
+                print(f"[FEEDBACK] Parse error: {e}")
+
+    def _check_adaptive_params(self) -> None:
+        """
+        Called every 60 seconds from run().
+        Iterates over all (symbol, strategy_id) pairs with recorded trades,
+        triggers adaptation if conditions are met, and publishes type=14
+        MSG_DYNAMIC_PARAMS over ZMQ when parameters change.
+        """
+        for sym, sid in self.perf_tracker.active_pairs():
+            changed, new_params = self.param_manager.update_if_needed(
+                sym, sid, self.perf_tracker
+            )
+            if changed:
+                self._send_dynamic_params(sym, sid, new_params)
+
+    def _send_dynamic_params(self, symbol: str, strategy_id: str,
+                             params: dict) -> None:
+        """
+        Publish MSG_DYNAMIC_PARAMS (type=14) to MQL5 Trader via ZMQ PUB.
+
+        Format: [14, timestamp_ms, symbol, strategy_id, {param_key: value, ...}]
+        """
+        if self.publisher is None:
+            return
+        try:
+            msg = [
+                14,                         # MSG_DYNAMIC_PARAMS
+                int(time.time() * 1000),    # timestamp_ms
+                symbol,
+                strategy_id,
+                params                      # msgpack map
+            ]
+            packed = msgpack.packb(msg, use_bin_type=True)
+            self.publisher.send(packed, flags=zmq.NOBLOCK)
+            print(f"📡 [ADAPT→MT5] {symbol} {strategy_id} params pushed "
+                  f"({len(params)} keys, {len(packed)} bytes)")
+        except zmq.Again:
+            print(f"⚠️  [ADAPT→MT5] ZMQ send blocked (NOBLOCK) for {symbol} {strategy_id}")
+        except Exception as e:
+            print(f"❌ [ADAPT→MT5] Send error: {e}")
+
     def run(self):
         """Main loop"""
-        
+
         # Setup ZMQ
         if not self.setup_zmq():
             print("❌ Cannot start without ZMQ")
             return
         
-        print("🚀 Strategy Engine v2.3 (Fixed Spike) running...")
+        print("🚀 Strategy Engine v2.4 (Adaptive Params) running...")
         print(f"   Listening to ingestion_queue")
         print(f"   Publishing to {self.zmq_pub_address}")
         print()
         
         last_dashboard = time.time()
-        
+
         while not self.shutdown_event.is_set():
             try:
                 # Get tick
                 tick_data = self.ingestion_queue.get(timeout=0.1)
-                
+
                 # Process it
                 self.process_tick(tick_data)
-                
+
+                # Drain feedback queue (non-blocking)
+                self._process_feedback()
+
+                # Check adaptive params every 60 seconds
+                now = time.time()
+                if now - self._last_adapt_check >= 60.0:
+                    self._check_adaptive_params()
+                    self._last_adapt_check = now
+
                 # Dashboard every 10 seconds
-                if time.time() - last_dashboard > 10:
+                if now - last_dashboard > 10:
                     self.print_dashboard()
-                    last_dashboard = time.time()
-                
+                    last_dashboard = now
+
             except queue.Empty:
+                # Still drain feedback and check adapt on idle ticks
+                self._process_feedback()
+                now = time.time()
+                if now - self._last_adapt_check >= 60.0:
+                    self._check_adaptive_params()
+                    self._last_adapt_check = now
                 continue
-            
+
             except Exception as e:
                 print(f"❌ Engine error: {e}")
                 import traceback
@@ -565,15 +696,15 @@ class StrategyEngineThreaded:
     
     def print_dashboard(self):
         """แสดง dashboard"""
-        
+
         print("\n" + "="*70)
-        print("📊 STRATEGY ENGINE DASHBOARD v2.3 (Fixed Spike Detection)")
+        print("📊 STRATEGY ENGINE DASHBOARD v2.4 (Adaptive Params)")
         print("="*70)
         print(f"Ticks Processed:    {self.tick_count}")
         print(f"Policies Sent:      {self.policy_count}")
         print(f"Risk Multiplier:    {self.risk_multiplier:.2f}x")
         print()
-        
+
         # Symbol mapping
         if self.symbol_map:
             print("Symbol Mapping:")
@@ -581,19 +712,31 @@ class StrategyEngineThreaded:
                 ticks = len(self.tick_history[norm])
                 print(f"  {raw:16s} → {norm:10s} ({ticks} ticks)")
             print()
-        
+
         # Top 5 spike scores
         sorted_scores = sorted(
             self.spike_scores.items(),
             key=lambda x: x[1],
             reverse=True
         )[:5]
-        
+
         print("Top 5 Symbols (Spike Score):")
         for i, (sym, score) in enumerate(sorted_scores, 1):
             status = "✅ ABOVE THRESHOLD" if score >= self.config.MIN_SPIKE_SCORE else "⏳ Below"
             print(f"  {i}. {sym:12s}: {score:6.2f} {status}")
-        
+
+        # Performance summary (adaptive tuning)
+        perf_summary = self.perf_tracker.get_summary()
+        if perf_summary:
+            print()
+            print("Strategy Performance (Adaptive Tuning):")
+            print(f"  {'Symbol':<10} {'SID':<5} {'Trades':>6} {'WR':>6} {'PF':>6} {'DD':>6} {'CL':>4}")
+            print(f"  {'-'*48}")
+            for (sym, sid), stats in sorted(perf_summary.items()):
+                print(f"  {sym:<10} {sid:<5} {stats['trades']:>6} "
+                      f"{stats['wr']:>6.2f} {stats['pf']:>6.2f} "
+                      f"{stats['dd']:>6.2f} {stats['consec_loss']:>4}")
+
         print("="*70 + "\n")
 
 
@@ -620,7 +763,7 @@ def create_strategy_engine_threaded(
     
     thread = threading.Thread(
         target=engine.run,
-        name="StrategyEngine-v2.3"
+        name="StrategyEngine-v2.4"
     )
     
     return thread

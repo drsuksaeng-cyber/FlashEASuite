@@ -1,0 +1,22 @@
+; S14 BBSqueeze — Optimization Setup
+; Expert   : Opt_S14_BBSqueeze
+; Symbol   : EURUSD.tp | Timeframe: H1 | Period: 2022-2024
+; Passes   : 1200 = BB_Period(5) × Squeeze_Min(4) × KC_ATR_Mult(3) × SL_ATR_Mult(4) × TP_ATR_Mult(5)
+; Criterion: Custom max — score = PF × WinRate × sqrt(Trades) / MaxDD%
+; ----------------------------------------------------------------
+[Inputs]
+BS_BB_Period=20||10|5|30|Y
+BS_BB_Deviation=2.00000||2.00000|0.25000|3.00000|N
+BS_KC_Period=20||20|5|30|N
+BS_KC_ATR_Mult=1.50000||1.00000|0.50000|2.00000|Y
+BS_Squeeze_Min=6||3|3|12|Y
+BS_Breakout_Mom=0.50000||0.50000|0.25000|1.50000|N
+BS_SL_ATR_Mult=2.00000||1.50000|0.50000|3.00000|Y
+BS_TP_ATR_Mult=3.00000||2.00000|0.50000|4.00000|Y
+BS_ATR_Period=14||14|2|20|N
+BS_LR_Period=14||14|2|20|N
+Inp_RiskPct=1.00000||1.00000|0.50000|2.00000|N
+Inp_MinConfidence=0.40000||0.40000|0.10000|0.70000|N
+Inp_MaxPositions=1||1|1|4|N
+Inp_Slippage=10||10|5|30|N
+Inp_UseOnTester=true||true|||N

@@ -60,9 +60,17 @@ private:
 
     //+------------------------------------------------------------------+
     //| _GetMidPrice: Get current mid price for a symbol                |
+    //| In Strategy Tester, SymbolInfoDouble returns 0 for non-chart    |
+    //| symbols — fall back to CopyClose() bar data instead.            |
     //+------------------------------------------------------------------+
     double _GetMidPrice(string symbol)
     {
+        if(MQLInfoInteger(MQL_TESTER))
+        {
+            double arr[1];
+            if(CopyClose(symbol, m_tf, 0, 1, arr) > 0) return arr[0];
+            return 0.0;
+        }
         double bid = SymbolInfoDouble(symbol, SYMBOL_BID);
         double ask = SymbolInfoDouble(symbol, SYMBOL_ASK);
         if(bid <= 0 || ask <= 0) return 0.0;

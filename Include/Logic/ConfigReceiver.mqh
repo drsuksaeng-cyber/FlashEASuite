@@ -994,6 +994,79 @@ public:
     }
 
     //+------------------------------------------------------------------+
+    //| ParseAdaptiveParams14: Parse MSG_DYNAMIC_PARAMS (type=14)       |
+    //| Sent by Brain AdaptiveParamManager via ZMQ PUB 7778             |
+    //|                                                                  |
+    //| MessagePack array format:                                        |
+    //|  [0] msg_type = 14 (int)                                         |
+    //|  [1] timestamp_ms (long)                                         |
+    //|  [2] symbol (string, e.g. "XAUUSD")                             |
+    //|  [3] strategy_id (string, e.g. "S10")                           |
+    //|  [4] params map {key(str): value(double), ...}                  |
+    //|                                                                  |
+    //| Outputs:                                                         |
+    //|  symbol_out      — normalised symbol string                      |
+    //|  strategy_id_out — "S01"–"S16"                                  |
+    //|  dp_out          — SDynamicParams bundle ready for SetDynamicParams |
+    //|                                                                  |
+    //| Returns true on success.                                         |
+    //+------------------------------------------------------------------+
+    bool ParseAdaptiveParams14(const uchar &data[], int size,
+                               string &symbol_out,
+                               string &strategy_id_out,
+                               SDynamicParams &dp_out)
+    {
+        symbol_out      = "";
+        strategy_id_out = "";
+        dp_out.Reset();
+
+        if(size <= 0) return false;
+
+        int pos = 0;
+
+        // Outer array must have exactly 5 elements
+        int arr_cnt = _MP_GetContainerSize(data, pos);
+        if(arr_cnt < 5)
+        {
+            PrintFormat("[ConfigReceiver] ParseAdaptiveParams14: expected 5 elements, got %d", arr_cnt);
+            return false;
+        }
+
+        _MP_Skip(data, pos);                              // [0] msg_type (skip — already known)
+        _MP_Skip(data, pos);                              // [1] timestamp_ms (skip)
+
+        if(!_MP_ReadStr(data, pos, symbol_out))           // [2] symbol
+        {
+            Print("[ConfigReceiver] ParseAdaptiveParams14: failed to read symbol");
+            return false;
+        }
+
+        if(!_MP_ReadStr(data, pos, strategy_id_out))      // [3] strategy_id
+        {
+            Print("[ConfigReceiver] ParseAdaptiveParams14: failed to read strategy_id");
+            return false;
+        }
+
+        // [4] params map: {key: double_value, ...}
+        int map_cnt = _MP_GetContainerSize(data, pos);
+        if(map_cnt < 0) map_cnt = 0;                     // empty or unrecognised — tolerate
+
+        dp_out.risk_multiplier = 1.0;                     // adaptive params don't change risk mult
+
+        for(int i = 0; i < map_cnt && dp_out.strategy_param_count < 20; i++)
+        {
+            string pname = "";
+            if(!_MP_ReadStr(data, pos, pname)) break;
+            double pval = _MP_ReadDouble(data, pos);
+            dp_out.SetParam(pname, pval);
+        }
+
+        PrintFormat("[ConfigReceiver] ParseAdaptiveParams14: %s %s | %d params parsed",
+                    symbol_out, strategy_id_out, dp_out.strategy_param_count);
+        return true;
+    }
+
+    //+------------------------------------------------------------------+
     //| ApplyDefaultDynamicParams: Seed all strategies with defaults    |
     //| Called on Init() so strategies always have valid param bundles  |
     //+------------------------------------------------------------------+

@@ -20,14 +20,15 @@
 #include "../IStrategy.mqh"
 
 //--- Input Parameters (standalone defaults — same pattern as S01)
-input int    BS_BB_Period      = 20;    // Bollinger Bands period
+// Optimized: XAUUSD.tp H1 2022-2024 | Custom=5.1855 | PF=1.863 DD=2.36% Trades=23/3y
+input int    BS_BB_Period      = 25;    // Bollinger Bands period
 input double BS_BB_Deviation   = 2.0;   // BB standard deviation multiplier
 input int    BS_KC_Period      = 20;    // Keltner Channel EMA period
-input double BS_KC_ATR_Mult    = 1.5;   // Keltner Channel ATR multiplier
+input double BS_KC_ATR_Mult    = 1.15;  // Keltner Channel ATR multiplier
 input int    BS_Squeeze_Min    = 6;     // Min bars inside squeeze for valid setup
-input double BS_Breakout_Mom   = 0.5;   // LR slope threshold (normalized by ATR)
-input double BS_SL_ATR_Mult    = 2.0;   // Stop loss: N × ATR
-input double BS_TP_ATR_Mult    = 3.0;   // Take profit: N × ATR
+input double BS_Breakout_Mom   = 0.1;   // LR slope threshold (normalized by ATR)
+input double BS_SL_ATR_Mult    = 3.4;   // Stop loss: N × ATR
+input double BS_TP_ATR_Mult    = 3.4;   // Take profit: N × ATR
 input int    BS_ATR_Period     = 14;    // ATR period
 input int    BS_LR_Period      = 14;    // Linear regression period for slope
 
@@ -55,10 +56,11 @@ private:
     int     m_ema_handle;      // EMA as Keltner Channel midline
 
     //--- Internal state
-    int     m_squeeze_bars;    // Consecutive bars with BB inside KC
-    bool    m_was_in_squeeze;  // Did we just exit a valid squeeze?
-    double  m_last_atr;
-    double  m_lr_slope;        // LR slope normalized by ATR
+    int      m_squeeze_bars;    // Consecutive bars with BB inside KC
+    bool     m_was_in_squeeze;  // Did we just exit a valid squeeze?
+    double   m_last_atr;
+    double   m_lr_slope;        // LR slope normalized by ATR
+    datetime m_last_bar_time;   // Bar-close guard: recompute once per bar
 
     //=================================================================
     //  PRIVATE HELPERS
@@ -177,6 +179,7 @@ public:
         m_was_in_squeeze    = false;
         m_last_atr          = 0.0;
         m_lr_slope          = 0.0;
+        m_last_bar_time     = 0;
     }
 
     ~CBBSqueeze() { Deinit(); }
@@ -197,6 +200,7 @@ public:
         m_squeeze_bars   = 0;
         m_was_in_squeeze = false;
         m_last_atr       = 0.0;
+        m_last_bar_time  = 0;
 
         // S14 is standalone: enable immediately
         m_enabled = true;
@@ -221,25 +225,34 @@ public:
     {
         if(!m_initialized || !m_enabled) return;
 
-        _RefreshATR();
-
-        double bb_w = _CalcBBWidth();
-        double kc_w = _CalcKCWidth();
-        bool   in_squeeze = (kc_w > 1e-10) && (bb_w < kc_w);
-
-        if(in_squeeze)
+        // ── Bar-close guard: recompute squeeze state once per bar ────────
+        // Prevents m_was_in_squeeze from resetting on every tick of the
+        // same release bar (which would kill the signal after tick #1).
+        datetime cur_bar_time = iTime(m_symbol, m_timeframe, 0);
+        if(cur_bar_time != m_last_bar_time)
         {
-            m_squeeze_bars++;
-            m_was_in_squeeze = false;   // still building, not released yet
-        }
-        else
-        {
-            // Squeeze released this bar — was it long enough?
-            m_was_in_squeeze = (m_squeeze_bars >= m_squeeze_min_bars);
-            m_squeeze_bars   = 0;       // reset counter
-        }
+            m_last_bar_time = cur_bar_time;
 
-        m_lr_slope = _CalcLRSlope();
+            _RefreshATR();
+
+            double bb_w = _CalcBBWidth();
+            double kc_w = _CalcKCWidth();
+            bool   in_squeeze = (kc_w > 1e-10) && (bb_w < kc_w);
+
+            if(in_squeeze)
+            {
+                m_squeeze_bars++;
+                m_was_in_squeeze = false;   // still building, not released yet
+            }
+            else
+            {
+                // Squeeze released this bar — was it long enough?
+                m_was_in_squeeze = (m_squeeze_bars >= m_squeeze_min_bars);
+                m_squeeze_bars   = 0;       // reset counter
+            }
+
+            m_lr_slope = _CalcLRSlope();
+        }
 
         // Default: no signal
         ENUM_TRADE_SIGNAL sig  = SIGNAL_NONE;
