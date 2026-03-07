@@ -20,7 +20,10 @@
 #include "../IStrategy.mqh"
 
 //--- Input Parameters (standalone defaults — same pattern as S01)
-// Optimized: XAUUSD.tp H1 2022-2024 | Custom=5.1855 | PF=1.863 DD=2.36% Trades=23/3y
+// Optimized XAUUSD.tp H1 2022-2024: BB=25 KC=1.15 SqMin=6 SL/TP=3.4 | Custom=5.19 PF=1.863 DD=2.36% Trades=23/3y
+// Validated 2026-03-07 OHLC-M1: PF=1.84 Profit=$635 DD=2.36% Trades=23 (98% match)
+// Optimized GBPUSD.tp H1 2022-2024: BB=48 KC=1.50 SqMin=4 SL=2.5 TP=4.5 | PF=2.752 DD=4.01% Trades=25/3y
+// Validated 2026-03-07 OHLC-M1: PF=2.76 Profit=$1812 DD=3.99% Trades=25 (100% match) — use S14_GBPUSD_H1_FINAL.set
 input int    BS_BB_Period      = 25;    // Bollinger Bands period
 input double BS_BB_Deviation   = 2.0;   // BB standard deviation multiplier
 input int    BS_KC_Period      = 20;    // Keltner Channel EMA period

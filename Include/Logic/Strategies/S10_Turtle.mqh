@@ -23,6 +23,7 @@
 
 //--- Input Parameters
 // Optimized: XAUUSD.tp H4 2022-2024 | Custom=0.1027 | PF=1.384 DD=23.7% Trades=84/3y
+// Validation pending: requires Real tick model (OHLC M1 unsuitable for breakout — PF=0.67 with OHLC)
 input int    Turtle_EntryPeriod = 15;   // Entry Donchian channel period
 input int    Turtle_ExitPeriod  = 30;   // Exit Donchian channel period
 input int    Turtle_ATR_Period  = 20;   // ATR period (classic Turtle = 20)

@@ -24,6 +24,7 @@
 
 //--- Input Parameters
 // Optimized: USDJPY.tp H4 2022-2024 | Custom=17.23 | PF=3.27 DD=1.24% Trades=54/3y
+// Validated 2026-03-07 OHLC-M1: PF=1.99 Profit=$260 DD=1.94% Trades=26 (OHLC M1 undercounts vs real tick)
 input int    KAMA_Period     = 13;   // KAMA lookback period
 input int    KAMA_Fast       = 2;    // Fast EMA period
 input int    KAMA_Slow       = 30;   // Slow EMA period
