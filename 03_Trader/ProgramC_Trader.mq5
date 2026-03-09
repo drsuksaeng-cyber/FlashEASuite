@@ -866,7 +866,7 @@ bool HasOpenPositionByMagic(int magic, string symbol)
 {
    for(int i = 0; i < PositionsTotal(); i++)
    {
-      if(PositionSelectByIndex(i))
+      if(PositionGetTicket(i) > 0)   // selects position at index + returns ticket
       {
          if((int)PositionGetInteger(POSITION_MAGIC) == magic &&
             PositionGetString(POSITION_SYMBOL) == symbol)
