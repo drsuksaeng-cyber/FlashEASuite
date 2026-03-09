@@ -234,11 +234,16 @@ public:
 
         m_state.last_signal = sig;
 
-        // Cache ATR offsets in state for Trader
-        if(sig != SIGNAL_NONE)
+        // Store ABSOLUTE SL/TP prices (per IStrategy contract)
+        if(sig == SIGNAL_BUY)
         {
-            m_state.last_tp = m_tp_atr_mult * m_atr;
-            m_state.last_sl = m_sl_atr_mult * m_atr;
+            m_state.last_sl = price - m_sl_atr_mult * m_atr;
+            m_state.last_tp = price + m_tp_atr_mult * m_atr;
+        }
+        else if(sig == SIGNAL_SELL)
+        {
+            m_state.last_sl = price + m_sl_atr_mult * m_atr;
+            m_state.last_tp = price - m_tp_atr_mult * m_atr;
         }
     }
 
@@ -255,22 +260,14 @@ public:
     }
 
     //+------------------------------------------------------------------+
-    //| GetTakeProfit: Returns ATR offset (not absolute price)          |
-    //| Trader adds this to entry price to get actual TP level          |
+    //| GetTakeProfit: Returns absolute TP price (set in Analyze)       |
     //+------------------------------------------------------------------+
-    virtual double GetTakeProfit() override
-    {
-        return m_tp_atr_mult * m_atr;
-    }
+    virtual double GetTakeProfit() override { return m_state.last_tp; }
 
     //+------------------------------------------------------------------+
-    //| GetStopLoss: Returns ATR offset (not absolute price)            |
-    //| Trader subtracts from entry price (buy) or adds (sell)         |
+    //| GetStopLoss: Returns absolute SL price (set in Analyze)         |
     //+------------------------------------------------------------------+
-    virtual double GetStopLoss() override
-    {
-        return m_sl_atr_mult * m_atr;
-    }
+    virtual double GetStopLoss() override { return m_state.last_sl; }
 
     //+------------------------------------------------------------------+
     //| ShouldExit: True when price crosses back through KAMA           |

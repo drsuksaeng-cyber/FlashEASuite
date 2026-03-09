@@ -49,9 +49,17 @@ input string   SYMBOL_SUFFIX = ".tp";          // Symbol Suffix (e.g., ".tp", "m
 input string   V6_ServerIP            = "127.0.0.1";      // Python Server IP (V6 mode)
 input int      V6_ServerPort          = 7778;             // ZMQ PUB port for CONFIG_PUSH
 input string   V6_ClientID            = "MT5_Client_001"; // Unique client identifier
-input bool     V6_EnableMode          = false;            // Enable V6 mode? (default: legacy mode)
+input bool     V6_EnableMode          = true;             // Enable V6 mode? (default: V6 standalone)
 input int      V6_HeartbeatTimeout    = 30;              // Seconds until disconnect
 input int      V6_HeartbeatInterval   = 10;              // Seconds between heartbeats
+
+//+------------------------------------------------------------------+
+//| V6 Strategy Selection (one EA per chart, pick strategy here)    |
+//+------------------------------------------------------------------+
+input bool     V6_Enable_S06 = false;  // Enable S06 KAMA (attach on USDJPY H4)
+input bool     V6_Enable_S10 = false;  // Enable S10 Turtle (DISABLED — re-optimize pending)
+input bool     V6_Enable_S14 = false;  // Enable S14 BBSqueeze (attach on XAUUSD H1 or GBPUSD H1)
+input double   V6_MinConfidence = 0.30; // Minimum signal confidence to trade
 
 // ========== GLOBAL VARIABLES ==========
 // ZMQ Components (Legacy)
@@ -284,28 +292,38 @@ int InitializeV6Mode()
    }
    Print("[V6] ✅ Subscribed to ", sub_addr);
 
-   // 5. Register all 16 strategies
-   if(!g_strategy_manager_v6.RegisterAllStrategies(v6_symbol, PERIOD_M15))
+   // 4b. Init Risk Management (required for ExecuteV6Signals)
+   if(!g_risk_guardian.Initialize(10, 2.0, 15.0, 2.0))
+   {
+      Print("[V6] ❌ Risk Guardian init failed");
+      return INIT_FAILED;
+   }
+   Print("[V6] ✅ Risk Guardian initialized");
+
+   // 5. Register all 16 strategies using CHART timeframe (not hardcoded M15)
+   if(!g_strategy_manager_v6.RegisterAllStrategies(v6_symbol, Period()))
       Print("[V6] ⚠️  Some strategies failed Init — continuing with partial set");
 
-   // 6. Start in STANDALONE mode — load saved config ถ้ามี
+   // 6. Start in STANDALONE mode — disable all, then enable only selected
    g_v6_standalone_mode = true;
    g_v6_online_mode     = false;
    g_strategy_manager_v6.SetServerConnected(false);
 
-   if(!g_config_receiver_v6.LoadStandaloneConfig())
+   // Disable all strategies first
+   for(int i = 0; i < TOTAL_STRATEGIES; i++)
    {
-      // ไม่มีไฟล์ → ใช้ default 7 standalone strategies
-      Print("[V6] No standalone config — enabling 7 SA strategies with defaults");
-      g_strategy_manager_v6.EnableAllStandalone();
+      IStrategy* s = g_strategy_manager_v6.GetStrategyByID((ENUM_STRATEGY_ID)i);
+      if(s != NULL) s.Disable();
    }
-   else
-   {
-      // มีไฟล์ → apply saved config
-      SConfigData saved_cfg = g_config_receiver_v6.GetLastConfig();
-      g_strategy_manager_v6.ApplyConfig_V6(saved_cfg);
-      Print("[V6] Standalone config applied from file");
-   }
+
+   // Enable only user-selected strategies
+   int v6_enabled_count = 0;
+   if(V6_Enable_S06) { g_strategy_manager_v6.EnableStrategy_V6(S06_KAMA);       v6_enabled_count++; Print("[V6] ✅ S06 KAMA enabled"); }
+   if(V6_Enable_S10) { g_strategy_manager_v6.EnableStrategy_V6(S10_TURTLE);     v6_enabled_count++; Print("[V6] ✅ S10 Turtle enabled (WARNING: validation pending)"); }
+   if(V6_Enable_S14) { g_strategy_manager_v6.EnableStrategy_V6(S14_BB_SQUEEZE); v6_enabled_count++; Print("[V6] ✅ S14 BBSqueeze enabled"); }
+
+   if(v6_enabled_count == 0)
+      Print("[V6] ⚠️  No strategies selected — set V6_Enable_S06 or V6_Enable_S14 to true");
 
    // 7. Start timer 100ms สำหรับ poll + strategy tick
    EventSetMillisecondTimer(100);
@@ -582,6 +600,9 @@ void OnTimer_V6()
    MqlTick tick;
    if(!SymbolInfoTick(_Symbol, tick)) return;
    g_strategy_manager_v6.OnTick(tick);
+
+   // ── Execute signals from V6 strategies ──
+   ExecuteV6Signals();
 }
 
 // ========== P6-1: V6 MESSAGE POLLING & ROUTING ==========
@@ -836,6 +857,117 @@ void ProcessMessage_V6(const uchar &data[], int size)
          if(size > 0 && msg_type != 0)
             PrintFormat("[V6] Unknown msg_type=%d (%d bytes)", msg_type, size);
          break;
+   }
+}
+
+// ========== V6 TRADE EXECUTION ==========
+
+//+------------------------------------------------------------------+
+//| HasOpenPositionByMagic: Check for open position (magic+symbol)  |
+//+------------------------------------------------------------------+
+bool HasOpenPositionByMagic(int magic, string symbol)
+{
+   for(int i = 0; i < PositionsTotal(); i++)
+   {
+      if(PositionSelectByIndex(i))
+      {
+         if((int)PositionGetInteger(POSITION_MAGIC) == magic &&
+            PositionGetString(POSITION_SYMBOL) == symbol)
+            return true;
+      }
+   }
+   return false;
+}
+
+//+------------------------------------------------------------------+
+//| ExecuteV6Signals: Read signals from V6 strategies and trade     |
+//| Called every timer tick from OnTimer_V6()                       |
+//+------------------------------------------------------------------+
+void ExecuteV6Signals()
+{
+   if(!g_risk_guardian.CheckDailyLimit())
+   {
+      return;  // daily limit — silent skip (already logged elsewhere)
+   }
+
+   string sym = FormatSymbol(_Symbol);
+
+   for(int i = 0; i < TOTAL_STRATEGIES; i++)
+   {
+      IStrategy* s = g_strategy_manager_v6.GetStrategyByID((ENUM_STRATEGY_ID)i);
+      if(s == NULL || !s.IsEnabled() || !s.IsInitialized()) continue;
+
+      ENUM_TRADE_SIGNAL sig = s.GetSignal();
+      if(sig == SIGNAL_NONE) continue;
+
+      int    magic      = s.GetMagic();
+      double confidence = s.GetConfidence();
+      double sl         = s.GetStopLoss();
+      double tp         = s.GetTakeProfit();
+
+      // Confidence filter
+      if(confidence < V6_MinConfidence)
+         continue;
+
+      // SL/TP must be set
+      if(sl <= 0.0 || tp <= 0.0)
+      {
+         PrintFormat("[V6] %s skip: SL/TP not set (sl=%.5f tp=%.5f)", s.GetShortName(), sl, tp);
+         continue;
+      }
+
+      // Already in position for this strategy+symbol?
+      if(HasOpenPositionByMagic(magic, sym)) continue;
+
+      // Current price
+      double ask   = SymbolInfoDouble(sym, SYMBOL_ASK);
+      double bid   = SymbolInfoDouble(sym, SYMBOL_BID);
+      double price = (sig == SIGNAL_BUY) ? ask : bid;
+
+      // Lot size
+      double lot = g_risk_guardian.CalculateSafeLotSize(sym, price, sl);
+      if(lot <= 0.0)
+      {
+         PrintFormat("[V6] %s skip: lot=0", s.GetShortName());
+         continue;
+      }
+
+      // Risk validation
+      if(!g_risk_guardian.ValidateNewTrade(sym, price, sl, lot))
+      {
+         PrintFormat("[V6] %s REJECTED by RiskGuardian", s.GetShortName());
+         continue;
+      }
+
+      // Place trade
+      MqlTradeRequest req = {};
+      MqlTradeResult  res = {};
+
+      req.action       = TRADE_ACTION_DEAL;
+      req.symbol       = sym;
+      req.magic        = magic;
+      req.volume       = lot;
+      req.price        = price;
+      req.sl           = sl;
+      req.tp           = tp;
+      req.deviation    = 20;
+      req.type_filling = ORDER_FILLING_FOK;
+      req.comment      = s.GetShortName() + " V6standalone";
+      req.type         = (sig == SIGNAL_BUY) ? ORDER_TYPE_BUY : ORDER_TYPE_SELL;
+
+      if(OrderSend(req, res) && res.retcode == TRADE_RETCODE_DONE)
+      {
+         g_trades_executed++;
+         PrintFormat("[V6] ✅ %s | %s | %s | lot=%.2f | sl=%.5f | tp=%.5f | conf=%.2f | deal=%d",
+                    s.GetShortName(), sym,
+                    (sig == SIGNAL_BUY ? "BUY" : "SELL"),
+                    lot, sl, tp, confidence, (int)res.deal);
+      }
+      else
+      {
+         PrintFormat("[V6] ❌ %s | OrderSend FAILED | retcode=%d | err=%d",
+                    s.GetShortName(), res.retcode, GetLastError());
+      }
    }
 }
 
