@@ -68,7 +68,7 @@ private:
         if(MQLInfoInteger(MQL_TESTER))
         {
             double arr[1];
-            if(CopyClose(symbol, m_tf, 0, 1, arr) > 0) return arr[0];
+            if(CopyClose(symbol, PERIOD_CURRENT, 0, 1, arr) > 0) return arr[0];
             return 0.0;
         }
         double bid = SymbolInfoDouble(symbol, SYMBOL_BID);
