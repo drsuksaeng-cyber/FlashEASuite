@@ -37,29 +37,26 @@
 #include "../Include/Security/DLLWrapper.mqh"
 
 // ========== INPUT PARAMETERS ==========
-//+------------------------------------------------------------------+
-//| Symbol Formatting (Broker-specific)                              |
-//+------------------------------------------------------------------+
-input string   SYMBOL_PREFIX = "";           // Symbol Prefix (e.g., "f" for FXPro, empty for most)
-input string   SYMBOL_SUFFIX = ".tp";          // Symbol Suffix (e.g., ".tp", "m", "_i", empty for ICMarkets)
 
-//+------------------------------------------------------------------+
-//| V6 Connection Parameters (Phase0 chat3)                          |
-//+------------------------------------------------------------------+
-input string   V6_ServerIP            = "127.0.0.1";      // Python Server IP (V6 mode)
-input int      V6_ServerPort          = 7778;             // ZMQ PUB port for CONFIG_PUSH
-input string   V6_ClientID            = "MT5_Client_001"; // Unique client identifier
-input bool     V6_EnableMode          = true;             // Enable V6 mode? (default: V6 standalone)
-input int      V6_HeartbeatTimeout    = 30;              // Seconds until disconnect
-input int      V6_HeartbeatInterval   = 10;              // Seconds between heartbeats
+input group "═══ 1. STRATEGY SELECTION (เลือก 1 strategy ต่อ chart) ═══"
+input bool     V6_Enable_S06    = false; // S06 KAMA       → ใช้บน USDJPY H4
+input bool     V6_Enable_S14    = false; // S14 BBSqueeze  → ใช้บน XAUUSD H1 หรือ GBPUSD H1
+input bool     V6_Enable_S10    = false; // S10 Turtle     → ❌ ยังไม่ผ่าน validation อย่าเปิด
+input double   V6_MinConfidence = 0.30;  // Confidence ขั้นต่ำ (0.0-1.0)
 
-//+------------------------------------------------------------------+
-//| V6 Strategy Selection (one EA per chart, pick strategy here)    |
-//+------------------------------------------------------------------+
-input bool     V6_Enable_S06 = false;  // Enable S06 KAMA (attach on USDJPY H4)
-input bool     V6_Enable_S10 = false;  // Enable S10 Turtle (DISABLED — re-optimize pending)
-input bool     V6_Enable_S14 = false;  // Enable S14 BBSqueeze (attach on XAUUSD H1 or GBPUSD H1)
-input double   V6_MinConfidence = 0.30; // Minimum signal confidence to trade
+input group "═══ 2. SYMBOL FORMAT (Broker suffix) ═══"
+input string   SYMBOL_PREFIX    = "";     // Prefix ก่อนชื่อ symbol (เช่น "f" สำหรับ FXPro)
+input string   SYMBOL_SUFFIX    = ".tp";  // Suffix ต่อท้าย (เช่น ".tp", ".m", "" สำหรับ ICMarkets)
+
+input group "═══ 3. MODE ═══"
+input bool     V6_EnableMode    = true;   // true = V6 standalone | false = Legacy (Grid/Spike)
+
+input group "═══ 4. BRAIN CONNECTION (ถ้าใช้ Brain Python) ═══"
+input string   V6_ServerIP          = "127.0.0.1";      // Brain server IP
+input int      V6_ServerPort        = 7778;              // ZMQ port (Brain → Trader)
+input string   V6_ClientID          = "MT5_Client_001";  // Client ID
+input int      V6_HeartbeatTimeout  = 30;                // Timeout ก่อน fallback standalone (วินาที)
+input int      V6_HeartbeatInterval = 10;                // Interval ส่ง heartbeat (วินาที)
 
 // ========== GLOBAL VARIABLES ==========
 // ZMQ Components (Legacy)
