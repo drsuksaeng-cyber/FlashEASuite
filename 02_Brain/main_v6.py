@@ -76,25 +76,36 @@ REGIME_UPDATE_INTERVAL = 60    # ประเมิน regime ใหม่ทุ
 
 SYMBOL_SUFFIX = ".tp"          # ปรับตาม broker
 
+# P3-12: risk_mult clamp bounds
+RISK_MULT_MIN = 0.3
+RISK_MULT_MAX = 2.0
+
+def _clamp_risk_mult(v: float) -> float:
+    """P3-12: Clamp risk_mult to [0.3, 2.0]."""
+    return max(RISK_MULT_MIN, min(RISK_MULT_MAX, float(v)))
+
+# P3-13: Config version counter
+_config_version = 0
+
 # Strategies ที่ deploy
+# Entry format: [id_str, name_str, enabled, confidence, tf_str, mm_method, risk_mult]
 SYMBOL_STRATEGIES = [
     {
         "symbol_base": "USDJPY",
         "strategies": [
-            # [id_str, name_str, enabled, confidence, tf_str, mm_method]
-            ["S06", "KAMA", True, 1.0, "H4", "MM01"],
+            ["S06", "KAMA", True, 1.0, "H4", "MM01", 1.0],
         ]
     },
     {
         "symbol_base": "XAUUSD",
         "strategies": [
-            ["S14", "BBSqueeze", True, 1.0, "H1", "MM01"],
+            ["S14", "BBSqueeze", True, 1.0, "H1", "MM01", 1.0],
         ]
     },
     {
         "symbol_base": "GBPUSD",
         "strategies": [
-            ["S14", "BBSqueeze", True, 1.0, "H1", "MM01"],
+            ["S14", "BBSqueeze", True, 1.0, "H1", "MM01", 1.0],
         ]
     },
 ]
@@ -115,7 +126,7 @@ def now_ms() -> int:
 
 
 def build_symbols_array(regime: str, symbol_suffix: str) -> list:
-    """สร้าง symbols array โดยปรับ enabled ตาม regime"""
+    """สร้าง symbols array โดยปรับ enabled ตาม regime และ clamp risk_mult"""
     symbols = []
     for sym_cfg in SYMBOL_STRATEGIES:
         full_sym = sym_cfg["symbol_base"] + symbol_suffix
@@ -127,15 +138,20 @@ def build_symbols_array(regime: str, symbol_suffix: str) -> list:
             allowed_regimes = STRATEGY_REGIMES.get(sid, [])
             if allowed_regimes and regime not in allowed_regimes:
                 strat[2] = False  # disable
+            # P3-12: clamp risk_mult (index 6) if present
+            if len(strat) > 6:
+                strat[6] = _clamp_risk_mult(strat[6])
             strats.append(strat)
         symbols.append([full_sym, len(strats), strats])
     return symbols
 
 
 def pack_config_push(regime: str, symbol_suffix: str, msg_type: int = 10) -> bytes:
-    """Pack CONFIG_PUSH (10) หรือ INITIAL_CONFIG (12)"""
+    """Pack CONFIG_PUSH (10) หรือ INITIAL_CONFIG (12) — P3-13: includes config_version"""
+    global _config_version
+    _config_version += 1
     symbols = build_symbols_array(regime, symbol_suffix)
-    msg = [msg_type, now_ms(), regime, len(symbols), symbols]
+    msg = [msg_type, now_ms(), regime, len(symbols), symbols, _config_version]
     return msgpack.packb(msg, use_bin_type=True)
 
 

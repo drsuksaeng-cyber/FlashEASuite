@@ -99,6 +99,13 @@ int  g_poll_attempts = 0;
 int  g_poll_success = 0;
 int  g_poll_failures = 0;
 
+// P2-9: Regime persistence filter (N=3 consecutive same-regime before applying)
+ENUM_MARKET_REGIME g_pending_regime     = REGIME_UNKNOWN;
+int                g_regime_vote_count  = 0;
+
+// P1-5: Brain connection state for heartbeat-loss graceful degradation
+bool               g_brain_offline_mode = false;
+
 // ========== INITIALIZATION ==========
 int OnInit()
 {
@@ -322,8 +329,8 @@ int InitializeV6Mode()
    if(v6_enabled_count == 0)
       Print("[V6] ⚠️  No strategies selected — set V6_Enable_S06 or V6_Enable_S14 to true");
 
-   // 7. Start timer 100ms สำหรับ poll + strategy tick
-   EventSetMillisecondTimer(100);
+   // 7. Start timer 200ms สำหรับ poll + strategy tick (P2-10: OnTimer-primary)
+   EventSetMillisecondTimer(200);
 
    Print("[V6] ✅ V6 Mode initialized | symbol=", v6_symbol,
          " | strategies=", g_strategy_manager_v6.GetEnabledCount_V6(), "/16");
@@ -566,8 +573,8 @@ void OnTimer_V6()
 {
    g_timer_calls++;
 
-   // Status update every 10 seconds (100 * 100ms = 10s)
-   if(g_timer_calls % 100 == 0)
+   // Status update every 10 seconds (50 * 200ms = 10s)
+   if(g_timer_calls % 50 == 0)
    {
       Print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
       Print("📊 V6 STATUS (", g_timer_calls / 100, " x 10 sec)");
@@ -632,14 +639,21 @@ void PollMessages_V6()
 
    if(!still_connected && g_v6_online_mode)
    {
-      // Timeout → switch to standalone
+      // P1-5: Timeout → switch to standalone + activate graceful degradation
       g_v6_online_mode     = false;
       g_v6_standalone_mode = true;
+      g_brain_offline_mode = true; // block new entries until Brain reconnects
       g_strategy_manager_v6.SetServerConnected(false);
       g_strategy_manager_v6.EnableAllStandalone(); // keep SA-capable only
 
-      PrintFormat("[V6] ⚠️  SERVER TIMEOUT (%ds) → STANDALONE MODE | disabled hybrid strategies",
+      PrintFormat("[V6] ⚠️  SERVER TIMEOUT (%ds) → STANDALONE MODE | new entries BLOCKED until Brain reconnects",
                   g_connection_monitor_v6.GetDisconnectDuration());
+   }
+   else if(still_connected && g_brain_offline_mode)
+   {
+      // Brain reconnected — resume normal operation
+      g_brain_offline_mode = false;
+      PrintFormat("[V6] ✅ Brain reconnected — new entries resumed");
    }
    else if(still_connected && !g_v6_online_mode && g_v6_standalone_mode)
    {
@@ -671,9 +685,31 @@ void ProcessMessage_V6(const uchar &data[], int size)
       case MSG_CONFIG_PUSH:
       {
          SConfigData cfg = g_config_receiver_v6.GetLastConfig();
-         g_strategy_manager_v6.ApplyConfig_V6(cfg);
 
-         // Distribute dynamic params แต่ละ strategy
+         // P2-9: Regime persistence filter — require N=3 consecutive same-regime
+         // before applying strategy enable/disable changes (prevents whipsaw)
+         ENUM_MARKET_REGIME new_regime = g_config_receiver_v6.GetCurrentRegime();
+         if(new_regime == g_pending_regime)
+            g_regime_vote_count++;
+         else
+         {
+            g_pending_regime    = new_regime;
+            g_regime_vote_count = 1;
+         }
+
+         bool regime_confirmed = (g_regime_vote_count >= 3);
+         if(regime_confirmed)
+         {
+            // Regime stable for 3+ consecutive CONFIG_PUSHes → apply enable/disable
+            g_strategy_manager_v6.ApplyConfig_V6(cfg);
+         }
+         else
+         {
+            PrintFormat("[V6] Regime vote %d/3 for %s — strategy states unchanged",
+                        g_regime_vote_count, RegimeToString(new_regime));
+         }
+
+         // Always distribute DynamicParams immediately (SL/TP/period updates)
          for(int i = 0; i < TOTAL_STRATEGIES; i++)
          {
             ENUM_STRATEGY_ID sid = (ENUM_STRATEGY_ID)i;
@@ -684,6 +720,13 @@ void ProcessMessage_V6(const uchar &data[], int size)
          // Auto-save ทุกครั้งที่ได้ CONFIG_PUSH
          g_config_receiver_v6.SaveStandaloneConfig();
 
+         // Brain reconnect — clear offline mode
+         if(g_brain_offline_mode)
+         {
+            g_brain_offline_mode = false;
+            Print("[V6] ✅ Brain back online (CONFIG_PUSH received) — entries resumed");
+         }
+
          // Switch → online ถ้ายังเป็น standalone
          if(!g_v6_online_mode)
          {
@@ -693,8 +736,8 @@ void ProcessMessage_V6(const uchar &data[], int size)
             Print("[V6] ✅ Switched → ONLINE MODE (CONFIG_PUSH received)");
          }
 
-         PrintFormat("[V6] CONFIG_PUSH: regime=%s | enabled=%d/16 | mm=%s",
-            RegimeToString(g_config_receiver_v6.GetCurrentRegime()),
+         PrintFormat("[V6] CONFIG_PUSH: regime=%s (vote %d/3) | enabled=%d/16 | mm=%s",
+            RegimeToString(new_regime), g_regime_vote_count,
             g_strategy_manager_v6.GetEnabledCount_V6(),
             cfg.mm_method);
          break;
@@ -889,10 +932,12 @@ bool HasOpenPositionByMagic(int magic, string symbol)
 //+------------------------------------------------------------------+
 void ExecuteV6Signals()
 {
+   // P0-1: Portfolio drawdown halt (5%)
    if(!g_risk_guardian.CheckDailyLimit())
-   {
-      return;  // daily limit — silent skip (already logged elsewhere)
-   }
+      return;
+
+   // P1-5: Brain offline — block new entries until reconnected
+   if(g_brain_offline_mode) return;
 
    string sym = FormatSymbol(_Symbol);
 
@@ -920,24 +965,84 @@ void ExecuteV6Signals()
          continue;
       }
 
-      // Already in position for this strategy+symbol?
+      // P0-2: Per-strategy slot quota check
+      if(!g_risk_guardian.CheckStrategySlot(magic)) continue;
+
+      // Already in position for this strategy+symbol? (original guard)
       if(HasOpenPositionByMagic(magic, sym)) continue;
+
+      // P1-3: Currency exposure check
+      if(!g_risk_guardian.CheckCurrencyExposure(sym, sig)) continue;
+
+      // P2-7: Spread filter — skip during abnormally wide spreads (news events)
+      {
+         double spread_pts = (SymbolInfoDouble(sym, SYMBOL_ASK) - SymbolInfoDouble(sym, SYMBOL_BID))
+                             / SymbolInfoDouble(sym, SYMBOL_POINT);
+         string base = StripSymbol(sym);
+         bool   spread_ok = true;
+         if(base == "USDJPY" && spread_pts > 40.0)  spread_ok = false;
+         else if(base == "GBPUSD" && spread_pts > 40.0)  spread_ok = false;
+         else if(base == "XAUUSD" && spread_pts > 500.0) spread_ok = false;
+         if(!spread_ok)
+         {
+            PrintFormat("[V6] %s SKIP: spread=%.0f pts too wide (news?)", s.GetShortName(), spread_pts);
+            continue;
+         }
+      }
+
+      // P2-11: False VOLATILE protection for S14 BBSqueeze
+      // If regime=VOLATILE but ATR is declining → allow S14 (squeeze forming)
+      if(magic == 1014) // MAGIC_S14_BB_SQUEEZE
+      {
+         ENUM_MARKET_REGIME cur_regime = g_config_receiver_v6.GetCurrentRegime();
+         if(cur_regime == REGIME_VOLATILE)
+         {
+            // Use iATR to check if current ATR < 80% of 20-period average → false volatile
+            int atr_h = iATR(sym, Period(), 20);
+            if(atr_h != INVALID_HANDLE)
+            {
+               double atr_buf[];
+               if(CopyBuffer(atr_h, 0, 0, 20, atr_buf) == 20)
+               {
+                  double atr_now = atr_buf[0];
+                  double atr_avg = 0;
+                  for(int k = 0; k < 20; k++) atr_avg += atr_buf[k];
+                  atr_avg /= 20.0;
+                  if(atr_now >= atr_avg * 0.8)
+                  {
+                     PrintFormat("[V6] S14 BLOCKED: VOLATILE regime (real) ATR=%.5f avg=%.5f", atr_now, atr_avg);
+                     IndicatorRelease(atr_h);
+                     continue; // real VOLATILE — block S14
+                  }
+                  // else: false VOLATILE (ATR declining) → allow S14
+               }
+               IndicatorRelease(atr_h);
+            }
+         }
+      }
 
       // Current price
       double ask   = SymbolInfoDouble(sym, SYMBOL_ASK);
       double bid   = SymbolInfoDouble(sym, SYMBOL_BID);
       double price = (sig == SIGNAL_BUY) ? ask : bid;
 
+      // P2-8: Push raw ATR to history, cap SL if ATR is spiking
+      g_risk_guardian.PushATR(sl);  // sl here is ATR-based distance
+      double atr_cap = g_risk_guardian.GetATRCap();
+      double sl_capped = (atr_cap < DBL_MAX && sl > atr_cap) ? atr_cap : sl;
+      if(sl_capped < sl)
+         PrintFormat("[V6] %s ATR capped: sl=%.5f → %.5f (75th pct cap)", s.GetShortName(), sl, sl_capped);
+
       // Lot size
-      double lot = g_risk_guardian.CalculateSafeLotSize(sym, price, sl);
+      double lot = g_risk_guardian.CalculateSafeLotSize(sym, price, sl_capped);
       if(lot <= 0.0)
       {
          PrintFormat("[V6] %s skip: lot=0", s.GetShortName());
          continue;
       }
 
-      // Risk validation
-      if(!g_risk_guardian.ValidateNewTrade(sym, price, sl, lot))
+      // Risk validation (use capped SL for final validation too)
+      if(!g_risk_guardian.ValidateNewTrade(sym, price, sl_capped, lot))
       {
          PrintFormat("[V6] %s REJECTED by RiskGuardian", s.GetShortName());
          continue;

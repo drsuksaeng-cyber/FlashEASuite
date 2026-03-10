@@ -50,9 +50,10 @@ private:
     int     m_rsi_handle;       // Not used for S01, kept for consistency
 
     //--- Internal state
-    double  m_last_zscore;      // Last computed Z-Score (for logging)
-    bool    m_in_long_spread;   // Currently long spread position
-    bool    m_in_short_spread;  // Currently short spread position
+    double   m_last_zscore;      // Last computed Z-Score (for logging)
+    bool     m_in_long_spread;   // Currently long spread position
+    bool     m_in_short_spread;  // Currently short spread position
+    datetime m_last_signal_bar;  // P2-6: Bar time of last entry signal (re-entry guard)
 
     //=================================================================
     //  PRIVATE HELPERS
@@ -194,12 +195,13 @@ public:
         m_pair1         = StatArb_Pair1;
         m_pair2         = StatArb_Pair2;
 
-        m_buf_pos       = 0;
-        m_buf_full      = false;
-        m_last_zscore   = 0.0;
+        m_buf_pos         = 0;
+        m_buf_full        = false;
+        m_last_zscore     = 0.0;
         m_in_long_spread  = false;
         m_in_short_spread = false;
-        m_rsi_handle    = INVALID_HANDLE;
+        m_rsi_handle      = INVALID_HANDLE;
+        m_last_signal_bar = 0;
     }
 
     //+------------------------------------------------------------------+
@@ -298,20 +300,26 @@ public:
         // --- Step 5: Generate signal
         ENUM_TRADE_SIGNAL new_signal = SIGNAL_NONE;
 
-        // Entry logic
+        // Entry logic — P2-6: one entry signal per bar only
         if(!m_in_long_spread && !m_in_short_spread)
         {
-            if(zscore < -m_entry_z)
+            datetime cur_bar = iTime(m_symbol, m_timeframe, 0);
+            if(cur_bar != m_last_signal_bar)
             {
-                // Spread too low → expect mean reversion upward → LONG spread (buy A, sell B)
-                new_signal = SIGNAL_BUY;
-                m_in_long_spread = true;
-            }
-            else if(zscore > m_entry_z)
-            {
-                // Spread too high → expect mean reversion downward → SHORT spread (sell A, buy B)
-                new_signal = SIGNAL_SELL;
-                m_in_short_spread = true;
+                if(zscore < -m_entry_z)
+                {
+                    // Spread too low → expect mean reversion upward → LONG spread (buy A, sell B)
+                    new_signal = SIGNAL_BUY;
+                    m_in_long_spread = true;
+                    m_last_signal_bar = cur_bar;
+                }
+                else if(zscore > m_entry_z)
+                {
+                    // Spread too high → expect mean reversion downward → SHORT spread (sell A, buy B)
+                    new_signal = SIGNAL_SELL;
+                    m_in_short_spread = true;
+                    m_last_signal_bar = cur_bar;
+                }
             }
         }
         // Exit logic — check if we're in a position
@@ -556,6 +564,7 @@ private:
         m_buf_full = false;
         m_in_long_spread  = false;
         m_in_short_spread = false;
+        m_last_signal_bar = 0; // P2-6: reset bar guard
         m_state.last_signal = SIGNAL_NONE;
     }
 };

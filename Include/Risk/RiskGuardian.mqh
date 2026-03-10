@@ -48,11 +48,27 @@ private:
         int lot_size;                          // Rejected by lot size
         int other;                             // Other rejections
     } m_rejection_stats;
-    
+
+    // === P0-1: Portfolio Drawdown Halt (5%) ===
+    double            m_portfolio_dd_limit;    // Portfolio DD% threshold (default 5.0)
+    double            m_day_start_equity;      // Equity snapshot at session start
+    bool              m_portfolio_halted;      // true = block all new entries
+
+    // === P0-2: Per-Strategy Slot Quota ===
+    int               m_strategy_quota[16];    // Max open positions per strategy (by enum index)
+
+    // === P2-8: ATR Cap — rolling 20-bar 75th percentile ===
+    double            m_atr_history[20];       // Circular ATR buffer
+    int               m_atr_hist_pos;          // Write position
+    bool              m_atr_hist_full;         // Buffer filled at least once
+
     //--- Helper methods
     double            CalculateCurrentExposure(void);
     int               CountOpenPositions(void);
     bool              ValidateLotSize(double lot);
+    int               _CountPositionsByMagic(int magic);
+    void              _InitQuotas(void);
+    double            _CalcNetUSDExposure(string new_symbol, ENUM_TRADE_SIGNAL new_dir, double new_lot);
     
 public:
     //--- Constructor/Destructor
@@ -85,7 +101,22 @@ public:
     //--- Trade updates
     void              OnTradeOpened(ulong ticket, double lot);
     void              OnTradeClosed(ulong ticket, double profit);
-    
+
+    // === P0-1: Portfolio Halt ===
+    bool              CheckPortfolioDrawdown(void);
+    bool              IsPortfolioHalted(void) const { return m_portfolio_halted; }
+    void              ResetPortfolioHalt(void) { m_portfolio_halted = false; m_day_start_equity = AccountInfoDouble(ACCOUNT_EQUITY); }
+
+    // === P0-2: Strategy Slot Quota ===
+    bool              CheckStrategySlot(int magic);
+
+    // === P1-3: Currency Exposure ===
+    bool              CheckCurrencyExposure(string symbol, ENUM_TRADE_SIGNAL direction);
+
+    // === P2-8: ATR Cap ===
+    void              PushATR(double atr);
+    double            GetATRCap(void);
+
     //--- Getters
     bool              IsInitialized(void) const { return m_is_initialized; }
     int               GetMaxOrders(void) const { return m_max_orders; }
@@ -119,14 +150,23 @@ CRiskGuardian::CRiskGuardian(void) :
     m_is_initialized(false),
     m_last_check_time(0),
     m_validation_count(0),
-    m_rejections_count(0)
+    m_rejections_count(0),
+    m_portfolio_dd_limit(5.0),
+    m_day_start_equity(0.0),
+    m_portfolio_halted(false),
+    m_atr_hist_pos(0),
+    m_atr_hist_full(false)
 {
-    // Initialize stats
+    // Initialize rejection stats
     m_rejection_stats.daily_limit = 0;
     m_rejection_stats.max_orders = 0;
     m_rejection_stats.max_exposure = 0;
     m_rejection_stats.lot_size = 0;
     m_rejection_stats.other = 0;
+    // Initialize ATR history buffer
+    ArrayInitialize(m_atr_history, 0.0);
+    // Initialize quotas
+    _InitQuotas();
 }
 
 //+------------------------------------------------------------------+
@@ -190,13 +230,19 @@ bool CRiskGuardian::Initialize(int max_orders=5,
     
     m_is_initialized = true;
     m_last_check_time = TimeCurrent();
-    
+
+    // P0-1: Snapshot equity at session start for portfolio DD tracking
+    m_day_start_equity = AccountInfoDouble(ACCOUNT_EQUITY);
+    if(m_day_start_equity <= 0) m_day_start_equity = AccountInfoDouble(ACCOUNT_BALANCE);
+    m_portfolio_halted = false;
+
     Print("✅ Risk Guardian initialized successfully");
     Print("   Max Orders: ", m_max_orders);
     Print("   Max Risk: ", m_max_risk_percent, "%");
     Print("   Max Exposure: ", m_max_exposure_percent, "%");
     Print("   Daily Limit: ", daily_limit, "%");
-    
+    Print("   Portfolio DD Limit: ", m_portfolio_dd_limit, "% | Start equity: ", m_day_start_equity);
+
     return true;
 }
 
@@ -330,7 +376,12 @@ bool CRiskGuardian::CheckDailyLimit(void)
 {
     if(m_daily_limit == NULL)
         return true;
-    
+
+    // P0-1: Check portfolio-level drawdown (5%) first
+    CheckPortfolioDrawdown();
+    if(m_portfolio_halted)
+        return false;
+
     return !m_daily_limit.IsDailyLimitReached();
 }
 
@@ -513,6 +564,117 @@ void CRiskGuardian::PrintRejectionStats(void)
         Print("Other: ", m_rejection_stats.other, " (", DoubleToString((double)m_rejection_stats.other / m_rejections_count * 100.0, 1), "%)");
     }
     Print("============================");
+}
+
+// ====================================================================
+// P0-1 / P0-2 / P1-3 / P2-8: New Risk Extensions
+// ====================================================================
+
+void CRiskGuardian::_InitQuotas(void)
+{
+    for(int i = 0; i < 16; i++) m_strategy_quota[i] = 1;
+    m_strategy_quota[5]  = 3;  // S06 KAMA
+    m_strategy_quota[9]  = 2;  // S10 Turtle
+    m_strategy_quota[13] = 3;  // S14 BBSqueeze
+}
+
+int CRiskGuardian::_CountPositionsByMagic(int magic)
+{
+    int count = 0;
+    for(int i = PositionsTotal() - 1; i >= 0; i--)
+    {
+        ulong ticket = PositionGetTicket(i);
+        if(ticket == 0) continue;
+        if((int)PositionGetInteger(POSITION_MAGIC) == magic) count++;
+    }
+    return count;
+}
+
+bool CRiskGuardian::CheckStrategySlot(int magic)
+{
+    int idx = magic - 1001; // 1001→0, 1006→5, 1010→9, 1014→13
+    if(idx < 0 || idx >= 16) return true;
+    int quota = m_strategy_quota[idx];
+    int open  = _CountPositionsByMagic(magic);
+    if(open >= quota)
+    {
+        PrintFormat("[Risk] Slot FULL: magic=%d open=%d/quota=%d", magic, open, quota);
+        return false;
+    }
+    return true;
+}
+
+bool CRiskGuardian::CheckPortfolioDrawdown(void)
+{
+    if(m_portfolio_halted) return false;
+    if(m_day_start_equity <= 0) return true;
+    double cur_equity = AccountInfoDouble(ACCOUNT_EQUITY);
+    double dd_pct = (m_day_start_equity - cur_equity) / m_day_start_equity * 100.0;
+    if(dd_pct >= m_portfolio_dd_limit)
+    {
+        m_portfolio_halted = true;
+        PrintFormat("[Risk] ⛔ PORTFOLIO HALT: DD=%.2f%% >= %.1f%% | equity=%.2f start=%.2f",
+                    dd_pct, m_portfolio_dd_limit, cur_equity, m_day_start_equity);
+        return false;
+    }
+    return true;
+}
+
+double CRiskGuardian::_CalcNetUSDExposure(string new_symbol, ENUM_TRADE_SIGNAL new_dir, double new_lot)
+{
+    double net_usd = 0.0;
+    for(int i = PositionsTotal() - 1; i >= 0; i--)
+    {
+        ulong ticket = PositionGetTicket(i);
+        if(ticket == 0) continue;
+        string sym  = PositionGetString(POSITION_SYMBOL);
+        double lots = PositionGetDouble(POSITION_VOLUME);
+        double sign = ((ENUM_POSITION_TYPE)PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY) ? 1.0 : -1.0;
+        if(StringFind(sym, "USDJPY") >= 0)      net_usd += sign * lots;
+        else if(StringFind(sym, "GBPUSD") >= 0) net_usd -= sign * lots;
+        else if(StringFind(sym, "XAUUSD") >= 0) net_usd -= sign * lots;
+    }
+    if(new_lot > 0)
+    {
+        double ns = (new_dir == SIGNAL_BUY) ? 1.0 : -1.0;
+        if(StringFind(new_symbol, "USDJPY") >= 0)      net_usd += ns * new_lot;
+        else if(StringFind(new_symbol, "GBPUSD") >= 0) net_usd -= ns * new_lot;
+        else if(StringFind(new_symbol, "XAUUSD") >= 0) net_usd -= ns * new_lot;
+    }
+    return net_usd;
+}
+
+bool CRiskGuardian::CheckCurrencyExposure(string symbol, ENUM_TRADE_SIGNAL direction)
+{
+    double net = _CalcNetUSDExposure(symbol, direction, 0.01);
+    if(MathAbs(net) > 5.0)
+    {
+        PrintFormat("[Risk] ❌ Currency exposure: net_USD=%.2f > 5.0 | %s %s",
+                    net, symbol, (direction == SIGNAL_BUY ? "BUY" : "SELL"));
+        return false;
+    }
+    return true;
+}
+
+void CRiskGuardian::PushATR(double atr)
+{
+    if(atr <= 0) return;
+    m_atr_history[m_atr_hist_pos] = atr;
+    m_atr_hist_pos = (m_atr_hist_pos + 1) % 20;
+    if(m_atr_hist_pos == 0) m_atr_hist_full = true;
+}
+
+double CRiskGuardian::GetATRCap(void)
+{
+    int n = m_atr_hist_full ? 20 : m_atr_hist_pos;
+    if(n == 0) return DBL_MAX;
+    double sorted[];
+    ArrayResize(sorted, n);
+    for(int i = 0; i < n; i++) sorted[i] = m_atr_history[i];
+    ArraySort(sorted);
+    int p75 = (int)MathFloor(n * 0.75);
+    if(p75 >= n) p75 = n - 1;
+    return sorted[p75];
 }
 
 //+------------------------------------------------------------------+

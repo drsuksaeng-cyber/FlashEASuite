@@ -66,6 +66,9 @@ private:
     double  m_breakout_strength;
     double  m_trend_consistency;
 
+    //--- Same-bar re-entry guard (P2-6)
+    datetime m_last_signal_bar; // Bar open time of last BREAKOUT ENTRY signal
+
     //=================================================================
     //  PRIVATE HELPERS
     //=================================================================
@@ -149,6 +152,7 @@ private:
         m_unit_count       = 0;
         m_direction        = SIGNAL_NONE;
         m_last_entry_price = 0.0;
+        m_last_signal_bar  = 0; // reset guard on position reset
     }
 
 public:
@@ -176,6 +180,7 @@ public:
 
         m_breakout_strength = 0.0;
         m_trend_consistency = 0.5;
+        m_last_signal_bar   = 0;
 
         _ResetPyramid();
     }
@@ -268,6 +273,15 @@ public:
 
         if(sig != SIGNAL_NONE)
         {
+            // P2-6: Same-bar re-entry guard — one breakout entry per bar only
+            datetime cur_bar = iTime(m_symbol, m_timeframe, 0);
+            if(cur_bar == m_last_signal_bar)
+            {
+                m_state.last_signal = SIGNAL_NONE;
+                return;
+            }
+            m_last_signal_bar = cur_bar;
+
             m_direction        = sig;
             m_unit_count       = 1;
             m_last_entry_price = price;

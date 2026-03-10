@@ -63,26 +63,37 @@ PUB_PORT               = 7778   # ZMQ PUB (Trader SUB ต่อมา)
 CONFIG_PUSH_INTERVAL   = 30     # ส่ง CONFIG_PUSH ทุก N วินาที
 HEARTBEAT_INTERVAL     = 10     # ส่ง HEARTBEAT ทุก N วินาที
 
+# P3-13: Config version counter (increments each send for traceability)
+_config_version = 0
+
+# P3-12: risk_mult clamp bounds
+RISK_MULT_MIN = 0.3
+RISK_MULT_MAX = 2.0
+
+def _clamp_risk_mult(v: float) -> float:
+    """P3-12: Clamp risk_mult to [0.3, 2.0] — prevents extreme position sizing."""
+    return max(RISK_MULT_MIN, min(RISK_MULT_MAX, float(v)))
+
 # Strategies เปิดใช้งาน (ปรับ enabled=False เพื่อปิด)
 # id_str: "S06","S14" → _MapStratIDToIndex รู้จักทั้ง "S06" และ "0"-"15"
+# Entry format: [id_str, name_str, enabled, confidence, tf_str, mm_method, risk_mult]
 DEFAULT_STRATEGIES = [
     {
         "symbol_base": "USDJPY",
         "strategies": [
-            # [id_str, name_str, enabled, confidence, tf_str, mm_method]
-            ["S06", "KAMA", True, 1.0, "H4", "MM01"],
+            ["S06", "KAMA", True, 1.0, "H4", "MM01", 1.0],
         ]
     },
     {
         "symbol_base": "XAUUSD",
         "strategies": [
-            ["S14", "BBSqueeze", True, 1.0, "H1", "MM01"],
+            ["S14", "BBSqueeze", True, 1.0, "H1", "MM01", 1.0],
         ]
     },
     {
         "symbol_base": "GBPUSD",
         "strategies": [
-            ["S14", "BBSqueeze", True, 1.0, "H1", "MM01"],
+            ["S14", "BBSqueeze", True, 1.0, "H1", "MM01", 1.0],
         ]
     },
 ]
@@ -101,11 +112,17 @@ def build_symbols_array(symbol_suffix: str, strategies_def: list) -> list:
     symbols = []
     for sym_cfg in strategies_def:
         full_sym = sym_cfg["symbol_base"] + symbol_suffix
-        strats = sym_cfg["strategies"]
+        # P3-12: clamp risk_mult on each strategy entry (index 6)
+        strats = []
+        for raw in sym_cfg["strategies"]:
+            entry = list(raw)
+            if len(entry) > 6:
+                entry[6] = _clamp_risk_mult(entry[6])
+            strats.append(entry)
         sym_entry = [
-            full_sym,          # [0] symbol name (with suffix)
-            len(strats),       # [1] strat_count
-            strats,            # [2] strategies: [[id,name,enabled,conf,tf,mm], ...]
+            full_sym,     # [0] symbol name (with suffix)
+            len(strats),  # [1] strat_count
+            strats,       # [2] strategies: [[id,name,enabled,conf,tf,mm,risk_mult], ...]
         ]
         symbols.append(sym_entry)
     return symbols
@@ -114,15 +131,18 @@ def build_symbols_array(symbol_suffix: str, strategies_def: list) -> list:
 def build_config_push(regime: str, symbol_suffix: str, strategies_def: list) -> bytes:
     """
     สร้าง CONFIG_PUSH (type 10) packed bytes
-    Format: [10, ts_ms, regime, sym_count, [symbols]]
+    Format: [10, ts_ms, regime, sym_count, [symbols], config_version]
     """
+    global _config_version
+    _config_version += 1
     symbols_array = build_symbols_array(symbol_suffix, strategies_def)
     msg = [
-        10,                       # [0] msg_type = CONFIG_PUSH
-        now_ms(),                 # [1] timestamp_ms
-        regime,                   # [2] regime string
-        len(symbols_array),       # [3] symbol_count (int, redundant แต่ต้องมี)
-        symbols_array,            # [4] symbols array
+        10,                  # [0] msg_type = CONFIG_PUSH
+        now_ms(),            # [1] timestamp_ms
+        regime,              # [2] regime string
+        len(symbols_array),  # [3] symbol_count
+        symbols_array,       # [4] symbols array
+        _config_version,     # [5] P3-13: version counter (MQL5 ignores — future use)
     ]
     return msgpack.packb(msg, use_bin_type=True)
 
@@ -131,15 +151,17 @@ def build_initial_config(regime: str, symbol_suffix: str, strategies_def: list) 
     """
     สร้าง INITIAL_CONFIG (type 12) packed bytes
     Format เหมือน CONFIG_PUSH ทุกอย่าง แต่ element[0] = 12
-    Trader จะ print "[V6] ✅ INITIAL_CONFIG: ONLINE MODE | 16 strategies registered"
     """
+    global _config_version
+    _config_version += 1
     symbols_array = build_symbols_array(symbol_suffix, strategies_def)
     msg = [
-        12,                       # [0] msg_type = INITIAL_CONFIG
-        now_ms(),                 # [1] timestamp_ms
-        regime,                   # [2] regime string
-        len(symbols_array),       # [3] symbol_count
-        symbols_array,            # [4] symbols array
+        12,                  # [0] msg_type = INITIAL_CONFIG
+        now_ms(),            # [1] timestamp_ms
+        regime,              # [2] regime string
+        len(symbols_array),  # [3] symbol_count
+        symbols_array,       # [4] symbols array
+        _config_version,     # [5] P3-13: version counter
     ]
     return msgpack.packb(msg, use_bin_type=True)
 
