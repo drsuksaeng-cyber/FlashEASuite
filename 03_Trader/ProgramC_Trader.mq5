@@ -843,6 +843,13 @@ void ProcessMessage_V6(const uchar &data[], int size)
       }
 
       //---------------------------------------------------------------
+      // [2] MSG_TYPE_POLICY — Legacy V5 PolicyMessage (Grid/Spike from Brain)
+      // V6 standalone ไม่ใช้ Brain policy → silently ignore
+      //---------------------------------------------------------------
+      case MSG_TYPE_POLICY:
+         break;
+
+      //---------------------------------------------------------------
       // [50] POLICY_UPDATE / [99] ERROR / unknown
       //---------------------------------------------------------------
       case MSG_POLICY_UPDATE:

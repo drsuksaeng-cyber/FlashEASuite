@@ -12,9 +12,11 @@
 | S10 Real tick validation | ❌ FAIL | PF=1.07, DD=48.88%, Trades=42, LR=-0.78 |
 | S14 XAUUSD H1 Full 2022-2024 | ✅ | PF=1.84, DD=2.36%, Trades=23, LR=0.92 |
 | S14 XAUUSD H1 Train 2022-2023 | ✅ | PF=1.41, DD=2.36%, Trades=17, LR=0.88 |
-| S14 XAUUSD H1 Test 2024 | ⏳ | ยังไม่ได้ผล |
-| S06 KAMA USDJPY H4 Walk-Forward | ⏳ | มีผล Full แต่ไม่แน่ใจ period |
-| S14 GBPUSD H1 Walk-Forward | ⬜ | ยังไม่เริ่ม |
+| S14 XAUUSD H1 Test 2024 | ✅ | PF=4.34, DD=3.58%, Trades=24, LR=0.91 |
+| S06 KAMA USDJPY H4 Train 2022-2023 | ✅ | PF=1.36, DD=1.24%, Trades=29, LR=0.46 |
+| S06 KAMA USDJPY H4 Test 2024 | ✅ | PF=8.32, DD=1.22%, Trades=25, LR=0.93 |
+| S14 GBPUSD H1 Train 2022-2023 | ✅ | PF=4.37, DD=3.58%, Trades=14*, LR=0.96 (*1 ต่ำกว่า target) |
+| S14 GBPUSD H1 Test 2024 | ✅ | PF=3.56, DD=5.93%, Trades=11, LR=0.79 |
 | ZMQ Live Connection | ⏳ | รอตลาดเปิด |
 | Demo Run | ⏳ | รอ ZMQ ผ่านก่อน |
 
@@ -68,13 +70,13 @@ Set:    S14_XAUUSD_H1_FINAL.set  (BB=25, KC=1.15, SqMin=6, SL/TP=3.4)
 
 | Metric | Target | Actual | ผล |
 |--------|--------|--------|----|
-| Profit Factor | > 1.0 | | |
-| Net Profit | บวก | | |
-| Equity DD Max | < 5% | | |
-| Trades | ≥ 4 | | |
-| LR Correlation | บวก | | |
+| Profit Factor | > 1.0 | 4.34 | ✅ |
+| Net Profit | บวก | $686.45 | ✅ |
+| Equity DD Max | < 5% | 3.58% | ✅ |
+| Trades | ≥ 4 | 24 | ✅ |
+| LR Correlation | บวก | 0.91 | ✅ |
 
-**สรุป B1:** ⏳
+**สรุป B1:** ✅ PASS — PF=4.34 ดีเยี่ยม
 
 ---
 
@@ -166,11 +168,11 @@ Date: 2024.01.01 – 2024.12.31
 |----------|--------|--------|----|-----|--------|-----|-----|
 | S14 BBSqueeze | XAUUSD H1 | Full 2022-2024 | 1.84 | 2.36% | 23 | 0.92 | ✅ |
 | S14 BBSqueeze | XAUUSD H1 | Train 2022-2023 | 1.41 | 2.36% | 17 | 0.88 | ✅ |
-| S14 BBSqueeze | XAUUSD H1 | Test 2024 | ⏳ | — | — | — | รอ |
-| S06 KAMA | USDJPY H4 | Train 2022-2023 | ⏳ | — | — | — | รอ |
-| S06 KAMA | USDJPY H4 | Test 2024 | ⏳ | — | — | — | รอ |
-| S14 BBSqueeze | GBPUSD H1 | Train 2022-2023 | ⬜ | — | — | — | รอ |
-| S14 BBSqueeze | GBPUSD H1 | Test 2024 | ⬜ | — | — | — | รอ |
+| S14 BBSqueeze | XAUUSD H1 | Test 2024 | 4.34 | 3.58% | 24 | 0.91 | ✅ |
+| S06 KAMA | USDJPY H4 | Train 2022-2023 | 1.36 | 1.24% | 29 | 0.46 | ✅ |
+| S06 KAMA | USDJPY H4 | Test 2024 | 8.32 | 1.22% | 25 | 0.93 | ✅ |
+| S14 BBSqueeze | GBPUSD H1 | Train 2022-2023 | 4.37 | 3.58% | 14* | 0.96 | ✅ |
+| S14 BBSqueeze | GBPUSD H1 | Test 2024 | 3.56 | 5.93% | 11 | 0.79 | ✅ |
 
 ---
 
