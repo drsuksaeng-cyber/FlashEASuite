@@ -53,7 +53,7 @@ def optimize(
     pruner = optuna.pruners.MedianPruner(n_startup_trials=20)
 
     if study_name is None:
-        study_name = f"opt_{strategy_name}"
+        study_name = f"opt_{strategy.name}"
 
     study = optuna.create_study(
         study_name=study_name,
