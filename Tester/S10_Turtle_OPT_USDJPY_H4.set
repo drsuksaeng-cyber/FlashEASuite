@@ -1,0 +1,26 @@
+; S10 Turtle — Optimization Preset for USDJPY H4
+; Target  : USDJPY.tp | Timeframe: H4
+; Period  : 2022.01.01 – 2024.12.31 (3 years train)
+; WF Test : 2025.01.01 – 2025.12.31 (1 year OOS)
+; Model   : Every tick based on real ticks
+; Optimize: Custom max (OnTester criterion)
+; Deposit : 10,000 USD
+; ----------------------------------------------------------------
+; Notes:
+;   - USDJPY forex = lower vol than XAUUSD → wider Entry range
+;   - Risk 0.2-1.0% per unit (conservative for pyramid)
+;   - MaxUnits 2-4 (Turtle classic pyramiding)
+;   - Breakout buffer wider range for forex
+; ----------------------------------------------------------------
+[Inputs]
+Turtle_EntryPeriod=10||10|5|30|Y
+Turtle_ExitPeriod=30||20|5|50|Y
+Turtle_ATR_Period=20||20|10|30|N
+Turtle_BreakoutBuf=0.15||0.05|0.05|0.50|Y
+Turtle_MaxUnits=3||2|1|4|Y
+Turtle_UnitSpacing=0.50||0.25|0.25|1.00|Y
+Turtle_RiskPct=0.20||0.20|0.10|1.00|Y
+Inp_MinConfidence=0||0|0|0.80|N
+Inp_MaxPositions=3||3|1|4|N
+Inp_Slippage=10||10|3|30|N
+Inp_UseOnTester=true||true|||N
