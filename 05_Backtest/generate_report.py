@@ -99,9 +99,9 @@ def generate_html():
     html += '<div class="legend">'
     html += '<span><div class="dot dot-pass"></div> WF PASS</span>'
     html += '<span><div class="dot dot-fail"></div> WF FAIL</span>'
-    html += '<span><div class="dot dot-gold"></div> Global Best</span>'
-    html += '<span><div class="dot dot-best"></div> Best in Strategy</span>'
+    html += '<span><div class="dot dot-gold"></div> Best in Strategy</span>'
     html += '</div>'
+    html += f'<p style="color:#8b949e;font-size:0.82em;margin:5px 0">WF PASS = OOS PF >= 1.0 on >= 60% of windows AND avg OOS PF >= 1.2</p>'
     html += '<table><tr><th>Strategy</th>'
     for sym in symbols:
         for tf in tfs:
@@ -111,6 +111,8 @@ def generate_html():
     for strat_name, combos in sorted(strategies.items()):
         html += f'<tr><td><b>{strat_name}</b></td>'
         pass_count = 0
+        strat_best_sym_tf = best_pass_per_strat.get(strat_name)
+
         for sym in symbols:
             for tf in tfs:
                 match = [c for c in combos if c["symbol"] == sym and c["tf"] == tf]
@@ -122,13 +124,10 @@ def generate_html():
                     ppy_thb = to_display(ppy)
                     arp = c.get("annual_return_pct", ppy / 100)
 
-                    is_global_best = global_best_key == (strat_name, sym, tf)
-                    is_strat_best = best_pass_per_strat.get(strat_name) == (sym, tf)
+                    is_strat_best = strat_best_sym_tf == (sym, tf)
 
-                    if is_global_best:
+                    if is_strat_best:
                         bg = "gold"
-                    elif is_strat_best:
-                        bg = "strat-best"
                     elif wf == "PASS":
                         bg = "heatmap-good"
                     elif pf < 1.0 or ppy < 0:
