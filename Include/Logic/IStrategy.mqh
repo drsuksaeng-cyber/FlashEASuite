@@ -127,6 +127,10 @@ struct SConfigData
     bool                strategy_enabled[TOTAL_STRATEGIES];
     double              strategy_confidence[TOTAL_STRATEGIES];
     string              strategy_params[TOTAL_STRATEGIES];
+
+    // Per-strategy symbol + timeframe (multi-TF multi-symbol support)
+    string              strategy_symbol[TOTAL_STRATEGIES];
+    ENUM_TIMEFRAMES     strategy_timeframe[TOTAL_STRATEGIES];
     
     // Money management
     string              mm_method;          // Selected MM method (e.g., "MM4")
@@ -157,6 +161,8 @@ struct SConfigData
             strategy_enabled[i] = false;
             strategy_confidence[i] = 0.0;
             strategy_params[i] = "";
+            strategy_symbol[i] = "";
+            strategy_timeframe[i] = PERIOD_CURRENT;
         }
     }
 };

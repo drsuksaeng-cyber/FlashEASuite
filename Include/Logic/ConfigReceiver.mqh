@@ -556,9 +556,8 @@ private:
             int strat_arr_cnt = _MP_GetContainerSize(data, pos);
             if(strat_arr_cnt < 0) strat_arr_cnt = 0;
 
-            // Use this symbol's data if it matches ours (or as fallback first symbol)
-            bool use_this = (sym_name == m_my_symbol) || 
-                            (!found_my_symbol && s == syms_arr_cnt - 1);
+            // Multi-TF multi-symbol: process ALL symbols, not just our own
+            bool use_this = true;
 
             if(sym_name == m_my_symbol) found_my_symbol = true;
 
@@ -596,7 +595,9 @@ private:
                     {
                         new_cfg.strategy_enabled[idx]    = enabled;
                         new_cfg.strategy_confidence[idx] = confidence;
-                        if(mm_str != "") new_cfg.mm_method = mm_str; // use last seen mm_method
+                        new_cfg.strategy_symbol[idx]     = sym_name;
+                        new_cfg.strategy_timeframe[idx]  = StringToTimeframe(tf_str);
+                        if(mm_str != "") new_cfg.mm_method = mm_str;
                     }
                 }
             }

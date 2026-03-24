@@ -42,6 +42,16 @@
 #include "Strategies/S16_Spike.mqh"
 
 //+------------------------------------------------------------------+
+//| STRUCT: Per-strategy symbol+TF assignment (multi-TF multi-sym)  |
+//+------------------------------------------------------------------+
+struct SStrategyAssignment
+{
+    string          symbol;
+    ENUM_TIMEFRAMES timeframe;
+    bool            assigned;    // true = explicitly overridden
+};
+
+//+------------------------------------------------------------------+
 //| STRUCT: Strategy Status Snapshot (for GetStrategyStatus())       |
 //+------------------------------------------------------------------+
 struct SStrategyStatusEntry
@@ -89,9 +99,12 @@ private:
     bool        m_registered;
     bool        m_server_connected;
 
-    //--- Runtime context
-    string          m_symbol;
-    ENUM_TIMEFRAMES m_timeframe;
+    //--- Runtime context (defaults — used when no per-strategy override)
+    string          m_default_symbol;
+    ENUM_TIMEFRAMES m_default_timeframe;
+
+    //--- Per-strategy symbol+TF overrides (multi-TF multi-symbol)
+    SStrategyAssignment m_assignments[TOTAL_STRATEGIES];
 
     //=================================================================
     //  PRIVATE: Wire pointers to direct members
@@ -123,12 +136,17 @@ public:
     //+------------------------------------------------------------------+
     CStrategyManager_V6()
     {
-        m_registered       = false;
-        m_server_connected = false;
-        m_symbol           = "";
-        m_timeframe        = PERIOD_M15;
+        m_registered        = false;
+        m_server_connected  = false;
+        m_default_symbol    = "";
+        m_default_timeframe = PERIOD_M15;
         for(int i = 0; i < TOTAL_STRATEGIES; i++)
+        {
             m_registry[i] = NULL;
+            m_assignments[i].symbol    = "";
+            m_assignments[i].timeframe = PERIOD_CURRENT;
+            m_assignments[i].assigned  = false;
+        }
     }
 
     //+------------------------------------------------------------------+
@@ -146,8 +164,8 @@ public:
     //+------------------------------------------------------------------+
     bool RegisterAllStrategies(string symbol, ENUM_TIMEFRAMES tf)
     {
-        m_symbol    = symbol;
-        m_timeframe = tf;
+        m_default_symbol    = symbol;
+        m_default_timeframe = tf;
         _BuildRegistry();
 
         int ok_count  = 0;
@@ -157,11 +175,15 @@ public:
         {
             if(m_registry[i] == NULL) { fail_count++; continue; }
 
-            if(m_registry[i].Init(symbol, tf))
+            // Use per-strategy override if assigned, otherwise use defaults
+            string s_sym = m_assignments[i].assigned ? m_assignments[i].symbol    : symbol;
+            ENUM_TIMEFRAMES s_tf = m_assignments[i].assigned ? m_assignments[i].timeframe : tf;
+
+            if(m_registry[i].Init(s_sym, s_tf))
             {
                 ok_count++;
-                PrintFormat("[StrategyManager] S%02d %-24s Init OK", i + 1,
-                            m_registry[i].GetName());
+                PrintFormat("[StrategyManager] S%02d %-24s Init OK | %s %s", i + 1,
+                            m_registry[i].GetName(), s_sym, TimeframeToString(s_tf));
             }
             else
             {
@@ -281,13 +303,41 @@ public:
         m_server_connected = connected;
     }
 
+    //+------------------------------------------------------------------+
+    //| AssignStrategyContext: Set per-strategy symbol+TF override        |
+    //| Call BEFORE RegisterAllStrategies, or call after to reinit       |
+    //+------------------------------------------------------------------+
+    bool AssignStrategyContext(ENUM_STRATEGY_ID id, string symbol, ENUM_TIMEFRAMES tf)
+    {
+        int idx = (int)id;
+        if(idx < 0 || idx >= TOTAL_STRATEGIES) return false;
+
+        m_assignments[idx].symbol    = symbol;
+        m_assignments[idx].timeframe = tf;
+        m_assignments[idx].assigned  = true;
+
+        // Ensure symbol is in Market Watch (required for SymbolInfoTick)
+        SymbolSelect(symbol, true);
+
+        // If already registered, reinit this strategy with new context
+        if(m_registry[idx] != NULL && m_registered)
+        {
+            m_registry[idx].Deinit();
+            bool ok = m_registry[idx].Init(symbol, tf);
+            PrintFormat("[StrategyManager] AssignContext: S%02d → %s %s %s",
+                        idx + 1, symbol, TimeframeToString(tf), ok ? "OK" : "FAILED");
+            return ok;
+        }
+        return true;
+    }
+
     //=================================================================
     //  TICK PROCESSING
     //=================================================================
 
     //+------------------------------------------------------------------+
-    //| OnTick: Call Analyze() on all enabled strategies                 |
-    //| ServerOnly strategies are skipped when server is disconnected    |
+    //| OnTick: Legacy single-symbol — feeds same tick to all strategies  |
+    //| Kept for backward compatibility                                  |
     //+------------------------------------------------------------------+
     void OnTick(const MqlTick &tick)
     {
@@ -307,6 +357,32 @@ public:
         }
     }
 
+    //+------------------------------------------------------------------+
+    //| OnTickMultiSymbol: Each strategy gets tick for ITS OWN symbol     |
+    //| Use this instead of OnTick() for multi-TF multi-symbol mode     |
+    //+------------------------------------------------------------------+
+    void OnTickMultiSymbol()
+    {
+        if(!m_registered) return;
+
+        for(int i = 0; i < TOTAL_STRATEGIES; i++)
+        {
+            if(m_registry[i] == NULL)        continue;
+            if(!m_registry[i].IsEnabled())   continue;
+            if(!m_registry[i].IsInitialized()) continue;
+
+            if(!m_server_connected && !m_registry[i].IsStandaloneCapable())
+                continue;
+
+            // Get tick for THIS strategy's own symbol
+            string sym = m_registry[i].GetSymbol();
+            MqlTick tick;
+            if(!SymbolInfoTick(sym, tick)) continue;
+
+            m_registry[i].Analyze(tick);
+        }
+    }
+
     //=================================================================
     //  CONFIG & PARAMS
     //=================================================================
@@ -318,6 +394,18 @@ public:
     void ApplyConfig_V6(const SConfigData &config)
     {
         EnableByConfig(config);
+
+        // Apply per-strategy symbol+TF from CONFIG_PUSH (multi-TF multi-symbol)
+        for(int i = 0; i < TOTAL_STRATEGIES; i++)
+        {
+            if(config.strategy_enabled[i] && config.strategy_symbol[i] != "")
+            {
+                ENUM_TIMEFRAMES tf = config.strategy_timeframe[i];
+                if(tf == PERIOD_CURRENT) tf = m_default_timeframe;
+                AssignStrategyContext((ENUM_STRATEGY_ID)i,
+                                      config.strategy_symbol[i], tf);
+            }
+        }
     }
 
     //+------------------------------------------------------------------+
@@ -375,20 +463,22 @@ public:
 
             if(en) enabled_count++; else disabled_count++;
 
-            PrintFormat("║ %s | %-28s | %-8s | %s | Conf:%.2f | %s ║",
+            PrintFormat("║ %s | %-20s | %-8s | %s | %.2f | %s | %s %s ║",
                 m_registry[i].GetShortName(),
                 m_registry[i].GetName(),
                 en ? "ENABLED" : "DISABLED",
                 sa ? "SA" : "  ",
                 conf,
-                sig);
+                sig,
+                m_registry[i].GetSymbol(),
+                TimeframeToString(m_registry[i].GetTimeframe()));
         }
 
         Print("╠══════════════════════════════════════════════════════════════════╣");
-        PrintFormat("║  Enabled: %-2d  |  Disabled: %-2d  |  Server: %-3s  |  Symbol: %-12s ║",
+        PrintFormat("║  Enabled: %-2d  |  Disabled: %-2d  |  Server: %-3s  |  Default: %-12s ║",
             enabled_count, disabled_count,
             m_server_connected ? "ON " : "OFF",
-            m_symbol);
+            m_default_symbol);
         Print("╚══════════════════════════════════════════════════════════════════╝");
     }
 

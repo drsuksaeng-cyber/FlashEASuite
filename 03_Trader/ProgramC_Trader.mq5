@@ -38,11 +38,19 @@
 
 // ========== INPUT PARAMETERS ==========
 
-input group "═══ 1. STRATEGY SELECTION (เลือก 1 strategy ต่อ chart) ═══"
+input group "═══ 1. STRATEGY SELECTION ═══"
 input bool     V6_Enable_S06    = false; // S06 KAMA       → ใช้บน USDJPY H4
 input bool     V6_Enable_S14    = false; // S14 BBSqueeze  → ใช้บน XAUUSD H1 หรือ GBPUSD H1
 input bool     V6_Enable_S10    = false; // S10 Turtle     → ❌ ยังไม่ผ่าน validation อย่าเปิด
 input double   V6_MinConfidence = 0.30;  // Confidence ขั้นต่ำ (0.0-1.0)
+
+input group "═══ 1b. PER-STRATEGY SYMBOL+TF (Multi-TF Multi-Symbol) ═══"
+input string   V6_S06_Symbol    = "USDJPY";   // S06 symbol (ว่าง = chart symbol)
+input string   V6_S06_TF        = "H4";       // S06 timeframe
+input string   V6_S14_Symbol    = "XAUUSD";   // S14 symbol (ว่าง = chart symbol)
+input string   V6_S14_TF        = "H1";       // S14 timeframe
+input string   V6_S10_Symbol    = "";          // S10 symbol (ว่าง = chart symbol)
+input string   V6_S10_TF        = "H4";       // S10 timeframe
 
 input group "═══ 2. SYMBOL FORMAT (Broker suffix) ═══"
 input string   SYMBOL_PREFIX    = "";     // Prefix ก่อนชื่อ symbol (เช่น "f" สำหรับ FXPro)
@@ -304,7 +312,15 @@ int InitializeV6Mode()
    }
    Print("[V6] ✅ Risk Guardian initialized");
 
-   // 5. Register all 16 strategies using CHART timeframe (not hardcoded M15)
+   // 5. Assign per-strategy symbol+TF BEFORE registration (multi-TF multi-symbol)
+   if(V6_Enable_S06 && V6_S06_Symbol != "")
+      g_strategy_manager_v6.AssignStrategyContext(S06_KAMA,       FormatSymbol(V6_S06_Symbol), StringToTimeframe(V6_S06_TF));
+   if(V6_Enable_S14 && V6_S14_Symbol != "")
+      g_strategy_manager_v6.AssignStrategyContext(S14_BB_SQUEEZE, FormatSymbol(V6_S14_Symbol), StringToTimeframe(V6_S14_TF));
+   if(V6_Enable_S10 && V6_S10_Symbol != "")
+      g_strategy_manager_v6.AssignStrategyContext(S10_TURTLE,     FormatSymbol(V6_S10_Symbol), StringToTimeframe(V6_S10_TF));
+
+   // 5b. Register all 16 strategies (defaults = chart symbol + chart TF as fallback)
    if(!g_strategy_manager_v6.RegisterAllStrategies(v6_symbol, Period()))
       Print("[V6] ⚠️  Some strategies failed Init — continuing with partial set");
 
@@ -600,10 +616,8 @@ void OnTimer_V6()
       return;
    }
 
-   // ── Strategy tick ──
-   MqlTick tick;
-   if(!SymbolInfoTick(_Symbol, tick)) return;
-   g_strategy_manager_v6.OnTick(tick);
+   // ── Strategy tick (multi-TF multi-symbol: each strategy gets its own symbol's tick) ──
+   g_strategy_manager_v6.OnTickMultiSymbol();
 
    // ── Execute signals from V6 strategies ──
    ExecuteV6Signals();
@@ -939,12 +953,13 @@ void ExecuteV6Signals()
    // P1-5: Brain offline — block new entries until reconnected
    if(g_brain_offline_mode) return;
 
-   string sym = FormatSymbol(_Symbol);
-
    for(int i = 0; i < TOTAL_STRATEGIES; i++)
    {
       IStrategy* s = g_strategy_manager_v6.GetStrategyByID((ENUM_STRATEGY_ID)i);
       if(s == NULL || !s.IsEnabled() || !s.IsInitialized()) continue;
+
+      // Multi-TF multi-symbol: each strategy uses its OWN symbol
+      string sym = s.GetSymbol();
 
       ENUM_TRADE_SIGNAL sig = s.GetSignal();
       if(sig == SIGNAL_NONE) continue;
@@ -998,7 +1013,7 @@ void ExecuteV6Signals()
          if(cur_regime == REGIME_VOLATILE)
          {
             // Use iATR to check if current ATR < 80% of 20-period average → false volatile
-            int atr_h = iATR(sym, Period(), 20);
+            int atr_h = iATR(sym, s.GetTimeframe(), 20);
             if(atr_h != INVALID_HANDLE)
             {
                double atr_buf[];
@@ -1071,6 +1086,7 @@ void ExecuteV6Signals()
                     s.GetShortName(), sym,
                     (sig == SIGNAL_BUY ? "BUY" : "SELL"),
                     lot, sl, tp, confidence, (int)res.deal);
+         break; // P3-14: max 1 new trade per 200ms timer call — prevent burst opening
       }
       else
       {
