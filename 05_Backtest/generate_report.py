@@ -6,6 +6,17 @@ from datetime import datetime
 
 OUTPUT_DIR = Path(__file__).parent.parent / "output"
 
+# Currency settings
+ACCOUNT_CURRENCY = "USD"
+DISPLAY_CURRENCY = "THB"
+DISPLAY_SYMBOL = "฿"
+USD_TO_THB = 34.0  # approximate rate
+
+
+def to_display(usd_amount: float) -> float:
+    """Convert account currency to display currency."""
+    return usd_amount * USD_TO_THB
+
 
 def generate_html():
     json_path = OUTPUT_DIR / "best_params_all.json"
@@ -64,7 +75,7 @@ def generate_html():
 </head>
 <body>
 <h1>FlashEASuite V2 - Optimization Report</h1>
-<div class="timestamp">Generated: {now} | Python Optuna 200 trials | 5-year data (2021-2026) | Walk-Forward Validated</div>
+<div class="timestamp">Generated: {now} | Python Optuna 200 trials | 5-year data (2021-2026) | Walk-Forward Validated | Currency: {DISPLAY_CURRENCY} (1 USD = {USD_TO_THB:.0f} {DISPLAY_CURRENCY}) | Initial Equity: {DISPLAY_SYMBOL}{to_display(10000):,.0f}</div>
 """
 
     # ========== SECTION 1: Overview Matrix ==========
@@ -90,8 +101,9 @@ def generate_html():
                     bg = "heatmap-good" if wf == "PASS" else "heatmap-bad" if pf < 1.0 else "heatmap-neutral"
                     pf_str = f"{pf:.1f}" if pf < 100 else "999"
                     ppy = c.get("profit_per_year", c.get("profit", 0) / 5)
+                    ppy_thb = to_display(ppy)
                     arp = c.get("annual_return_pct", ppy / 100)
-                    html += f'<td class="{bg}"><span class="{cls}">{wf}</span><br>PF={pf_str}<br>${ppy:,.0f}/yr ({arp:.0f}%)</td>'
+                    html += f'<td class="{bg}"><span class="{cls}">{wf}</span><br>PF={pf_str}<br>{DISPLAY_SYMBOL}{ppy_thb:,.0f}/yr ({arp:.0f}%)</td>'
                     if wf == "PASS":
                         pass_count += 1
                 else:
@@ -108,17 +120,18 @@ def generate_html():
         html += f'<h3>{strat_name}</h3>'
 
         # Performance table
-        html += '<table><tr><th>Symbol</th><th>TF</th><th>PF</th><th>WR%</th><th>DD%</th><th>Trades</th><th>$/yr</th><th>%/yr</th><th>Score</th><th>WF</th><th>WF PF</th></tr>'
+        html += f'<table><tr><th>Symbol</th><th>TF</th><th>PF</th><th>WR%</th><th>DD%</th><th>Trades</th><th>{DISPLAY_SYMBOL}/yr</th><th>%/yr</th><th>Score</th><th>WF</th><th>WF PF</th></tr>'
         for c in sorted(combos, key=lambda x: (x["symbol"], x["tf"])):
             wf = c.get("wf_status", "N/A")
             cls = "pass" if wf == "PASS" else "fail"
             ppy = c.get("profit_per_year", c.get("profit", 0) / 5)
+            ppy_thb = to_display(ppy)
             arp = c.get("annual_return_pct", ppy / 100)
             row_cls = "best" if wf == "PASS" and ppy > 200 else ""
             pf_str = f'{c["pf"]:.2f}' if c["pf"] < 100 else "999"
             html += f'<tr class="{row_cls}"><td>{c["symbol"]}</td><td>{c["tf"]}</td>'
             html += f'<td>{pf_str}</td><td>{c["wr"]:.1f}</td><td>{c["dd"]:.1f}</td>'
-            html += f'<td>{c["trades"]}</td><td>${ppy:,.0f}</td><td>{arp:.1f}%</td>'
+            html += f'<td>{c["trades"]}</td><td>{DISPLAY_SYMBOL}{ppy_thb:,.0f}</td><td>{arp:.1f}%</td>'
             html += f'<td>{c["score"]:.2f}</td>'
             html += f'<td class="{cls}">{wf}</td>'
             html += f'<td>{c.get("wf_avg_pf", 0):.2f}</td></tr>'
