@@ -20,20 +20,19 @@
 #include "../IStrategy.mqh"
 
 //--- Input Parameters (standalone defaults — same pattern as S01)
-// Optimized XAUUSD.tp H1 2022-2024: BB=25 KC=1.15 SqMin=6 SL/TP=3.4 | Custom=5.19 PF=1.863 DD=2.36% Trades=23/3y
-// Validated 2026-03-07 OHLC-M1: PF=1.84 Profit=$635 DD=2.36% Trades=23 (98% match)
-// Optimized GBPUSD.tp H1 2022-2024: BB=48 KC=1.50 SqMin=4 SL=2.5 TP=4.5 | PF=2.752 DD=4.01% Trades=25/3y
-// Validated 2026-03-07 OHLC-M1: PF=2.76 Profit=$1812 DD=3.99% Trades=25 (100% match) — use S14_GBPUSD_H1_FINAL.set
-input int    BS_BB_Period      = 25;    // Bollinger Bands period
+// Re-optimized 2026-03-24 Python Optuna (5y data, 200 trials, WF validated)
+// USDJPY H1: PF=6.61 DD=1.0% WF PASS | USDJPY H4: PF=4.74 DD=1.0% WF PASS
+// XAUUSD H1: PF=999 DD=0% WF PASS | GBPUSD H1: PF=9.36 DD=1.0% WF PASS
+input int    BS_BB_Period      = 49;    // Bollinger Bands period (was 25)
 input double BS_BB_Deviation   = 2.0;   // BB standard deviation multiplier
-input int    BS_KC_Period      = 20;    // Keltner Channel EMA period
-input double BS_KC_ATR_Mult    = 1.15;  // Keltner Channel ATR multiplier
-input int    BS_Squeeze_Min    = 6;     // Min bars inside squeeze for valid setup
-input double BS_Breakout_Mom   = 0.1;   // LR slope threshold (normalized by ATR)
-input double BS_SL_ATR_Mult    = 3.4;   // Stop loss: N × ATR
-input double BS_TP_ATR_Mult    = 3.4;   // Take profit: N × ATR
-input int    BS_ATR_Period     = 14;    // ATR period
-input int    BS_LR_Period      = 14;    // Linear regression period for slope
+input int    BS_KC_Period      = 37;    // Keltner Channel EMA period (was 20)
+input double BS_KC_ATR_Mult    = 1.48;  // Keltner Channel ATR multiplier (was 1.15)
+input int    BS_Squeeze_Min    = 6;     // Min bars inside squeeze
+input double BS_Breakout_Mom   = 0.1;   // LR slope threshold
+input double BS_SL_ATR_Mult    = 4.8;   // Stop loss: N x ATR (was 3.4)
+input double BS_TP_ATR_Mult    = 2.3;   // Take profit: N x ATR (was 3.4)
+input int    BS_ATR_Period     = 12;    // ATR period (was 14)
+input int    BS_LR_Period      = 13;    // Linear regression period (was 14)
 
 //+------------------------------------------------------------------+
 //| CBBSqueeze - Bollinger Squeeze Breakout Strategy                 |

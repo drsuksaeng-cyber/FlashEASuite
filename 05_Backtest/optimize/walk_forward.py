@@ -91,7 +91,7 @@ def run_walk_forward(
                                    initial_equity, risk_pct, max_positions)
 
         results.append({
-            "window": f"{w.train_start:%Y-%m} → {w.test_end:%Y-%m}",
+            "window": f"{w.train_start:%Y-%m} -> {w.test_end:%Y-%m}",
             "train_bars": len(df_train),
             "test_bars": len(df_test),
             "IS_trades": is_result.total_trades,
@@ -115,7 +115,7 @@ def print_wf_results(results: list[dict], strategy_name: str = ""):
     print(f"\n{'=' * 70}")
     print(f"  Walk-Forward Validation: {strategy_name}")
     print(f"{'=' * 70}")
-    print(tabulate(results, headers="keys", tablefmt="simple_grid", floatfmt=".2f"))
+    print(tabulate(results, headers="keys", tablefmt="grid", floatfmt=".2f"))
 
     # Summary
     oos_pfs = [r["OOS_PF"] for r in results if r["OOS_trades"] > 0]

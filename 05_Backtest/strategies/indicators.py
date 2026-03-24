@@ -57,7 +57,7 @@ def linear_regression_slope(close: pd.Series, period: int, atr_series: pd.Series
     """
     LR slope normalized by ATR.
     Matches S14 _CalcLRSlope() exactly:
-      x = 0..n-1, y = closes oldest→newest (reversed from ArraySetAsSeries)
+      x = 0..n-1, y = closes oldest->newest (reversed from ArraySetAsSeries)
     """
     slopes = pd.Series(np.nan, index=close.index)
     close_arr = close.values

@@ -94,6 +94,6 @@ def optimize(
                 "WR%": round(t.user_attrs.get("WR%", 0), 1),
             })
         print("  Top 10 Trials:")
-        print(tabulate(rows, headers="keys", tablefmt="simple_grid"))
+        print(tabulate(rows, headers="keys", tablefmt="grid"))
 
     return best_params, study

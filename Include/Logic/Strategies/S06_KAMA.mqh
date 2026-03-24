@@ -23,15 +23,16 @@
 #include "..\IStrategy.mqh"
 
 //--- Input Parameters
-// Optimized: USDJPY.tp H4 2022-2024 | Custom=17.23 | PF=3.27 DD=1.24% Trades=54/3y
-// Validated 2026-03-07 OHLC-M1: PF=1.99 Profit=$260 DD=1.94% Trades=26 (OHLC M1 undercounts vs real tick)
-input int    KAMA_Period     = 13;   // KAMA lookback period
+// Re-optimized 2026-03-24 Python Optuna (5y data, 200 trials, WF validated)
+// USDJPY H1: PF=4.26 DD=1.0% WF PASS | USDJPY H4: PF=3.52 DD=1.0% WF PASS
+// XAUUSD H4: PF=10.50 DD=1.0% WF PASS | GBPUSD H4: PF=1.77 DD=2.0% WF PASS
+input int    KAMA_Period     = 25;   // KAMA lookback period (was 13)
 input int    KAMA_Fast       = 2;    // Fast EMA period
-input int    KAMA_Slow       = 30;   // Slow EMA period
-input double KAMA_ER_Thresh  = 0.90; // Efficiency Ratio threshold for entry
-input double KAMA_TP_ATR     = 4.7;  // Take Profit multiplier (x ATR)
-input double KAMA_SL_ATR     = 2.3;  // Stop Loss multiplier (x ATR)
-input int    KAMA_ATR_Period = 14;   // ATR calculation period
+input int    KAMA_Slow       = 25;   // Slow EMA period (was 30)
+input double KAMA_ER_Thresh  = 0.78; // Efficiency Ratio threshold (was 0.90)
+input double KAMA_TP_ATR     = 5.5;  // Take Profit multiplier (was 4.7)
+input double KAMA_SL_ATR     = 3.5;  // Stop Loss multiplier (was 2.3)
+input int    KAMA_ATR_Period = 17;   // ATR calculation period (was 14)
 
 //+------------------------------------------------------------------+
 //| CKAMATrend — Adaptive Trend Following Strategy                   |

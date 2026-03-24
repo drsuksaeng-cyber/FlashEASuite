@@ -10,7 +10,7 @@ import pandas as pd
 CACHE_DIR = Path(__file__).parent / "cache"
 CACHE_DIR.mkdir(exist_ok=True)
 
-# Symbol mapping: broker symbol → yfinance ticker
+# Symbol mapping: broker symbol -> yfinance ticker
 YF_SYMBOL_MAP = {
     "USDJPY":    "USDJPY=X",
     "USDJPY.tp": "USDJPY=X",
@@ -172,7 +172,7 @@ def fetch_ohlcv(
     source: str = "auto",
 ) -> pd.DataFrame:
     """
-    Fetch OHLCV data. Tries cache → yfinance → MT5.
+    Fetch OHLCV data. Tries cache -> yfinance -> MT5.
 
     Args:
         symbol: e.g. "USDJPY.tp", "XAUUSD.tp", "USDJPY"
@@ -214,7 +214,7 @@ def fetch_ohlcv(
 
     # Cache
     df.to_parquet(cache_file, index=False)
-    print(f"  → Cached to {cache_file.name}")
+    print(f"  -> Cached to {cache_file.name}")
 
     return df
 
