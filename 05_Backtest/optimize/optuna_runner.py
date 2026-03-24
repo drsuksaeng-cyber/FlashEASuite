@@ -74,7 +74,7 @@ def optimize(
 
     if verbose:
         print(f"\n{'=' * 60}")
-        print(f"  Optimization Complete: {strategy_name}")
+        print(f"  Optimization Complete: {strategy.name}")
         print(f"{'=' * 60}")
         print(f"  Best Score : {best.value:.4f}")
         print(f"  PF         : {best.user_attrs.get('PF', 0):.2f}")
