@@ -109,7 +109,15 @@ class BacktestResult:
 
         return s
 
-    def summary(self) -> dict:
+    def profit_per_year(self, years: float = 5.0) -> float:
+        """Annualized profit. Default assumes 5-year backtest period."""
+        return self.net_profit / years if years > 0 else 0.0
+
+    def annual_return_pct(self, years: float = 5.0) -> float:
+        """Annualized return % on initial equity."""
+        return (self.profit_per_year(years) / self.initial_equity) * 100 if self.initial_equity > 0 else 0.0
+
+    def summary(self, years: float = 5.0) -> dict:
         return {
             "trades": self.total_trades,
             "profit": round(self.net_profit, 2),
@@ -119,4 +127,6 @@ class BacktestResult:
             "Sharpe": round(self.sharpe_ratio, 2),
             "RR": round(self.rr_ratio, 2),
             "Score": round(self.score(), 4),
+            "$/yr": round(self.profit_per_year(years), 2),
+            "%/yr": round(self.annual_return_pct(years), 1),
         }

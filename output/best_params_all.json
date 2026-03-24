@@ -20,7 +20,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 749.25,
-    "wf_pass": "3/4"
+    "wf_pass": "3/4",
+    "profit_per_year": 281.12,
+    "annual_return_pct": 2.8
   },
   "S10_Turtle|USDJPY.tp|H1": {
     "strategy": "S10_Turtle",
@@ -43,7 +45,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 8.67,
-    "wf_pass": "2/4"
+    "wf_pass": "2/4",
+    "profit_per_year": 12078.27,
+    "annual_return_pct": 120.8
   },
   "S14_BBSqueeze|USDJPY.tp|H1": {
     "strategy": "S14_BBSqueeze",
@@ -69,7 +73,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 999.0,
-    "wf_pass": "4/4"
+    "wf_pass": "4/4",
+    "profit_per_year": 116.53,
+    "annual_return_pct": 1.2
   },
   "S06_KAMA|USDJPY.tp|H4": {
     "strategy": "S06_KAMA",
@@ -92,7 +98,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 500.12,
-    "wf_pass": "2/2"
+    "wf_pass": "2/2",
+    "profit_per_year": 105.06,
+    "annual_return_pct": 1.1
   },
   "S10_Turtle|USDJPY.tp|H4": {
     "strategy": "S10_Turtle",
@@ -115,7 +123,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 0.83,
-    "wf_pass": "1/4"
+    "wf_pass": "1/4",
+    "profit_per_year": 6243.37,
+    "annual_return_pct": 62.4
   },
   "S14_BBSqueeze|USDJPY.tp|H4": {
     "strategy": "S14_BBSqueeze",
@@ -141,7 +151,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 749.55,
-    "wf_pass": "4/4"
+    "wf_pass": "4/4",
+    "profit_per_year": 232.32,
+    "annual_return_pct": 2.3
   },
   "S06_KAMA|XAUUSD.tp|H1": {
     "strategy": "S06_KAMA",
@@ -164,7 +176,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 1.27,
-    "wf_pass": "4/4"
+    "wf_pass": "4/4",
+    "profit_per_year": 1885.26,
+    "annual_return_pct": 18.9
   },
   "S10_Turtle|XAUUSD.tp|H1": {
     "strategy": "S10_Turtle",
@@ -187,7 +201,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 7.42,
-    "wf_pass": "3/4"
+    "wf_pass": "3/4",
+    "profit_per_year": 5499.56,
+    "annual_return_pct": 55.0
   },
   "S14_BBSqueeze|XAUUSD.tp|H1": {
     "strategy": "S14_BBSqueeze",
@@ -213,7 +229,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 999.0,
-    "wf_pass": "3/3"
+    "wf_pass": "3/3",
+    "profit_per_year": 222.55,
+    "annual_return_pct": 2.2
   },
   "S06_KAMA|XAUUSD.tp|H4": {
     "strategy": "S06_KAMA",
@@ -236,7 +254,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 749.37,
-    "wf_pass": "3/4"
+    "wf_pass": "3/4",
+    "profit_per_year": 202.64,
+    "annual_return_pct": 2.0
   },
   "S10_Turtle|XAUUSD.tp|H4": {
     "strategy": "S10_Turtle",
@@ -259,7 +279,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 2.88,
-    "wf_pass": "3/4"
+    "wf_pass": "3/4",
+    "profit_per_year": 6443.65,
+    "annual_return_pct": 64.4
   },
   "S14_BBSqueeze|XAUUSD.tp|H4": {
     "strategy": "S14_BBSqueeze",
@@ -285,7 +307,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 999.0,
-    "wf_pass": "2/2"
+    "wf_pass": "2/2",
+    "profit_per_year": 129.7,
+    "annual_return_pct": 1.3
   },
   "S06_KAMA|GBPUSD.tp|H1": {
     "strategy": "S06_KAMA",
@@ -308,7 +332,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 1.1,
-    "wf_pass": "3/4"
+    "wf_pass": "3/4",
+    "profit_per_year": 404.84,
+    "annual_return_pct": 4.0
   },
   "S10_Turtle|GBPUSD.tp|H1": {
     "strategy": "S10_Turtle",
@@ -331,7 +357,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 0.71,
-    "wf_pass": "0/4"
+    "wf_pass": "0/4",
+    "profit_per_year": -1139.71,
+    "annual_return_pct": -11.4
   },
   "S14_BBSqueeze|GBPUSD.tp|H1": {
     "strategy": "S14_BBSqueeze",
@@ -357,7 +385,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 999.0,
-    "wf_pass": "4/4"
+    "wf_pass": "4/4",
+    "profit_per_year": 167.88,
+    "annual_return_pct": 1.7
   },
   "S06_KAMA|GBPUSD.tp|H4": {
     "strategy": "S06_KAMA",
@@ -380,7 +410,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 500.0,
-    "wf_pass": "3/4"
+    "wf_pass": "3/4",
+    "profit_per_year": 159.59,
+    "annual_return_pct": 1.6
   },
   "S10_Turtle|GBPUSD.tp|H4": {
     "strategy": "S10_Turtle",
@@ -403,7 +435,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 1.01,
-    "wf_pass": "1/4"
+    "wf_pass": "1/4",
+    "profit_per_year": -501.74,
+    "annual_return_pct": -5.0
   },
   "S14_BBSqueeze|GBPUSD.tp|H4": {
     "strategy": "S14_BBSqueeze",
@@ -429,7 +463,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 1.1,
-    "wf_pass": "2/4"
+    "wf_pass": "2/4",
+    "profit_per_year": 419.32,
+    "annual_return_pct": 4.2
   },
   "S01_StatArb|USDJPY.tp|H1": {
     "strategy": "S01_StatArb",
@@ -452,7 +488,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 1.12,
-    "wf_pass": "2/4"
+    "wf_pass": "2/4",
+    "profit_per_year": 255.75,
+    "annual_return_pct": 2.6
   },
   "S01_StatArb|USDJPY.tp|H4": {
     "strategy": "S01_StatArb",
@@ -475,7 +513,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 1.96,
-    "wf_pass": "2/4"
+    "wf_pass": "2/4",
+    "profit_per_year": 485.43,
+    "annual_return_pct": 4.9
   },
   "S01_StatArb|XAUUSD.tp|H1": {
     "strategy": "S01_StatArb",
@@ -498,7 +538,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 1.03,
-    "wf_pass": "3/4"
+    "wf_pass": "3/4",
+    "profit_per_year": 927.36,
+    "annual_return_pct": 9.3
   },
   "S01_StatArb|XAUUSD.tp|H4": {
     "strategy": "S01_StatArb",
@@ -521,7 +563,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 1.11,
-    "wf_pass": "2/4"
+    "wf_pass": "2/4",
+    "profit_per_year": 442.76,
+    "annual_return_pct": 4.4
   },
   "S01_StatArb|GBPUSD.tp|H1": {
     "strategy": "S01_StatArb",
@@ -544,7 +588,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 1.07,
-    "wf_pass": "2/4"
+    "wf_pass": "2/4",
+    "profit_per_year": 1200.63,
+    "annual_return_pct": 12.0
   },
   "S01_StatArb|GBPUSD.tp|H4": {
     "strategy": "S01_StatArb",
@@ -567,7 +613,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 999.0,
-    "wf_pass": "4/4"
+    "wf_pass": "4/4",
+    "profit_per_year": 294.26,
+    "annual_return_pct": 2.9
   },
   "S07_MeanReversion|USDJPY.tp|H1": {
     "strategy": "S07_MeanReversion",
@@ -593,7 +641,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 0.99,
-    "wf_pass": "2/4"
+    "wf_pass": "2/4",
+    "profit_per_year": 77.53,
+    "annual_return_pct": 0.8
   },
   "S07_MeanReversion|USDJPY.tp|H4": {
     "strategy": "S07_MeanReversion",
@@ -619,7 +669,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 1.69,
-    "wf_pass": "4/4"
+    "wf_pass": "4/4",
+    "profit_per_year": 504.99,
+    "annual_return_pct": 5.0
   },
   "S07_MeanReversion|XAUUSD.tp|H1": {
     "strategy": "S07_MeanReversion",
@@ -645,7 +697,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 4.36,
-    "wf_pass": "3/4"
+    "wf_pass": "3/4",
+    "profit_per_year": 951.42,
+    "annual_return_pct": 9.5
   },
   "S07_MeanReversion|XAUUSD.tp|H4": {
     "strategy": "S07_MeanReversion",
@@ -671,7 +725,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 1.34,
-    "wf_pass": "3/4"
+    "wf_pass": "3/4",
+    "profit_per_year": 307.06,
+    "annual_return_pct": 3.1
   },
   "S07_MeanReversion|GBPUSD.tp|H1": {
     "strategy": "S07_MeanReversion",
@@ -697,7 +753,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 1.08,
-    "wf_pass": "3/4"
+    "wf_pass": "3/4",
+    "profit_per_year": 690.46,
+    "annual_return_pct": 6.9
   },
   "S07_MeanReversion|GBPUSD.tp|H4": {
     "strategy": "S07_MeanReversion",
@@ -723,7 +781,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 1.48,
-    "wf_pass": "3/4"
+    "wf_pass": "3/4",
+    "profit_per_year": 415.21,
+    "annual_return_pct": 4.2
   },
   "S15_Grid|USDJPY.tp|H1": {
     "strategy": "S15_Grid",
@@ -743,7 +803,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 0.78,
-    "wf_pass": "0/4"
+    "wf_pass": "0/4",
+    "profit_per_year": 118.62,
+    "annual_return_pct": 1.2
   },
   "S15_Grid|USDJPY.tp|H4": {
     "strategy": "S15_Grid",
@@ -763,7 +825,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 0.79,
-    "wf_pass": "1/4"
+    "wf_pass": "1/4",
+    "profit_per_year": 150.91,
+    "annual_return_pct": 1.5
   },
   "S15_Grid|XAUUSD.tp|H1": {
     "strategy": "S15_Grid",
@@ -783,7 +847,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 0.87,
-    "wf_pass": "1/4"
+    "wf_pass": "1/4",
+    "profit_per_year": 237.11,
+    "annual_return_pct": 2.4
   },
   "S15_Grid|XAUUSD.tp|H4": {
     "strategy": "S15_Grid",
@@ -803,7 +869,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 0.76,
-    "wf_pass": "1/4"
+    "wf_pass": "1/4",
+    "profit_per_year": 380.75,
+    "annual_return_pct": 3.8
   },
   "S15_Grid|GBPUSD.tp|H1": {
     "strategy": "S15_Grid",
@@ -823,7 +891,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 1.11,
-    "wf_pass": "4/4"
+    "wf_pass": "4/4",
+    "profit_per_year": 2707.57,
+    "annual_return_pct": 27.1
   },
   "S15_Grid|GBPUSD.tp|H4": {
     "strategy": "S15_Grid",
@@ -843,7 +913,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 0.94,
-    "wf_pass": "2/4"
+    "wf_pass": "2/4",
+    "profit_per_year": 102.19,
+    "annual_return_pct": 1.0
   },
   "S16_Spike|USDJPY.tp|H1": {
     "strategy": "S16_Spike",
@@ -868,7 +940,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 1.08,
-    "wf_pass": "4/4"
+    "wf_pass": "4/4",
+    "profit_per_year": 2863.07,
+    "annual_return_pct": 28.6
   },
   "S16_Spike|USDJPY.tp|H4": {
     "strategy": "S16_Spike",
@@ -893,7 +967,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 1.12,
-    "wf_pass": "2/4"
+    "wf_pass": "2/4",
+    "profit_per_year": 1381.78,
+    "annual_return_pct": 13.8
   },
   "S16_Spike|XAUUSD.tp|H1": {
     "strategy": "S16_Spike",
@@ -918,7 +994,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 1.3,
-    "wf_pass": "2/4"
+    "wf_pass": "2/4",
+    "profit_per_year": 373.07,
+    "annual_return_pct": 3.7
   },
   "S16_Spike|XAUUSD.tp|H4": {
     "strategy": "S16_Spike",
@@ -943,7 +1021,9 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 1.74,
-    "wf_pass": "4/4"
+    "wf_pass": "4/4",
+    "profit_per_year": 794.08,
+    "annual_return_pct": 7.9
   },
   "S16_Spike|GBPUSD.tp|H1": {
     "strategy": "S16_Spike",
@@ -968,7 +1048,9 @@
     },
     "wf_status": "FAIL",
     "wf_avg_pf": 1.12,
-    "wf_pass": "2/4"
+    "wf_pass": "2/4",
+    "profit_per_year": 111.32,
+    "annual_return_pct": 1.1
   },
   "S16_Spike|GBPUSD.tp|H4": {
     "strategy": "S16_Spike",
@@ -993,6 +1075,8 @@
     },
     "wf_status": "PASS",
     "wf_avg_pf": 1.36,
-    "wf_pass": "3/4"
+    "wf_pass": "3/4",
+    "profit_per_year": 454.79,
+    "annual_return_pct": 4.5
   }
 }
