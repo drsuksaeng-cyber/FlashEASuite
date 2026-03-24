@@ -38,6 +38,19 @@ def _stochastic(high: pd.Series, low: pd.Series, close: pd.Series,
 
 class S07MeanReversion(BaseStrategy):
     name = "S07_MeanReversion"
+    max_positions = 1
+    param_space = {
+        "rsi_period":    ("int", 10, 20),
+        "rsi_buy":       ("float", 20.0, 40.0),
+        "rsi_sell":      ("float", 60.0, 80.0),
+        "stoch_k":       ("int", 10, 20),
+        "stoch_buy":     ("float", 15.0, 30.0),
+        "stoch_sell":    ("float", 70.0, 85.0),
+        "atr_period":    ("int", 10, 20),
+        "vol_filter":    ("float", 1.0, 2.0),
+        "sl_atr_mult":   ("float", 1.5, 3.0),
+        "tp_atr_mult":   ("float", 1.0, 2.5),
+    }
 
     def default_params(self) -> dict:
         return {

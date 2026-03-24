@@ -13,6 +13,18 @@ from strategies import indicators as ind
 
 class S16Spike(BaseStrategy):
     name = "S16_Spike"
+    max_positions = 1
+    param_space = {
+        "atr_period":      ("int", 10, 20),
+        "velocity_thresh": ("float", 1.5, 4.0),
+        "roc_period":      ("int", 5, 20),
+        "roc_thresh":      ("float", 0.2, 1.0),
+        "volume_thresh":   ("float", 1.5, 3.0),
+        "score_min":       ("float", 50.0, 90.0),
+        "sl_atr_mult":     ("float", 0.2, 1.0),
+        "tp_atr_mult":     ("float", 0.5, 2.0),
+        "max_hold_bars":   ("int", 5, 30),
+    }
 
     def default_params(self) -> dict:
         return {

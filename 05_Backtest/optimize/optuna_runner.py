@@ -7,7 +7,6 @@ from tabulate import tabulate
 
 from engine.backtester import run_backtest
 from strategies.base import BaseStrategy
-from optimize.param_spaces import suggest_params
 
 
 def optimize(
@@ -27,10 +26,17 @@ def optimize(
     Returns:
         (best_params, study)
     """
-    strategy_name = strategy.name
+    def _suggest(trial, space):
+        params = {}
+        for key, (ptype, lo, hi) in space.items():
+            if ptype == "int":
+                params[key] = trial.suggest_int(key, lo, hi)
+            elif ptype == "float":
+                params[key] = trial.suggest_float(key, lo, hi)
+        return params
 
     def objective(trial):
-        params = suggest_params(trial, strategy_name)
+        params = _suggest(trial, strategy.param_space)
         result = run_backtest(df, strategy, params, initial_equity, risk_pct, max_positions)
         score = result.score()
 

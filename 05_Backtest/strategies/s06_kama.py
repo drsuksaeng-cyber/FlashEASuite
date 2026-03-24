@@ -11,6 +11,16 @@ from strategies import indicators as ind
 
 class S06KAMA(BaseStrategy):
     name = "S06_KAMA"
+    max_positions = 1
+    param_space = {
+        "kama_period":   ("int", 5, 30),
+        "kama_fast":     ("int", 2, 5),
+        "kama_slow":     ("int", 20, 40),
+        "er_threshold":  ("float", 0.10, 0.95),
+        "tp_atr_mult":   ("float", 1.5, 6.0),
+        "sl_atr_mult":   ("float", 1.0, 4.0),
+        "atr_period":    ("int", 10, 20),
+    }
 
     def default_params(self) -> dict:
         return {

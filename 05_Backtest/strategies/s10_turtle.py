@@ -12,6 +12,16 @@ from strategies import indicators as ind
 
 class S10Turtle(BaseStrategy):
     name = "S10_Turtle"
+    max_positions = 3
+    param_space = {
+        "entry_period":  ("int", 5, 30),
+        "exit_period":   ("int", 5, 50),
+        "atr_period":    ("int", 14, 25),
+        "breakout_buf":  ("float", 0.0, 0.50),
+        "max_units":     ("int", 1, 5),
+        "unit_spacing":  ("float", 0.25, 1.0),
+        "risk_pct":      ("float", 0.1, 1.0),
+    }
 
     def default_params(self) -> dict:
         return {

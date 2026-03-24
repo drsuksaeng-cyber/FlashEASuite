@@ -13,6 +13,13 @@ from strategies import indicators as ind
 
 class S15Grid(BaseStrategy):
     name = "S15_Grid"
+    max_positions = 10
+    param_space = {
+        "max_levels":    ("int", 3, 15),
+        "elastic_factor":("float", 0.5, 3.0),
+        "atr_period":    ("int", 10, 20),
+        "atr_ratio_thresh": ("float", 0.5, 1.0),
+    }
 
     def default_params(self) -> dict:
         return {

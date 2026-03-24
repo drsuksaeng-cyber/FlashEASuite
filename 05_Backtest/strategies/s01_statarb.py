@@ -13,6 +13,16 @@ from strategies.base import BaseStrategy
 
 class S01StatArb(BaseStrategy):
     name = "S01_StatArb"
+    max_positions = 1
+    param_space = {
+        "period":        ("int", 10, 40),
+        "entry_z":       ("float", 1.5, 3.0),
+        "stop_z":        ("float", 2.5, 4.0),
+        "beta":          ("float", 0.5, 1.5),
+        "sl_atr_mult":   ("float", 1.0, 3.0),
+        "tp_atr_mult":   ("float", 1.0, 3.0),
+        "atr_period":    ("int", 10, 20),
+    }
 
     def default_params(self) -> dict:
         return {

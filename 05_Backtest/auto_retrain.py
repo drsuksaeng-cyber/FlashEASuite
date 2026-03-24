@@ -29,27 +29,13 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent))
 
 from data.mt5_fetcher import fetch_ohlcv
-from strategies.s01_statarb import S01StatArb
-from strategies.s06_kama import S06KAMA
-from strategies.s07_meanreversion import S07MeanReversion
-from strategies.s10_turtle import S10Turtle
-from strategies.s14_bbsqueeze import S14BBSqueeze
-from strategies.s15_grid import S15Grid
-from strategies.s16_spike import S16Spike
+from strategies.base import discover_strategies
 from engine.backtester import run_backtest
 from optimize.optuna_runner import optimize
 from optimize.walk_forward import run_walk_forward
 
-# Config
-STRATEGIES = {
-    "S01": S01StatArb(),
-    "S06": S06KAMA(),
-    "S07": S07MeanReversion(),
-    "S10": S10Turtle(),
-    "S14": S14BBSqueeze(),
-    "S15": S15Grid(),
-    "S16": S16Spike(),
-}
+# Auto-discover all strategies
+STRATEGIES = discover_strategies()
 
 SYMBOLS = ["USDJPY.tp", "XAUUSD.tp", "GBPUSD.tp"]
 TIMEFRAMES = ["H1", "H4"]
@@ -90,7 +76,7 @@ def run_retrain(n_trials: int = N_TRIALS, verbose: bool = True):
                 continue
 
             for sk, strategy in STRATEGIES.items():
-                max_pos = 3 if sk == "S10" else (10 if sk == "S15" else 1)
+                max_pos = strategy.max_positions
                 key = f"{sk}_{sym}_{tf}"
 
                 print(f"\n{'='*50}")

@@ -11,6 +11,19 @@ from strategies import indicators as ind
 
 class S14BBSqueeze(BaseStrategy):
     name = "S14_BBSqueeze"
+    max_positions = 1
+    param_space = {
+        "bb_period":     ("int", 15, 60),
+        "bb_deviation":  ("float", 1.5, 3.0),
+        "kc_period":     ("int", 10, 40),
+        "kc_atr_mult":   ("float", 0.8, 2.0),
+        "squeeze_min":   ("int", 3, 12),
+        "breakout_mom":  ("float", 0.05, 0.5),
+        "sl_atr_mult":   ("float", 1.5, 5.0),
+        "tp_atr_mult":   ("float", 1.5, 6.0),
+        "atr_period":    ("int", 10, 20),
+        "lr_period":     ("int", 8, 20),
+    }
 
     def default_params(self) -> dict:
         return {
