@@ -1,0 +1,193 @@
+[I 2026-03-25 19:47:48,574] A new study created in memory with name: opt_S14_BBSqueeze
+[MT5] Fetched 62144 bars for EURUSD.tp M30
+  -> Cached to EURUSD_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31078 bars for EURUSD.tp H1
+  -> Cached to EURUSD_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62165 bars for GBPUSD.tp M30
+  -> Cached to GBPUSD_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31090 bars for GBPUSD.tp H1
+  -> Cached to GBPUSD_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62164 bars for USDJPY.tp M30
+  -> Cached to USDJPY_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31088 bars for USDJPY.tp H1
+  -> Cached to USDJPY_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62163 bars for USDCHF.tp M30
+  -> Cached to USDCHF_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31087 bars for USDCHF.tp H1
+  -> Cached to USDCHF_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62170 bars for USDCAD.tp M30
+  -> Cached to USDCAD_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31091 bars for USDCAD.tp H1
+  -> Cached to USDCAD_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62192 bars for AUDUSD.tp M30
+  -> Cached to AUDUSD_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31102 bars for AUDUSD.tp H1
+  -> Cached to AUDUSD_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62121 bars for NZDUSD.tp M30
+  -> Cached to NZDUSD_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31065 bars for NZDUSD.tp H1
+  -> Cached to NZDUSD_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62176 bars for EURGBP.tp M30
+  -> Cached to EURGBP_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31094 bars for EURGBP.tp H1
+  -> Cached to EURGBP_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62163 bars for EURJPY.tp M30
+  -> Cached to EURJPY_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31088 bars for EURJPY.tp H1
+  -> Cached to EURJPY_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62153 bars for EURCHF.tp M30
+  -> Cached to EURCHF_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31084 bars for EURCHF.tp H1
+  -> Cached to EURCHF_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62158 bars for EURAUD.tp M30
+  -> Cached to EURAUD_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31088 bars for EURAUD.tp H1
+  -> Cached to EURAUD_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62173 bars for EURCAD.tp M30
+  -> Cached to EURCAD_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31094 bars for EURCAD.tp H1
+  -> Cached to EURCAD_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62100 bars for EURNZD.tp M30
+  -> Cached to EURNZD_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31060 bars for EURNZD.tp H1
+  -> Cached to EURNZD_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62168 bars for GBPJPY.tp M30
+  -> Cached to GBPJPY_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31091 bars for GBPJPY.tp H1
+  -> Cached to GBPJPY_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62138 bars for GBPCHF.tp M30
+  -> Cached to GBPCHF_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31083 bars for GBPCHF.tp H1
+  -> Cached to GBPCHF_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62152 bars for GBPAUD.tp M30
+  -> Cached to GBPAUD_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31086 bars for GBPAUD.tp H1
+  -> Cached to GBPAUD_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62158 bars for GBPCAD.tp M30
+  -> Cached to GBPCAD_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31088 bars for GBPCAD.tp H1
+  -> Cached to GBPCAD_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62111 bars for GBPNZD.tp M30
+  -> Cached to GBPNZD_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31068 bars for GBPNZD.tp H1
+  -> Cached to GBPNZD_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62174 bars for AUDJPY.tp M30
+  -> Cached to AUDJPY_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31093 bars for AUDJPY.tp H1
+  -> Cached to AUDJPY_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62126 bars for AUDNZD.tp M30
+  -> Cached to AUDNZD_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31071 bars for AUDNZD.tp H1
+  -> Cached to AUDNZD_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62158 bars for AUDCAD.tp M30
+  -> Cached to AUDCAD_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31087 bars for AUDCAD.tp H1
+  -> Cached to AUDCAD_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62165 bars for AUDCHF.tp M30
+  -> Cached to AUDCHF_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31091 bars for AUDCHF.tp H1
+  -> Cached to AUDCHF_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62128 bars for NZDJPY.tp M30
+  -> Cached to NZDJPY_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31071 bars for NZDJPY.tp H1
+  -> Cached to NZDJPY_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62132 bars for NZDCAD.tp M30
+  -> Cached to NZDCAD_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31073 bars for NZDCAD.tp H1
+  -> Cached to NZDCAD_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62125 bars for NZDCHF.tp M30
+  -> Cached to NZDCHF_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31068 bars for NZDCHF.tp H1
+  -> Cached to NZDCHF_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62165 bars for CADJPY.tp M30
+  -> Cached to CADJPY_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31090 bars for CADJPY.tp H1
+  -> Cached to CADJPY_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62151 bars for CADCHF.tp M30
+  -> Cached to CADCHF_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31084 bars for CADCHF.tp H1
+  -> Cached to CADCHF_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 62095 bars for CHFJPY.tp M30
+  -> Cached to CHFJPY_tp_M30_20210326_20260325.parquet
+[MT5] Fetched 31064 bars for CHFJPY.tp H1
+  -> Cached to CHFJPY_tp_H1_20210326_20260325.parquet
+[MT5] Fetched 59552 bars for XAUUSD.tp M30
+  -> Cached to XAUUSD_tp_M30_20210326_20260325.parquet
+[Cache] Loaded 30766 bars from XAUUSD_tp_H1_20210326_20260325.parquet
+Data loaded: 58 symbol-TF combos
+  Screen: 200/928 (482s)
+  Screen: 400/928 (969s)
+  Screen: 600/928 (1437s)
+  Screen: 800/928 (1911s)
+Screen done: 928 combos in 2189s
+Viable: 63/928
+  Optimize: 20/63 (2097s)
+  Optimize: 40/63 (4165s)
+  Optimize: 60/63 (6847s)
+Optimize done: 63 combos in 7370s
+
+======================================================================
+  M15: 0 PASS / 0 optimized
+======================================================================
+
+======================================================================
+  M30: 8 PASS / 26 optimized
+======================================================================
+  S14_BBSqueeze          USDJPY.tp      | PF= 1.89 |    7.4% | DD=  2.5% | trades=   82 | WF=4/4
+  S14_BBSqueeze          NZDCAD.tp      | PF= 2.77 |    6.7% | DD=  2.0% | trades=   23 | WF=3/4
+  S06_KAMA               USDJPY.tp      | PF= 1.71 |    6.4% | DD=  2.0% | trades=   93 | WF=3/4
+  S06_KAMA               XAUUSD.tp      | PF= 3.49 |    5.4% | DD=  1.0% | trades=   33 | WF=3/4
+  S06_KAMA               CHFJPY.tp      | PF= 3.83 |    3.0% | DD=  1.0% | trades=   16 | WF=2/3
+  S14_BBSqueeze          AUDCAD.tp      | PF= 2.16 |    2.9% | DD=  1.8% | trades=   23 | WF=4/4
+  S06_KAMA               EURUSD.tp      | PF= 1.61 |    2.5% | DD=  1.4% | trades=   31 | WF=3/3
+  S06_KAMA               EURAUD.tp      | PF= 1.07 |    0.9% | DD=  7.9% | trades=   59 | WF=3/4
+
+======================================================================
+  H1: 17 PASS / 37 optimized
+======================================================================
+  S10_Turtle             XAUUSD.tp      | PF= 5.42 |  145.6% | DD= 65.8% | trades=  109 | WF=3/4
+  S11_Ichimoku           USDJPY.tp      | PF= 1.62 |   58.8% | DD=  5.8% | trades=  282 | WF=4/4
+  S06_KAMA               XAUUSD.tp      | PF= 1.16 |   26.4% | DD= 11.1% | trades=  873 | WF=4/4
+  S11_Ichimoku           EURJPY.tp      | PF= 1.31 |   20.9% | DD=  7.9% | trades=  368 | WF=3/4
+  S06_KAMA               CHFJPY.tp      | PF= 1.48 |   11.0% | DD=  4.0% | trades=  145 | WF=3/4
+  S06_KAMA               USDJPY.tp      | PF= 4.14 |    8.3% | DD=  1.0% | trades=   19 | WF=4/4
+  S14_BBSqueeze          AUDJPY.tp      | PF= 3.90 |    8.1% | DD=  2.0% | trades=   34 | WF=3/4
+  S06_KAMA               EURCAD.tp      | PF= 2.03 |    6.6% | DD=  2.0% | trades=   42 | WF=3/4
+  S06_KAMA               GBPCHF.tp      | PF= 2.90 |    5.8% | DD=  2.0% | trades=   20 | WF=2/2
+  S06_KAMA               EURNZD.tp      | PF= 3.04 |    5.7% | DD=  2.0% | trades=   16 | WF=2/3
+  S14_BBSqueeze          EURUSD.tp      | PF= 1.83 |    5.1% | DD=  3.0% | trades=   33 | WF=3/4
+  S14_BBSqueeze          NZDJPY.tp      | PF= 4.89 |    4.1% | DD=  1.0% | trades=   33 | WF=3/4
+  S14_BBSqueeze          USDJPY.tp      | PF= 3.62 |    4.1% | DD=  1.3% | trades=   18 | WF=4/4
+  S14_BBSqueeze          AUDCAD.tp      | PF= 1.82 |    2.5% | DD=  2.0% | trades=   15 | WF=3/3
+  S06_KAMA               EURCHF.tp      | PF= 1.98 |    2.5% | DD=  2.5% | trades=   24 | WF=2/3
+
+======================================================================
+  TOP 30 (M5-H1, WF PASS, sorted by %)
+======================================================================
+  Strategy               Symbol         TF   |    PF |      % |   DD% | Trades |    WF
+  ---------------------- -------------- ---- | ----- | ------ | ----- | ------ | -----
+  S10_Turtle             XAUUSD.tp      H1   |  5.42 | 145.6% |  65.8% |    109 |   3/4
+  S11_Ichimoku           USDJPY.tp      H1   |  1.62 |  58.8% |   5.8% |    282 |   4/4
+  S06_KAMA               XAUUSD.tp      H1   |  1.16 |  26.4% |  11.1% |    873 |   4/4
+  S11_Ichimoku           EURJPY.tp      H1   |  1.31 |  20.9% |   7.9% |    368 |   3/4
+  S06_KAMA               CHFJPY.tp      H1   |  1.48 |  11.0% |   4.0% |    145 |   3/4
+  S06_KAMA               USDJPY.tp      H1   |  4.14 |   8.3% |   1.0% |     19 |   4/4
+  S14_BBSqueeze          AUDJPY.tp      H1   |  3.90 |   8.1% |   2.0% |     34 |   3/4
+  S14_BBSqueeze          USDJPY.tp      M30  |  1.89 |   7.4% |   2.5% |     82 |   4/4
+  S14_BBSqueeze          NZDCAD.tp      M30  |  2.77 |   6.7% |   2.0% |     23 |   3/4
+  S06_KAMA               EURCAD.tp      H1   |  2.03 |   6.6% |   2.0% |     42 |   3/4
+  S06_KAMA               USDJPY.tp      M30  |  1.71 |   6.4% |   2.0% |     93 |   3/4
+  S06_KAMA               GBPCHF.tp      H1   |  2.90 |   5.8% |   2.0% |     20 |   2/2
+  S06_KAMA               EURNZD.tp      H1   |  3.04 |   5.7% |   2.0% |     16 |   2/3
+  S06_KAMA               XAUUSD.tp      M30  |  3.49 |   5.4% |   1.0% |     33 |   3/4
+  S14_BBSqueeze          EURUSD.tp      H1   |  1.83 |   5.1% |   3.0% |     33 |   3/4
+  S14_BBSqueeze          NZDJPY.tp      H1   |  4.89 |   4.1% |   1.0% |     33 |   3/4
+  S14_BBSqueeze          USDJPY.tp      H1   |  3.62 |   4.1% |   1.3% |     18 |   4/4
+  S06_KAMA               CHFJPY.tp      M30  |  3.83 |   3.0% |   1.0% |     16 |   2/3
+  S14_BBSqueeze          AUDCAD.tp      M30  |  2.16 |   2.9% |   1.8% |     23 |   4/4
+  S14_BBSqueeze          AUDCAD.tp      H1   |  1.82 |   2.5% |   2.0% |     15 |   3/3
+  S06_KAMA               EURCHF.tp      H1   |  1.98 |   2.5% |   2.5% |     24 |   2/3
+  S06_KAMA               EURUSD.tp      M30  |  1.61 |   2.5% |   1.4% |     31 |   3/3
+  S14_BBSqueeze          XAUUSD.tp      H1   |  5.98 |   2.5% |   1.0% |     15 |   3/3
+  S06_KAMA               CADCHF.tp      H1   |  3.34 |   2.4% |   1.0% |     17 |   2/2
+  S06_KAMA               EURAUD.tp      M30  |  1.07 |   0.9% |   7.9% |     59 |   3/4
