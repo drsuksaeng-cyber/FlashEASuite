@@ -39,6 +39,10 @@ class BacktestResult:
         return wins / self.total_trades
 
     @property
+    def total_spread_cost(self) -> float:
+        return sum(t.get("spread_cost", 0) for t in self.trades)
+
+    @property
     def avg_trade(self) -> float:
         return self.net_profit / self.total_trades if self.total_trades > 0 else 0.0
 

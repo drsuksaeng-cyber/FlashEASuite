@@ -89,31 +89,46 @@ _config_version = 0
 
 # Strategies ที่ deploy
 # Entry format: [id_str, name_str, enabled, confidence, tf_str, mm_method, risk_mult]
+# Re-optimized 2026-03-25 Optuna WF-PASS params
+# Multi-TF Multi-Symbol: each strategy has its own symbol+TF
 SYMBOL_STRATEGIES = [
     {
         "symbol_base": "USDJPY",
         "strategies": [
-            ["S06", "KAMA", True, 1.0, "H4", "MM01", 1.0],
+            ["S06", "KAMA",        True, 1.0, "H4", "MM04", 1.0],
+            ["S14", "BBSqueeze",   True, 1.0, "H4", "MM04", 1.0],
+            ["S07", "MeanRev",     True, 1.0, "H4", "MM07", 1.0],
         ]
     },
     {
         "symbol_base": "XAUUSD",
         "strategies": [
-            ["S14", "BBSqueeze", True, 1.0, "H1", "MM01", 1.0],
+            ["S06", "KAMA",        True, 1.0, "H1", "MM04", 1.0],
+            ["S07", "MeanRev",     True, 1.0, "H1", "MM07", 1.0],
+            ["S10", "Turtle",      True, 1.0, "H4", "MM04", 0.6],
+            ["S14", "BBSqueeze",   True, 1.0, "H1", "MM04", 1.0],
+            ["S16", "Spike",       True, 1.0, "H4", "MM01", 0.5],
         ]
     },
     {
         "symbol_base": "GBPUSD",
         "strategies": [
-            ["S14", "BBSqueeze", True, 1.0, "H1", "MM01", 1.0],
+            ["S01", "StatArb",     True, 1.0, "H4", "MM04", 1.0],
+            ["S07", "MeanRev",     True, 1.0, "H4", "MM07", 1.0],
+            ["S14", "BBSqueeze",   True, 1.0, "H1", "MM04", 1.0],
+            ["S16", "Spike",       True, 1.0, "H4", "MM01", 0.5],
         ]
     },
 ]
 
-# Strategy → regime mapping (enable/disable based on regime)
+# Strategy -> regime mapping (enable/disable based on detected regime)
 STRATEGY_REGIMES = {
+    "S01": ["RANGING", "SQUEEZE"],
     "S06": ["TRENDING"],
+    "S07": ["RANGING", "SQUEEZE"],
+    "S10": ["TRENDING"],
     "S14": ["SQUEEZE", "RANGING"],
+    "S16": ["VOLATILE", "TRENDING"],
 }
 
 
