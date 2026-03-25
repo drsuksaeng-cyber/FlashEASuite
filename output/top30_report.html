@@ -8,7 +8,7 @@
   body { font-family:'Segoe UI',Tahoma,sans-serif; background:#0d1117; color:#c9d1d9; padding:20px; }
   h1 { color:#ffd700; margin-bottom:5px; font-size:1.6em; }
   .sub { color:#8b949e; font-size:0.9em; margin-bottom:20px; }
-  table { border-collapse:collapse; width:100%; margin:15px 0; font-size:0.88em; }
+  table { border-collapse:collapse; width:100%; margin:15px 0; font-size:0.85em; }
   th { background:#21262d; color:#58a6ff; padding:10px 12px; text-align:left; border:1px solid #30363d; position:sticky; top:0; }
   td { padding:8px 12px; border:1px solid #30363d; }
   tr:hover { background:#161b22; }
@@ -20,355 +20,415 @@
   .rank { color:#ffd700; font-weight:bold; font-size:1.1em; }
   .note { color:#8b949e; font-size:0.82em; margin:8px 0; }
   .summary-box { background:#161b22; border:1px solid #30363d; border-radius:8px; padding:15px; margin:15px 0; }
+  h2 { color:#79c0ff; margin:25px 0 10px; font-size:1.2em; }
   .rating-table { width:auto; margin:10px 0; }
   .rating-table td, .rating-table th { padding:5px 15px; }
-  h2 { color:#79c0ff; margin:25px 0 10px; font-size:1.2em; }
 </style>
 </head>
 <body>
 <h1>FlashEASuite V2 - TOP 30 Strategy Combinations</h1>
-<div class="sub">Generated: 2026-03-25 22:26 | WF Validated | Spread Cost Included | THB (1 USD = 34 THB) | Equity: 340,000</div>
+<div class="sub">Generated: 2026-03-25 22:37 | WF Validated | Spread Cost Included | THB (1 USD = 34) | Equity: 340,000</div>
 
 <div class="summary-box">
   <p><b>Total WF PASS:</b> 366 combos | 29 symbols x 16 strategies x M15-W1</p>
-  <p><b>Data:</b> 2-5 years | <b>Optimization:</b> Optuna TPE 100 trials | <b>Spread:</b> Real broker data</p>
-  <p class="note">% = annualized return | DD% = max drawdown | WF = walk-forward windows passed</p>
+  <p><b>Optimization:</b> Optuna TPE 100 trials | <b>Spread:</b> Real broker data | <b>Backtest:</b> Re-computed with spread cost</p>
+  <p class="note">% = annualized return | DD% = max drawdown | Sharpe = risk-adjusted | Data = actual years available</p>
 </div>
 
 <table>
 <tr>
   <th>#</th><th>Strategy</th><th>Symbol</th><th>TF</th>
-  <th>PF</th><th>%</th><th>THB/yr</th><th>DD%</th><th>Trades</th><th>WF</th><th>Rating</th>
+  <th>PF</th><th>%</th><th>THB</th><th>DD%</th><th>Trades</th><th>Sharpe</th><th>Data</th><th>WF</th><th>Rate</th>
 </tr>
 <tr class="gold">
   <td class="rank">1</td>
-  <td>S10_Turtle</td><td>XAUUSD.tp</td><td>H1</td>
-  <td>5.18</td>
-  <td><b>145.6%</b></td>
-  <td>495,040</td>
-  <td class="bad">65.8%</td>
-  <td>109</td>
+  <td>S10_Turtle</td><td>XAUUSD.tp</td><td>M30</td>
+  <td>5.72</td>
+  <td><b>73.9%</b></td>
+  <td>251,278</td>
+  <td class="bad">78.3%</td>
+  <td>153</td>
+  <td>1.38</td>
+  <td>5.0y</td>
   <td class="pass">3/4</td>
   <td class="warn">C</td>
 </tr>
 <tr class="top3">
   <td class="rank">2</td>
-  <td>S11_Ichimoku</td><td>USDJPY.tp</td><td>H1</td>
-  <td>1.41</td>
-  <td><b>58.8%</b></td>
-  <td>199,920</td>
-  <td class="warn">5.4%</td>
-  <td>282</td>
-  <td class="pass">4/4</td>
-  <td class="pass">A+</td>
+  <td>S10_Turtle</td><td>USDJPY.tp</td><td>H4</td>
+  <td>14.89</td>
+  <td><b>55.6%</b></td>
+  <td>189,085</td>
+  <td class="bad">20.0%</td>
+  <td>25</td>
+  <td>1.67</td>
+  <td>5.0y</td>
+  <td class="pass">3/4</td>
+  <td class="warn">C</td>
 </tr>
 <tr class="top3">
   <td class="rank">3</td>
-  <td>S06_KAMA</td><td>XAUUSD.tp</td><td>H1</td>
-  <td>1.22</td>
-  <td><b>26.4%</b></td>
-  <td>89,760</td>
-  <td class="warn">11.3%</td>
-  <td>873</td>
-  <td class="pass">4/4</td>
-  <td class="pass">A</td>
+  <td>S10_Turtle</td><td>XAUUSD.tp</td><td>H1</td>
+  <td>3.35</td>
+  <td><b>37.4%</b></td>
+  <td>127,174</td>
+  <td class="bad">79.5%</td>
+  <td>159</td>
+  <td>1.21</td>
+  <td>5.0y</td>
+  <td class="pass">3/4</td>
+  <td class="warn">C</td>
 </tr>
 <tr class="">
   <td class="rank">4</td>
-  <td>S11_Ichimoku</td><td>EURJPY.tp</td><td>H1</td>
-  <td>1.34</td>
-  <td><b>20.9%</b></td>
-  <td>71,060</td>
-  <td class="warn">6.3%</td>
-  <td>368</td>
-  <td class="pass">4/4</td>
-  <td class="pass">A+</td>
+  <td>S10_Turtle</td><td>XAUUSD.tp</td><td>H4</td>
+  <td>4.16</td>
+  <td><b>32.9%</b></td>
+  <td>111,803</td>
+  <td class="bad">51.9%</td>
+  <td>75</td>
+  <td>1.31</td>
+  <td>5.0y</td>
+  <td class="pass">3/4</td>
+  <td class="warn">C</td>
 </tr>
 <tr class="">
   <td class="rank">5</td>
-  <td>S06_KAMA</td><td>CHFJPY.tp</td><td>H1</td>
-  <td>2.91</td>
-  <td><b>11.0%</b></td>
-  <td>37,400</td>
-  <td class="pass">2.4%</td>
-  <td>145</td>
-  <td class="pass">2/3</td>
-  <td class="pass">A</td>
+  <td>S10_Turtle</td><td>EURJPY.tp</td><td>H4</td>
+  <td>3.51</td>
+  <td><b>15.0%</b></td>
+  <td>51,090</td>
+  <td class="bad">29.9%</td>
+  <td>38</td>
+  <td>1.24</td>
+  <td>5.0y</td>
+  <td class="pass">3/4</td>
+  <td class="warn">C</td>
 </tr>
 <tr class="">
   <td class="rank">6</td>
-  <td>S15_Grid</td><td>EURGBP.tp</td><td>W1</td>
-  <td>999</td>
-  <td><b>-</b></td>
-  <td>-</td>
-  <td class="pass">0.0%</td>
-  <td>-</td>
-  <td class="pass">1/1</td>
-  <td class="bad">-</td>
+  <td>S11_Ichimoku</td><td>EURJPY.tp</td><td>H1</td>
+  <td>1.18</td>
+  <td><b>12.2%</b></td>
+  <td>41,339</td>
+  <td class="bad">20.4%</td>
+  <td>406</td>
+  <td>1.25</td>
+  <td>5.0y</td>
+  <td class="pass">4/4</td>
+  <td class="warn">C</td>
 </tr>
 <tr class="">
   <td class="rank">7</td>
-  <td>S15_Grid</td><td>NZDCAD.tp</td><td>W1</td>
-  <td>999</td>
-  <td><b>-</b></td>
-  <td>-</td>
-  <td class="pass">0.0%</td>
-  <td>-</td>
-  <td class="pass">2/2</td>
-  <td class="bad">-</td>
+  <td>S04_MarketProfile</td><td>EURJPY.tp</td><td>H4</td>
+  <td>1.27</td>
+  <td><b>8.5%</b></td>
+  <td>28,945</td>
+  <td class="bad">15.3%</td>
+  <td>194</td>
+  <td>1.29</td>
+  <td>5.0y</td>
+  <td class="pass">3/4</td>
+  <td class="warn">C</td>
 </tr>
 <tr class="">
   <td class="rank">8</td>
-  <td>S06_KAMA</td><td>USDJPY.tp</td><td>H1</td>
-  <td>4.26</td>
-  <td><b>8.3%</b></td>
-  <td>28,220</td>
-  <td class="pass">1.0%</td>
-  <td>19</td>
+  <td>S15_Grid</td><td>GBPNZD.tp</td><td>H4</td>
+  <td>1.20</td>
+  <td><b>7.4%</b></td>
+  <td>25,038</td>
+  <td class="warn">8.8%</td>
+  <td>781</td>
+  <td>1.23</td>
+  <td>5.0y</td>
   <td class="pass">3/4</td>
   <td class="pass">B+</td>
 </tr>
 <tr class="">
   <td class="rank">9</td>
-  <td>S14_BBSqueeze</td><td>AUDJPY.tp</td><td>H1</td>
-  <td>3.79</td>
-  <td><b>8.1%</b></td>
-  <td>27,540</td>
-  <td class="pass">1.0%</td>
-  <td>34</td>
+  <td>S11_Ichimoku</td><td>USDJPY.tp</td><td>H1</td>
+  <td>1.12</td>
+  <td><b>7.3%</b></td>
+  <td>24,927</td>
+  <td class="bad">22.7%</td>
+  <td>428</td>
+  <td>0.86</td>
+  <td>5.0y</td>
   <td class="pass">4/4</td>
-  <td class="pass">B+</td>
+  <td class="warn">C</td>
 </tr>
 <tr class="">
   <td class="rank">10</td>
-  <td>S14_BBSqueeze</td><td>USDJPY.tp</td><td>M30</td>
-  <td>3.36</td>
-  <td><b>7.4%</b></td>
-  <td>25,160</td>
-  <td class="pass">2.0%</td>
-  <td>82</td>
-  <td class="pass">2/2</td>
-  <td class="pass">B+</td>
+  <td>S10_Turtle</td><td>CADJPY.tp</td><td>D1</td>
+  <td>4.22</td>
+  <td><b>6.8%</b></td>
+  <td>23,057</td>
+  <td class="warn">10.5%</td>
+  <td>14</td>
+  <td>1.32</td>
+  <td>5.0y</td>
+  <td class="pass">4/4</td>
+  <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">11</td>
-  <td>S14_BBSqueeze</td><td>NZDCAD.tp</td><td>M30</td>
-  <td>2.75</td>
-  <td><b>6.7%</b></td>
-  <td>22,780</td>
-  <td class="pass">2.0%</td>
-  <td>23</td>
-  <td class="pass">3/4</td>
-  <td class="pass">B+</td>
+  <td>S07_MeanReversion</td><td>EURGBP.tp</td><td>H4</td>
+  <td>1.29</td>
+  <td><b>6.8%</b></td>
+  <td>23,122</td>
+  <td class="warn">12.3%</td>
+  <td>185</td>
+  <td>1.66</td>
+  <td>5.0y</td>
+  <td class="pass">4/4</td>
+  <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">12</td>
-  <td>S06_KAMA</td><td>EURCAD.tp</td><td>H1</td>
-  <td>2.11</td>
-  <td><b>6.6%</b></td>
-  <td>22,440</td>
-  <td class="pass">2.6%</td>
-  <td>42</td>
+  <td>S07_MeanReversion</td><td>AUDCAD.tp</td><td>H4</td>
+  <td>1.25</td>
+  <td><b>5.5%</b></td>
+  <td>18,593</td>
+  <td class="warn">10.3%</td>
+  <td>185</td>
+  <td>1.48</td>
+  <td>5.0y</td>
   <td class="pass">3/4</td>
-  <td class="pass">B+</td>
+  <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">13</td>
-  <td>S06_KAMA</td><td>USDJPY.tp</td><td>M30</td>
-  <td>3.28</td>
-  <td><b>6.4%</b></td>
-  <td>21,760</td>
-  <td class="pass">1.0%</td>
-  <td>93</td>
-  <td class="pass">4/4</td>
-  <td class="pass">B+</td>
+  <td>S04_MarketProfile</td><td>GBPJPY.tp</td><td>H4</td>
+  <td>1.16</td>
+  <td><b>5.4%</b></td>
+  <td>18,223</td>
+  <td class="bad">20.7%</td>
+  <td>215</td>
+  <td>0.86</td>
+  <td>5.0y</td>
+  <td class="pass">3/4</td>
+  <td class="warn">C</td>
 </tr>
 <tr class="">
   <td class="rank">14</td>
-  <td>S06_KAMA</td><td>GBPCHF.tp</td><td>H1</td>
-  <td>3.16</td>
-  <td><b>5.8%</b></td>
-  <td>19,720</td>
-  <td class="pass">3.0%</td>
-  <td>20</td>
-  <td class="pass">2/2</td>
-  <td class="pass">B+</td>
+  <td>S03_SMC</td><td>XAUUSD.tp</td><td>D1</td>
+  <td>1.52</td>
+  <td><b>5.0%</b></td>
+  <td>17,153</td>
+  <td class="warn">6.3%</td>
+  <td>91</td>
+  <td>1.94</td>
+  <td>5.0y</td>
+  <td class="pass">3/4</td>
+  <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">15</td>
-  <td>S06_KAMA</td><td>EURNZD.tp</td><td>H1</td>
-  <td>3.11</td>
-  <td><b>5.7%</b></td>
-  <td>19,380</td>
-  <td class="pass">2.0%</td>
-  <td>16</td>
-  <td class="pass">2/3</td>
-  <td class="pass">B+</td>
+  <td>S01_StatArb</td><td>GBPUSD.tp</td><td>H4</td>
+  <td>1.16</td>
+  <td><b>4.7%</b></td>
+  <td>16,010</td>
+  <td class="warn">13.8%</td>
+  <td>305</td>
+  <td>1.19</td>
+  <td>5.0y</td>
+  <td class="pass">3/4</td>
+  <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">16</td>
-  <td>S06_KAMA</td><td>XAUUSD.tp</td><td>M30</td>
-  <td>1.64</td>
-  <td><b>5.4%</b></td>
-  <td>18,360</td>
-  <td class="pass">2.1%</td>
-  <td>33</td>
+  <td>S15_Grid</td><td>EURGBP.tp</td><td>H4</td>
+  <td>1.13</td>
+  <td><b>4.6%</b></td>
+  <td>15,731</td>
+  <td class="warn">11.0%</td>
+  <td>774</td>
+  <td>0.79</td>
+  <td>5.0y</td>
   <td class="pass">4/4</td>
-  <td class="pass">B+</td>
+  <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">17</td>
-  <td>S14_BBSqueeze</td><td>EURUSD.tp</td><td>H1</td>
-  <td>2.16</td>
-  <td><b>5.1%</b></td>
-  <td>17,340</td>
-  <td class="pass">2.4%</td>
-  <td>33</td>
-  <td class="pass">3/4</td>
-  <td class="pass">B+</td>
+  <td>S01_StatArb</td><td>EURGBP.tp</td><td>H4</td>
+  <td>1.16</td>
+  <td><b>4.5%</b></td>
+  <td>15,170</td>
+  <td class="warn">12.0%</td>
+  <td>306</td>
+  <td>1.13</td>
+  <td>5.0y</td>
+  <td class="pass">4/4</td>
+  <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">18</td>
-  <td>S14_BBSqueeze</td><td>NZDJPY.tp</td><td>H1</td>
-  <td>2.65</td>
-  <td><b>4.1%</b></td>
-  <td>13,940</td>
-  <td class="pass">1.4%</td>
-  <td>33</td>
-  <td class="pass">3/3</td>
+  <td>S10_Turtle</td><td>AUDJPY.tp</td><td>D1</td>
+  <td>2.47</td>
+  <td><b>4.4%</b></td>
+  <td>14,999</td>
+  <td class="warn">15.0%</td>
+  <td>19</td>
+  <td>1.02</td>
+  <td>5.0y</td>
+  <td class="pass">4/4</td>
   <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">19</td>
-  <td>S14_BBSqueeze</td><td>USDJPY.tp</td><td>H1</td>
-  <td>3.25</td>
-  <td><b>4.1%</b></td>
-  <td>13,940</td>
-  <td class="pass">1.2%</td>
-  <td>18</td>
-  <td class="pass">4/4</td>
+  <td>S13_FibStoch</td><td>AUDNZD.tp</td><td>H4</td>
+  <td>1.41</td>
+  <td><b>4.3%</b></td>
+  <td>14,756</td>
+  <td class="warn">9.9%</td>
+  <td>89</td>
+  <td>1.53</td>
+  <td>5.0y</td>
+  <td class="pass">3/4</td>
   <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">20</td>
-  <td>S06_KAMA</td><td>CHFJPY.tp</td><td>M30</td>
-  <td>2.95</td>
-  <td><b>3.0%</b></td>
-  <td>10,200</td>
-  <td class="pass">2.0%</td>
-  <td>16</td>
+  <td>S03_SMC</td><td>EURUSD.tp</td><td>D1</td>
+  <td>2.43</td>
+  <td><b>4.3%</b></td>
+  <td>14,672</td>
+  <td class="pass">3.0%</td>
+  <td>36</td>
+  <td>2.64</td>
+  <td>5.0y</td>
   <td class="pass">3/4</td>
-  <td class="warn">C</td>
+  <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">21</td>
-  <td>S14_BBSqueeze</td><td>AUDCAD.tp</td><td>M30</td>
-  <td>2.90</td>
-  <td><b>2.9%</b></td>
-  <td>9,860</td>
-  <td class="pass">1.7%</td>
-  <td>23</td>
-  <td class="pass">3/4</td>
-  <td class="warn">C</td>
+  <td>S07_MeanReversion</td><td>AUDUSD.tp</td><td>H4</td>
+  <td>1.15</td>
+  <td><b>4.0%</b></td>
+  <td>13,742</td>
+  <td class="warn">12.3%</td>
+  <td>208</td>
+  <td>1.00</td>
+  <td>5.0y</td>
+  <td class="pass">2/3</td>
+  <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">22</td>
-  <td>S14_BBSqueeze</td><td>AUDCAD.tp</td><td>H1</td>
-  <td>2.16</td>
-  <td><b>2.5%</b></td>
-  <td>8,500</td>
-  <td class="pass">1.0%</td>
-  <td>15</td>
+  <td>S07_MeanReversion</td><td>GBPAUD.tp</td><td>H4</td>
+  <td>1.17</td>
+  <td><b>3.8%</b></td>
+  <td>12,842</td>
+  <td class="warn">11.1%</td>
+  <td>186</td>
+  <td>1.04</td>
+  <td>5.0y</td>
   <td class="pass">2/3</td>
-  <td class="warn">C</td>
+  <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">23</td>
-  <td>S06_KAMA</td><td>EURCHF.tp</td><td>H1</td>
-  <td>7.61</td>
-  <td><b>2.5%</b></td>
-  <td>8,500</td>
-  <td class="pass">1.0%</td>
-  <td>24</td>
-  <td class="pass">3/3</td>
-  <td class="warn">C</td>
+  <td>S06_KAMA</td><td>GBPJPY.tp</td><td>H1</td>
+  <td>1.73</td>
+  <td><b>3.8%</b></td>
+  <td>12,884</td>
+  <td class="warn">5.8%</td>
+  <td>43</td>
+  <td>1.70</td>
+  <td>5.0y</td>
+  <td class="pass">4/4</td>
+  <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">24</td>
-  <td>S14_BBSqueeze</td><td>XAUUSD.tp</td><td>H1</td>
-  <td>2.18</td>
-  <td><b>2.5%</b></td>
-  <td>8,500</td>
-  <td class="pass">2.5%</td>
-  <td>15</td>
+  <td>S07_MeanReversion</td><td>EURCAD.tp</td><td>H4</td>
+  <td>1.14</td>
+  <td><b>3.6%</b></td>
+  <td>12,189</td>
+  <td class="warn">13.0%</td>
+  <td>197</td>
+  <td>0.90</td>
+  <td>5.0y</td>
   <td class="pass">3/4</td>
-  <td class="warn">C</td>
+  <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">25</td>
-  <td>S06_KAMA</td><td>CADCHF.tp</td><td>H1</td>
-  <td>2.56</td>
-  <td><b>2.4%</b></td>
-  <td>8,160</td>
-  <td class="pass">2.0%</td>
-  <td>17</td>
-  <td class="pass">3/3</td>
+  <td>S05_SupplyDemand</td><td>GBPCAD.tp</td><td>D1</td>
+  <td>1.10</td>
+  <td><b>3.6%</b></td>
+  <td>12,304</td>
+  <td class="bad">15.7%</td>
+  <td>216</td>
+  <td>0.54</td>
+  <td>5.0y</td>
+  <td class="pass">3/4</td>
   <td class="warn">C</td>
 </tr>
 <tr class="">
   <td class="rank">26</td>
-  <td>S15_Grid</td><td>NZDUSD.tp</td><td>W1</td>
-  <td>26.76</td>
-  <td><b>-</b></td>
-  <td>-</td>
-  <td class="pass">0.2%</td>
-  <td>-</td>
-  <td class="pass">1/1</td>
-  <td class="bad">-</td>
+  <td>S15_Grid</td><td>EURGBP.tp</td><td>D1</td>
+  <td>1.79</td>
+  <td><b>3.4%</b></td>
+  <td>11,454</td>
+  <td class="pass">3.4%</td>
+  <td>136</td>
+  <td>2.86</td>
+  <td>5.0y</td>
+  <td class="pass">4/4</td>
+  <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">27</td>
-  <td>S10_Turtle</td><td>USDJPY.tp</td><td>H4</td>
-  <td>26.37</td>
-  <td><b>-</b></td>
-  <td>-</td>
-  <td class="warn">12.3%</td>
-  <td>-</td>
-  <td class="pass">3/4</td>
-  <td class="bad">-</td>
+  <td>S06_KAMA</td><td>EURNZD.tp</td><td>H1</td>
+  <td>1.88</td>
+  <td><b>3.1%</b></td>
+  <td>10,430</td>
+  <td class="pass">3.0%</td>
+  <td>31</td>
+  <td>1.66</td>
+  <td>5.0y</td>
+  <td class="pass">2/3</td>
+  <td class="warn">B</td>
 </tr>
 <tr class="">
   <td class="rank">28</td>
-  <td>S10_Turtle</td><td>XAUUSD.tp</td><td>H4</td>
-  <td>12.52</td>
-  <td><b>-</b></td>
-  <td>-</td>
-  <td class="bad">27.6%</td>
-  <td>-</td>
+  <td>S04_MarketProfile</td><td>EURGBP.tp</td><td>H4</td>
+  <td>1.08</td>
+  <td><b>3.0%</b></td>
+  <td>10,323</td>
+  <td class="bad">19.4%</td>
+  <td>244</td>
+  <td>0.49</td>
+  <td>5.0y</td>
   <td class="pass">3/4</td>
-  <td class="bad">-</td>
+  <td class="warn">C</td>
 </tr>
 <tr class="">
   <td class="rank">29</td>
-  <td>S01_StatArb</td><td>USDCAD.tp</td><td>W1</td>
-  <td>10.40</td>
-  <td><b>-</b></td>
-  <td>-</td>
-  <td class="pass">1.0%</td>
-  <td>-</td>
-  <td class="pass">1/1</td>
-  <td class="bad">-</td>
+  <td>S12_PriceAction</td><td>GBPAUD.tp</td><td>D1</td>
+  <td>1.25</td>
+  <td><b>3.0%</b></td>
+  <td>10,280</td>
+  <td class="warn">11.4%</td>
+  <td>99</td>
+  <td>1.05</td>
+  <td>5.0y</td>
+  <td class="pass">3/3</td>
+  <td class="warn">C</td>
 </tr>
 <tr class="">
   <td class="rank">30</td>
-  <td>S01_StatArb</td><td>GBPCHF.tp</td><td>W1</td>
-  <td>10.18</td>
-  <td><b>-</b></td>
-  <td>-</td>
-  <td class="pass">1.0%</td>
-  <td>-</td>
+  <td>S01_StatArb</td><td>GBPCHF.tp</td><td>H4</td>
+  <td>1.12</td>
+  <td><b>3.0%</b></td>
+  <td>10,342</td>
+  <td class="warn">13.7%</td>
+  <td>298</td>
+  <td>0.88</td>
+  <td>5.0y</td>
   <td class="pass">3/4</td>
-  <td class="bad">-</td>
+  <td class="warn">C</td>
 </tr>
 
 </table>
