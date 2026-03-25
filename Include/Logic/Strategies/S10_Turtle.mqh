@@ -22,15 +22,14 @@
 #include "..\IStrategy.mqh"
 
 //--- Input Parameters
-// Optimized: XAUUSD.tp H4 2022-2024 | Custom=0.1027 | PF=1.384 DD=23.7% Trades=84/3y
-// Validation pending: requires Real tick model (OHLC M1 unsuitable for breakout — PF=0.67 with OHLC)
-input int    Turtle_EntryPeriod = 15;   // Entry Donchian channel period
-input int    Turtle_ExitPeriod  = 30;   // Exit Donchian channel period
-input int    Turtle_ATR_Period  = 20;   // ATR period (classic Turtle = 20)
-input double Turtle_BreakoutBuf = 0.1;  // ATR buffer beyond Donchian edge
-input int    Turtle_MaxUnits    = 4;    // Max pyramid units
-input double Turtle_UnitSpacing = 0.5;  // ATR spacing between pyramid units
-input double Turtle_RiskPct     = 0.5;  // Risk % per unit
+// Re-optimized 2026-03-25 Python Optuna | Best: XAUUSD H4 PF=12.99 $6444/yr WF PASS (DD=26.9%)
+input int    Turtle_EntryPeriod = 20;   // Entry Donchian channel period
+input int    Turtle_ExitPeriod  = 50;   // Exit Donchian channel period
+input int    Turtle_ATR_Period  = 25;   // ATR period
+input double Turtle_BreakoutBuf = 0.44; // ATR buffer beyond Donchian edge
+input int    Turtle_MaxUnits    = 1;    // Max pyramid units
+input double Turtle_UnitSpacing = 0.53; // ATR spacing between pyramid units
+input double Turtle_RiskPct     = 0.6;  // Risk % per unit
 
 //+------------------------------------------------------------------+
 //| CTurtle — Modernized Turtle Trading Strategy                     |

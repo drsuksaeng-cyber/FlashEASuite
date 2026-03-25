@@ -61,15 +61,22 @@ def fetch_all_data(symbols, timeframes, skip_fetch=False):
             done += 1
             key = f"{sym}_{tf}"
             try:
-                df = fetch_ohlcv(sym, tf, source="mt5" if not skip_fetch else "auto")
+                if skip_fetch:
+                    # Only use cached parquet — skip if not cached
+                    from pathlib import Path
+                    from data.mt5_fetcher import _cache_path
+                    from datetime import datetime, timedelta
+                    _end = datetime.now(); _start = _end - timedelta(days=5*365)
+                    cp = _cache_path(sym, tf, _start, _end)
+                    if not cp.exists():
+                        failed += 1; continue
+                df = fetch_ohlcv(sym, tf, source="mt5")
                 if len(df) >= 100:
                     data_map[key] = df
                 else:
                     failed += 1
             except Exception as e:
                 failed += 1
-                if done <= 5 or done % 50 == 0:
-                    print(f"  [{done}/{total}] {sym} {tf}: FAIL ({e})")
 
             if done % 20 == 0:
                 print(f"  Fetched {done}/{total} ({failed} failed)")

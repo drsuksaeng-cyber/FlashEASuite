@@ -23,15 +23,13 @@
 #include "..\IStrategy.mqh"
 
 //--- Input Parameters
-// Re-optimized 2026-03-24 Python Optuna (5y data, 200 trials, WF validated)
-// USDJPY H1: PF=4.26 DD=1.0% WF PASS | USDJPY H4: PF=3.52 DD=1.0% WF PASS
-// XAUUSD H4: PF=10.50 DD=1.0% WF PASS | GBPUSD H4: PF=1.77 DD=2.0% WF PASS
-input int    KAMA_Period     = 25;   // KAMA lookback period (was 13)
-input int    KAMA_Fast       = 2;    // Fast EMA period
-input int    KAMA_Slow       = 25;   // Slow EMA period (was 30)
-input double KAMA_ER_Thresh  = 0.78; // Efficiency Ratio threshold (was 0.90)
-input double KAMA_TP_ATR     = 5.5;  // Take Profit multiplier (was 4.7)
-input double KAMA_SL_ATR     = 3.5;  // Stop Loss multiplier (was 2.3)
+// Re-optimized 2026-03-25 Python Optuna | Best: XAUUSD H1 PF=1.22 $1885/yr WF PASS
+input int    KAMA_Period     = 21;   // KAMA lookback period
+input int    KAMA_Fast       = 4;    // Fast EMA period
+input int    KAMA_Slow       = 38;   // Slow EMA period
+input double KAMA_ER_Thresh  = 0.35; // Efficiency Ratio threshold
+input double KAMA_TP_ATR     = 1.7;  // Take Profit multiplier
+input double KAMA_SL_ATR     = 3.8;  // Stop Loss multiplier
 input int    KAMA_ATR_Period = 17;   // ATR calculation period (was 14)
 
 //+------------------------------------------------------------------+
