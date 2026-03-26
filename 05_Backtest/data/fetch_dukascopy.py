@@ -162,10 +162,17 @@ def _download_direct(symbol: str, year: int, month: int) -> pd.DataFrame:
 
 
 def _download_day(symbol: str, year: int, month: int, day: int) -> pd.DataFrame:
-    """Download one day of M1 data from Dukascopy."""
+    """Download one day of M1 data from Dukascopy.
+    Binary format: 24 bytes per row
+      uint32 time_offset_seconds (from start of day)
+      uint32 open  (pipettes)
+      uint32 close (pipettes)
+      uint32 low   (pipettes)
+      uint32 high  (pipettes)
+      float32 volume
+    """
     import struct, lzma
     from urllib.request import urlopen, Request
-    from urllib.error import URLError
 
     url = (f"https://datafeed.dukascopy.com/datafeed/{symbol}/"
            f"{year}/{month-1:02d}/{day:02d}/BID_candles_min_1.bi5")
@@ -185,7 +192,7 @@ def _download_day(symbol: str, year: int, month: int, day: int) -> pd.DataFrame:
     except Exception:
         return pd.DataFrame()
 
-    row_size = 20
+    row_size = 24
     n_rows = len(decompressed) // row_size
     if n_rows == 0:
         return pd.DataFrame()
@@ -198,15 +205,17 @@ def _download_day(symbol: str, year: int, month: int, day: int) -> pd.DataFrame:
         chunk = decompressed[offset:offset + row_size]
         if len(chunk) < row_size:
             break
-        time_ms, o, h, l, c = struct.unpack(">IIIII", chunk[:20])
-        dt = base_time + timedelta(milliseconds=time_ms)
-        rows.append([dt, o, h, l, c, 0])
+        time_sec, o, c, l, h = struct.unpack(">IIIII", chunk[:20])
+        vol = struct.unpack(">f", chunk[20:24])[0]
+        dt = base_time + timedelta(seconds=time_sec)
+        rows.append([dt, o, h, l, c, max(int(vol), 0)])
 
     if not rows:
         return pd.DataFrame()
 
     df = pd.DataFrame(rows, columns=["time", "open", "high", "low", "close", "tick_volume"])
 
+    # Convert pipettes to price
     if symbol in ("XAUUSD",):
         scale = 1000.0
     elif "JPY" in symbol:
@@ -218,7 +227,6 @@ def _download_day(symbol: str, year: int, month: int, day: int) -> pd.DataFrame:
         df[col] = df[col] / scale
 
     df["spread"] = 0
-    df["tick_volume"] = df["tick_volume"].astype(int)
     return df
 
 

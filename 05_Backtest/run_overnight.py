@@ -30,7 +30,7 @@ SYMBOLS_BASE = [
     "XAUUSD",
 ]
 
-TIMEFRAMES = ["M1", "M5", "M15", "M30", "H1", "H4", "D1"]
+TIMEFRAMES = ["M5", "M15", "M30", "H1", "H4", "D1"]  # Skip M1: 1.5M bars too slow + overflow
 EQUITY = 10000.0
 
 
