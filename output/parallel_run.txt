@@ -1,0 +1,384 @@
+[I 2026-03-27 12:10:38,730] A new study created in memory with name: opt_S13_FibStoch
+[I 2026-03-27 12:10:38,791] A new study created in memory with name: opt_S07_MeanReversion
+[I 2026-03-27 12:10:38,813] A new study created in memory with name: opt_S01_StatArb
+[I 2026-03-27 12:10:38,857] A new study created in memory with name: opt_S15_Grid
+[I 2026-03-27 12:10:39,003] A new study created in memory with name: opt_S04_MarketProfile
+[I 2026-03-27 12:10:40,641] A new study created in memory with name: opt_S01_StatArb
+[I 2026-03-27 12:10:41,626] A new study created in memory with name: opt_S07_MeanReversion
+[I 2026-03-27 12:10:42,127] A new study created in memory with name: opt_S07_MeanReversion
+[I 2026-03-27 12:10:42,610] A new study created in memory with name: opt_S01_StatArb
+[I 2026-03-27 12:10:42,745] A new study created in memory with name: opt_S13_FibStoch
+[I 2026-03-27 12:10:43,355] A new study created in memory with name: opt_S11_Ichimoku
+[I 2026-03-27 12:10:44,040] A new study created in memory with name: opt_S15_Grid
+[I 2026-03-27 12:10:46,298] A new study created in memory with name: opt_S15_Grid
+[I 2026-03-27 12:10:49,525] A new study created in memory with name: opt_S04_MarketProfile
+[I 2026-03-27 12:11:01,796] A new study created in memory with name: opt_S01_StatArb
+[I 2026-03-27 12:11:29,031] A new study created in memory with name: opt_S04_MarketProfile
+[I 2026-03-27 12:11:47,279] A new study created in memory with name: opt_S04_MarketProfile
+[I 2026-03-27 12:12:21,173] A new study created in memory with name: opt_S15_Grid
+[I 2026-03-27 12:13:07,797] A new study created in memory with name: opt_S01_StatArb
+Workers: 19 CPUs
+Data: 145 symbol-TF combos
+Strategies: 16
+Total jobs: 2320
+Starting 19 workers...
+
+  [31/2320] S13_FibStoch           AUDCAD.tp      D1   | PF= 1.98 |    1.7% | DD=  2.8% | WF=1/1 PASS
+  [36/2320] S07_MeanReversion      AUDCAD.tp      D1   | PF= 7.34 |    2.7% | DD=  1.0% | WF=2/2 PASS
+  [37/2320] S01_StatArb            AUDCAD.tp      D1   | PF= 5.37 |    1.8% | DD=  1.0% | WF=3/4 PASS
+  [39/2320] S15_Grid               AUDCAD.tp      D1   | PF= 2.03 |    4.2% | DD=  2.8% | WF=3/4 PASS
+  [46/2320] S13_FibStoch           AUDCAD.tp      H4   | PF= 1.48 |    8.9% | DD=  5.6% | WF=3/4 PASS
+  [63/2320] S07_MeanReversion      AUDCAD.tp      H4   | PF= 1.63 |   11.3% | DD=  5.5% | WF=4/4 PASS
+  [80/2320] S01_StatArb            AUDCAD.tp      H4   | PF= 1.61 |   14.5% | DD=  3.5% | WF=4/4 PASS
+  [82/2320] S01_StatArb            AUDCHF.tp      D1   | PF= 3.09 |    2.5% | DD=  1.2% | WF=3/4 PASS
+  [87/2320] S15_Grid               AUDCHF.tp      D1   | PF= 1.72 |    1.6% | DD=  2.4% | WF=3/4 PASS
+  [98/2320] S15_Grid               AUDCAD.tp      H4   | PF= 1.39 |   36.3% | DD=  6.5% | WF=4/4 PASS
+  Progress: 100/2320 | optimized=13 | WF PASS=10 | 163s elapsed | ETA 3610s (60min)
+  [108/2320] S07_MeanReversion      AUDCHF.tp      H4   | PF= 1.82 |    6.2% | DD=  3.9% | WF=4/4 PASS
+  [111/2320] S14_BBSqueeze          AUDCHF.tp      H4   | PF= 2.85 |    2.2% | DD=  1.0% | WF=4/4 PASS
+  [112/2320] S07_MeanReversion      AUDCAD.tp      H1   | PF= 1.37 |   22.5% | DD=  7.5% | WF=4/4 PASS
+  [113/2320] S15_Grid               AUDCHF.tp      H4   | PF= 1.24 |   22.9% | DD= 10.3% | WF=3/4 PASS
+  [118/2320] S01_StatArb            AUDCAD.tp      H1   | PF= 1.22 |   25.9% | DD= 10.8% | WF=4/4 PASS
+  [122/2320] S04_MarketProfile      AUDCHF.tp      H4   | PF= 1.19 |    6.1% | DD=  7.8% | WF=4/4 PASS
+  [125/2320] S07_MeanReversion      AUDCHF.tp      H1   | PF= 5.53 |    3.7% | DD=  1.0% | WF=2/3 PASS
+  [140/2320] S15_Grid               AUDCAD.tp      H1   | PF= 1.33 |   22.1% | DD=  7.5% | WF=4/4 PASS
+  [142/2320] S01_StatArb            AUDCHF.tp      H1   | PF= 2.05 |   46.2% | DD=  5.9% | WF=4/4 PASS
+  [160/2320] S15_Grid               AUDJPY.tp      D1   | PF= 1.16 |    1.2% | DD=  3.2% | WF=3/4 PASS
+  [169/2320] S02_MLEnsemble         AUDJPY.tp      D1   | PF= 1.31 |    1.2% | DD=  4.3% | WF=4/4 PASS
+  [170/2320] S15_Grid               AUDCHF.tp      H1   | PF= 1.18 |   18.8% | DD= 13.0% | WF=4/4 PASS
+  [180/2320] S03_SMC                AUDJPY.tp      H4   | PF= 1.17 |    8.8% | DD= 10.3% | WF=3/4 PASS
+  [187/2320] S07_MeanReversion      AUDCAD.tp      M30  | PF= 1.30 |   56.9% | DD= 10.3% | WF=4/4 PASS
+  [200/2320] S07_MeanReversion      AUDJPY.tp      H1   | PF= 1.97 |    9.8% | DD=  3.3% | WF=4/4 PASS
+  Progress: 200/2320 | optimized=36 | WF PASS=25 | 1148s elapsed | ETA 12173s (203min)
+  [201/2320] S14_BBSqueeze          AUDJPY.tp      H4   | PF= 3.57 |    1.0% | DD=  1.6% | WF=4/4 PASS
+  [205/2320] S10_Turtle             AUDJPY.tp      M15  | PF= 3.09 |   39.9% | DD= 99.9% | WF=3/4 PASS
+  [208/2320] S15_Grid               AUDCAD.tp      M30  | PF= 1.32 |   84.9% | DD= 10.1% | WF=4/4 PASS
+  [212/2320] S07_MeanReversion      AUDCHF.tp      M30  | PF= 1.62 |   53.8% | DD=  8.6% | WF=4/4 PASS
+  [219/2320] S04_MarketProfile      AUDCHF.tp      H1   | PF= 1.12 |   18.0% | DD= 16.4% | WF=4/4 PASS
+  [234/2320] S07_MeanReversion      AUDNZD.tp      D1   | PF= 2.14 |    2.1% | DD=  3.0% | WF=3/4 PASS
+  [251/2320] S12_PriceAction        AUDJPY.tp      H4   | PF= 1.19 |   15.0% | DD= 17.7% | WF=3/4 PASS
+  [252/2320] S07_MeanReversion      AUDCAD.tp      M15  | PF= 1.25 |  545.9% | DD= 14.9% | WF=4/4 PASS
+  [272/2320] S01_StatArb            AUDNZD.tp      H4   | PF= 1.36 |    6.4% | DD=  4.6% | WF=4/4 PASS
+  [283/2320] S15_Grid               AUDNZD.tp      H4   | PF= 1.47 |   48.9% | DD=  6.0% | WF=4/4 PASS
+  [287/2320] S01_StatArb            AUDNZD.tp      H1   | PF= 1.16 |   15.1% | DD= 13.5% | WF=4/4 PASS
+  [288/2320] S07_MeanReversion      AUDNZD.tp      H1   | PF= 1.81 |   32.6% | DD=  4.9% | WF=4/4 PASS
+  Progress: 300/2320 | optimized=62 | WF PASS=37 | 2072s elapsed | ETA 13949s (232min)
+  [303/2320] S01_StatArb            AUDUSD.tp      D1   | PF= 1.88 |    2.8% | DD=  2.2% | WF=3/4 PASS
+  [307/2320] S07_MeanReversion      AUDCHF.tp      M15  | PF= 1.32 |  115.8% | DD= 13.2% | WF=3/4 PASS
+  [314/2320] S07_MeanReversion      AUDUSD.tp      D1   | PF= 3.42 |    2.0% | DD=  2.3% | WF=3/3 PASS
+  [317/2320] S02_MLEnsemble         AUDUSD.tp      D1   | PF= 1.68 |    0.7% | DD=  1.4% | WF=2/3 PASS
+  [320/2320] S15_Grid               AUDUSD.tp      D1   | PF= 2.08 |    2.3% | DD=  2.7% | WF=3/4 PASS
+  [325/2320] S15_Grid               AUDNZD.tp      H1   | PF= 1.28 |   35.2% | DD=  9.3% | WF=4/4 PASS
+  [329/2320] S12_PriceAction        AUDUSD.tp      D1   | PF= 1.16 |    3.0% | DD=  8.8% | WF=3/4 PASS
+  [349/2320] S07_MeanReversion      AUDUSD.tp      H4   | PF= 1.40 |   10.4% | DD=  9.4% | WF=3/4 PASS
+  [352/2320] S11_Ichimoku           AUDUSD.tp      H4   | PF= 1.80 |    5.0% | DD=  4.6% | WF=3/4 PASS
+  [354/2320] S07_MeanReversion      AUDUSD.tp      H1   | PF= 1.16 |   21.0% | DD= 11.9% | WF=4/4 PASS
+  [358/2320] S04_MarketProfile      AUDUSD.tp      H4   | PF= 1.27 |    9.4% | DD=  9.0% | WF=4/4 PASS
+  [370/2320] S04_MarketProfile      AUDNZD.tp      H1   | PF= 1.13 |   21.2% | DD= 16.6% | WF=4/4 PASS
+  [375/2320] S07_MeanReversion      AUDNZD.tp      M30  | PF= 1.91 |   46.8% | DD=  5.9% | WF=4/4 PASS
+  [399/2320] S15_Grid               CADCHF.tp      D1   | PF= 1.79 |    1.4% | DD=  2.0% | WF=3/4 PASS
+  Progress: 400/2320 | optimized=87 | WF PASS=51 | 2899s elapsed | ETA 13915s (232min)
+  [406/2320] S01_StatArb            AUDNZD.tp      M30  | PF= 1.15 |   43.1% | DD= 10.3% | WF=4/4 PASS
+  [424/2320] S01_StatArb            CADCHF.tp      H4   | PF= 1.33 |    3.6% | DD=  4.9% | WF=3/4 PASS
+  [429/2320] S15_Grid               AUDNZD.tp      M30  | PF= 1.37 |    6.2% | DD=  3.8% | WF=3/4 PASS
+  [431/2320] S15_Grid               CADCHF.tp      H4   | PF= 1.31 |   12.2% | DD=  6.9% | WF=4/4 PASS
+  [432/2320] S14_BBSqueeze          CADCHF.tp      H4   | PF= 3.56 |    1.0% | DD=  1.0% | WF=3/4 PASS
+  [433/2320] S01_StatArb            CADCHF.tp      H1   | PF= 1.13 |   18.2% | DD= 15.0% | WF=3/4 PASS
+  [444/2320] S07_MeanReversion      AUDNZD.tp      M15  | PF= 1.67 |   61.5% | DD=  5.1% | WF=4/4 PASS
+  [463/2320] S01_StatArb            CADJPY.tp      D1   | PF= 4.19 |    1.3% | DD=  2.0% | WF=3/3 PASS
+  [475/2320] S13_FibStoch           CADJPY.tp      D1   | PF= 2.37 |    2.8% | DD=  2.0% | WF=4/4 PASS
+  [477/2320] S04_MarketProfile      CADJPY.tp      D1   | PF= 2.28 |    2.6% | DD=  3.0% | WF=3/4 PASS
+  [479/2320] S01_StatArb            AUDNZD.tp      M15  | PF= 1.20 |  112.7% | DD= 11.1% | WF=4/4 PASS
+  [490/2320] S12_PriceAction        CADJPY.tp      D1   | PF= 1.33 |    6.1% | DD=  6.8% | WF=4/4 PASS
+  Progress: 500/2320 | optimized=112 | WF PASS=63 | 3850s elapsed | ETA 14014s (234min)
+  [507/2320] S13_FibStoch           CADJPY.tp      H4   | PF= 1.38 |    4.7% | DD=  5.7% | WF=3/4 PASS
+  [508/2320] S11_Ichimoku           CADJPY.tp      H4   | PF= 1.78 |    2.7% | DD=  3.0% | WF=4/4 PASS
+  [528/2320] S11_Ichimoku           CADJPY.tp      H1   | PF= 1.23 |    6.1% | DD=  5.9% | WF=4/4 PASS
+  [542/2320] S07_MeanReversion      CADCHF.tp      M30  | PF= 1.46 |   67.5% | DD=  9.8% | WF=4/4 PASS
+  [554/2320] S01_StatArb            CHFJPY.tp      D1   | PF= 2.71 |    1.3% | DD=  2.8% | WF=4/4 PASS
+  [560/2320] S11_Ichimoku           CHFJPY.tp      D1   | PF= 1.64 |    0.6% | DD=  1.4% | WF=3/3 PASS
+  [562/2320] S06_KAMA               CHFJPY.tp      D1   | PF= 2.50 |    1.5% | DD=  1.0% | WF=3/3 PASS
+  [566/2320] S10_Turtle             CADJPY.tp      M15  | PF=59.96 |  128.9% | DD= 11.4% | WF=3/4 PASS
+  [570/2320] S02_MLEnsemble         CHFJPY.tp      D1   | PF= 5.50 |    0.9% | DD=  1.0% | WF=1/1 PASS
+  [586/2320] S12_PriceAction        CHFJPY.tp      D1   | PF= 1.53 |    6.8% | DD=  5.0% | WF=4/4 PASS
+  [594/2320] S11_Ichimoku           CHFJPY.tp      H4   | PF= 2.04 |    4.1% | DD=  3.0% | WF=3/3 PASS
+  Progress: 600/2320 | optimized=143 | WF PASS=74 | 4647s elapsed | ETA 13320s (222min)
+  [601/2320] S08_Intermarket        CHFJPY.tp      H1   | PF= 2.36 |    1.4% | DD=  2.0% | WF=2/3 PASS
+  [624/2320] S01_StatArb            EURAUD.tp      D1   | PF= 4.34 |    2.1% | DD=  1.0% | WF=4/4 PASS
+  [627/2320] S05_SupplyDemand       EURAUD.tp      D1   | PF= 1.21 |    7.2% | DD=  9.6% | WF=4/4 PASS
+  [639/2320] S12_PriceAction        CADJPY.tp      H4   | PF= 1.20 |   17.4% | DD= 11.7% | WF=4/4 PASS
+  [640/2320] S15_Grid               EURAUD.tp      D1   | PF= 2.70 |    2.9% | DD=  2.0% | WF=4/4 PASS
+  [669/2320] S02_MLEnsemble         EURAUD.tp      D1   | PF= 2.51 |    1.5% | DD=  1.0% | WF=2/3 PASS
+  [672/2320] S13_FibStoch           EURAUD.tp      H4   | PF= 1.63 |    5.7% | DD=  5.3% | WF=3/4 PASS
+  [676/2320] S07_MeanReversion      CADCHF.tp      M15  | PF= 1.68 |  617.6% | DD= 13.4% | WF=4/4 PASS
+  [677/2320] S01_StatArb            EURAUD.tp      H4   | PF= 1.87 |    8.1% | DD=  2.9% | WF=3/4 PASS
+  Progress: 700/2320 | optimized=161 | WF PASS=83 | 5270s elapsed | ETA 12196s (203min)
+  [703/2320] S01_StatArb            EURCAD.tp      D1   | PF= 3.19 |    1.7% | DD=  1.0% | WF=3/4 PASS
+  [705/2320] S03_SMC                EURCAD.tp      D1   | PF= 2.59 |    1.9% | DD=  2.0% | WF=3/4 PASS
+  [717/2320] S07_MeanReversion      EURAUD.tp      H1   | PF= 1.54 |   18.0% | DD= 13.0% | WF=4/4 PASS
+  [722/2320] S15_Grid               EURCAD.tp      D1   | PF= 2.77 |    2.9% | DD=  1.7% | WF=3/4 PASS
+  [726/2320] S02_MLEnsemble         EURCAD.tp      D1   | PF= 2.30 |    1.3% | DD=  1.1% | WF=2/2 PASS
+  [733/2320] S13_FibStoch           EURCAD.tp      H1   | PF= 1.30 |   23.1% | DD= 15.9% | WF=4/4 PASS
+  [749/2320] S02_MLEnsemble         EURAUD.tp      H4   | PF= 1.97 |    3.3% | DD=  3.4% | WF=4/4 PASS
+  [751/2320] S11_Ichimoku           EURCAD.tp      H4   | PF= 1.46 |    1.6% | DD=  2.4% | WF=3/4 PASS
+  [754/2320] S07_MeanReversion      EURCAD.tp      H1   | PF= 2.01 |   21.5% | DD=  4.9% | WF=4/4 PASS
+  [756/2320] S15_Grid               EURCAD.tp      H4   | PF= 1.27 |    6.9% | DD=  7.5% | WF=3/4 PASS
+  [778/2320] S07_MeanReversion      EURAUD.tp      M30  | PF= 1.26 |   25.8% | DD=  9.7% | WF=4/4 PASS
+  [785/2320] S03_SMC                EURCHF.tp      D1   | PF= 4.10 |    2.5% | DD=  1.0% | WF=2/2 PASS
+  [787/2320] S05_SupplyDemand       EURCHF.tp      D1   | PF= 1.77 |   16.3% | DD=  6.8% | WF=4/4 PASS
+  [789/2320] S07_MeanReversion      EURCHF.tp      D1   | PF= 4.82 |    4.0% | DD=  2.0% | WF=3/4 PASS
+  [799/2320] S15_Grid               EURCHF.tp      D1   | PF= 1.72 |    2.9% | DD=  3.0% | WF=3/4 PASS
+  Progress: 800/2320 | optimized=184 | WF PASS=98 | 6359s elapsed | ETA 12083s (201min)
+  [805/2320] S15_Grid               EURCAD.tp      H1   | PF= 1.20 |   28.2% | DD= 11.5% | WF=4/4 PASS
+  [815/2320] S01_StatArb            EURCHF.tp      H4   | PF= 1.19 |    5.8% | DD=  7.1% | WF=3/4 PASS
+  [825/2320] S07_MeanReversion      EURCHF.tp      H1   | PF= 1.66 |   26.3% | DD=  5.8% | WF=3/4 PASS
+  [829/2320] S11_Ichimoku           EURCHF.tp      H4   | PF= 1.34 |    5.6% | DD=  5.8% | WF=3/4 PASS
+  [832/2320] S07_MeanReversion      EURAUD.tp      M15  | PF= 1.20 |   37.6% | DD= 14.6% | WF=4/4 PASS
+  [835/2320] S15_Grid               EURCHF.tp      H4   | PF= 2.18 |    0.9% | DD=  1.1% | WF=3/4 PASS
+  [840/2320] S14_BBSqueeze          EURCHF.tp      H4   | PF= 4.20 |    2.0% | DD=  1.0% | WF=3/3 PASS
+  [841/2320] S04_MarketProfile      EURCAD.tp      H1   | PF= 1.19 |   24.0% | DD= 16.8% | WF=4/4 PASS
+  [847/2320] S01_StatArb            EURCAD.tp      M30  | PF= 1.17 |   20.1% | DD= 15.7% | WF=4/4 PASS
+  [848/2320] S15_Grid               EURCHF.tp      H1   | PF= 1.40 |    2.9% | DD=  3.2% | WF=3/4 PASS
+  [850/2320] S04_MarketProfile      EURCHF.tp      H4   | PF= 1.55 |   18.9% | DD=  9.2% | WF=3/4 PASS
+  [863/2320] S01_StatArb            EURGBP.tp      D1   | PF= 2.79 |    3.9% | DD=  1.1% | WF=4/4 PASS
+  [867/2320] S05_SupplyDemand       EURGBP.tp      D1   | PF= 1.35 |    6.9% | DD=  7.1% | WF=3/4 PASS
+  [869/2320] S07_MeanReversion      EURGBP.tp      D1   | PF= 2.73 |    2.1% | DD=  2.0% | WF=3/4 PASS
+  [880/2320] S04_MarketProfile      EURGBP.tp      D1   | PF= 3.84 |    5.1% | DD=  2.0% | WF=3/4 PASS
+  [882/2320] S15_Grid               EURGBP.tp      D1   | PF= 2.78 |    5.1% | DD=  1.7% | WF=4/4 PASS
+  [899/2320] S05_SupplyDemand       EURGBP.tp      H4   | PF= 1.10 |   17.8% | DD= 23.6% | WF=4/4 PASS
+  Progress: 900/2320 | optimized=217 | WF PASS=115 | 7792s elapsed | ETA 12295s (205min)
+  [901/2320] S01_StatArb            EURGBP.tp      H4   | PF= 1.46 |    8.4% | DD=  4.2% | WF=3/4 PASS
+  [906/2320] S07_MeanReversion      EURCAD.tp      M15  | PF= 1.26 |   95.7% | DD= 13.5% | WF=4/4 PASS
+  [911/2320] S07_MeanReversion      EURGBP.tp      H4   | PF= 2.73 |    9.4% | DD=  3.1% | WF=4/4 PASS
+  [912/2320] S07_MeanReversion      EURGBP.tp      H1   | PF= 1.43 |   36.2% | DD=  7.8% | WF=4/4 PASS
+  [916/2320] S15_Grid               EURGBP.tp      H4   | PF= 1.52 |   16.3% | DD=  4.5% | WF=4/4 PASS
+  [925/2320] S01_StatArb            EURCAD.tp      M15  | PF= 1.16 |  114.0% | DD= 18.7% | WF=4/4 PASS
+  [938/2320] S07_MeanReversion      EURCHF.tp      M30  | PF= 1.48 |   91.5% | DD= 10.2% | WF=4/4 PASS
+  [943/2320] S01_StatArb            EURJPY.tp      D1   | PF= 4.49 |    1.4% | DD=  1.0% | WF=3/3 PASS
+  [949/2320] S04_MarketProfile      EURGBP.tp      H4   | PF= 1.57 |   13.9% | DD=  6.8% | WF=4/4 PASS
+  [953/2320] S07_MeanReversion      EURJPY.tp      D1   | PF= 4.04 |    3.3% | DD=  2.0% | WF=3/3 PASS
+  [954/2320] S11_Ichimoku           EURJPY.tp      D1   | PF= 6.37 |    3.3% | DD=  1.0% | WF=2/2 PASS
+  [960/2320] S15_Grid               EURJPY.tp      D1   | PF= 2.09 |    2.9% | DD=  2.7% | WF=3/4 PASS
+  [971/2320] S12_PriceAction        EURJPY.tp      D1   | PF= 2.39 |    9.9% | DD=  4.9% | WF=4/4 PASS
+  [976/2320] S13_FibStoch           EURJPY.tp      H1   | PF= 1.27 |   17.9% | DD= 11.4% | WF=3/4 PASS
+  [980/2320] S15_Grid               EURCHF.tp      M30  | PF= 1.78 |   10.9% | DD=  3.4% | WF=3/4 PASS
+  [985/2320] S06_KAMA               EURJPY.tp      H4   | PF= 1.09 |    2.5% | DD=  8.0% | WF=4/4 PASS
+  [987/2320] S13_FibStoch           EURJPY.tp      H4   | PF= 1.31 |    2.9% | DD=  6.0% | WF=4/4 PASS
+  [988/2320] S04_MarketProfile      EURGBP.tp      H1   | PF= 1.16 |   26.1% | DD= 16.0% | WF=3/4 PASS
+  [992/2320] S11_Ichimoku           EURJPY.tp      H4   | PF= 1.16 |    2.0% | DD=  5.1% | WF=4/4 PASS
+  Progress: 1000/2320 | optimized=248 | WF PASS=134 | 8826s elapsed | ETA 11650s (194min)
+  [1001/2320] S07_MeanReversion      EURCHF.tp      M15  | PF= 1.53 |  115.8% | DD=  7.4% | WF=4/4 PASS
+  [1013/2320] S14_BBSqueeze          EURJPY.tp      H4   | PF= 1.74 |    0.9% | DD=  1.0% | WF=2/3 PASS
+  [1020/2320] S07_MeanReversion      EURGBP.tp      M30  | PF= 1.43 |   30.6% | DD=  7.2% | WF=4/4 PASS
+  [1032/2320] S05_SupplyDemand       EURNZD.tp      D1   | PF= 1.33 |    8.0% | DD=  7.7% | WF=4/4 PASS
+  [1042/2320] S15_Grid               EURNZD.tp      D1   | PF= 1.71 |    1.7% | DD=  3.3% | WF=3/4 PASS
+  [1062/2320] S01_StatArb            EURGBP.tp      M30  | PF= 1.21 |  151.9% | DD= 16.0% | WF=4/4 PASS
+  [1069/2320] S10_Turtle             EURJPY.tp      M15  | PF= 1.04 |    0.8% | DD= 95.1% | WF=3/4 PASS
+  [1071/2320] S13_FibStoch           EURNZD.tp      H4   | PF= 1.84 |    7.8% | DD=  3.9% | WF=4/4 PASS
+  [1072/2320] S01_StatArb            EURCHF.tp      M15  | PF= 1.25 |  581.5% | DD= 13.2% | WF=4/4 PASS
+  [1085/2320] S13_FibStoch           EURJPY.tp      M30  | PF= 1.18 |   15.8% | DD= 14.7% | WF=4/4 PASS
+  Progress: 1100/2320 | optimized=270 | WF PASS=144 | 9288s elapsed | ETA 10301s (172min)
+  [1105/2320] S03_SMC                EURUSD.tp      D1   | PF= 3.38 |    3.4% | DD=  2.0% | WF=3/4 PASS
+  [1109/2320] S07_MeanReversion      EURUSD.tp      D1   | PF= 2.50 |    2.1% | DD=  2.0% | WF=4/4 PASS
+  [1114/2320] S11_Ichimoku           EURUSD.tp      D1   | PF= 5.63 |    1.9% | DD=  1.0% | WF=2/3 PASS
+  [1119/2320] S15_Grid               EURUSD.tp      D1   | PF= 1.76 |    2.3% | DD=  2.0% | WF=3/4 PASS
+  [1122/2320] S07_MeanReversion      EURNZD.tp      H1   | PF= 1.34 |    8.9% | DD= 10.2% | WF=4/4 PASS
+  [1133/2320] S12_PriceAction        EURUSD.tp      D1   | PF= 1.65 |    7.9% | DD=  3.9% | WF=3/4 PASS
+  [1145/2320] S13_FibStoch           EURUSD.tp      H1   | PF= 1.21 |    9.3% | DD=  8.6% | WF=3/4 PASS
+  [1146/2320] S07_MeanReversion      EURUSD.tp      H4   | PF= 1.70 |   11.8% | DD=  5.3% | WF=3/4 PASS
+  [1147/2320] S07_MeanReversion      EURGBP.tp      M15  | PF= 1.50 |  178.4% | DD=  8.8% | WF=4/4 PASS
+  [1148/2320] S13_FibStoch           EURUSD.tp      H4   | PF= 1.50 |    4.2% | DD=  3.2% | WF=4/4 PASS
+  [1150/2320] S11_Ichimoku           EURUSD.tp      H4   | PF= 1.44 |    5.9% | DD=  3.9% | WF=3/4 PASS
+  [1152/2320] S15_Grid               EURCHF.tp      M15  | PF= 1.40 |  849.2% | DD= 10.8% | WF=4/4 PASS
+  [1161/2320] S01_StatArb            EURGBP.tp      M15  | PF= 1.21 | 2635.9% | DD= 13.5% | WF=4/4 PASS
+  [1163/2320] S14_BBSqueeze          EURUSD.tp      H4   | PF= 2.06 |    2.1% | DD=  3.0% | WF=3/4 PASS
+  [1179/2320] S07_MeanReversion      EURNZD.tp      M30  | PF= 1.13 |   20.2% | DD= 14.2% | WF=3/4 PASS
+  [1181/2320] S12_PriceAction        EURUSD.tp      H4   | PF= 1.35 |   23.1% | DD= 14.4% | WF=3/4 PASS
+  [1183/2320] S01_StatArb            GBPAUD.tp      D1   | PF= 1.65 |    1.1% | DD=  2.0% | WF=3/4 PASS
+  [1185/2320] S03_SMC                GBPAUD.tp      D1   | PF= 2.02 |    2.4% | DD=  2.0% | WF=3/3 PASS
+  [1186/2320] S04_MarketProfile      GBPAUD.tp      D1   | PF= 2.41 |    2.2% | DD=  2.0% | WF=2/2 PASS
+  [1197/2320] S12_PriceAction        GBPAUD.tp      D1   | PF= 1.40 |    5.6% | DD=  6.0% | WF=4/4 PASS
+  [1200/2320] S15_Grid               GBPAUD.tp      D1   | PF= 1.86 |    2.1% | DD=  2.0% | WF=4/4 PASS
+  Progress: 1200/2320 | optimized=300 | WF PASS=165 | 10354s elapsed | ETA 9663s (161min)
+  [1227/2320] S13_FibStoch           GBPAUD.tp      H4   | PF= 1.65 |    6.8% | DD=  4.1% | WF=3/4 PASS
+  [1229/2320] S07_MeanReversion      GBPAUD.tp      H4   | PF= 1.51 |    4.5% | DD=  3.9% | WF=4/4 PASS
+  [1232/2320] S04_MarketProfile      EURUSD.tp      H1   | PF= 1.11 |   22.4% | DD= 17.0% | WF=3/4 PASS
+  [1243/2320] S14_BBSqueeze          GBPAUD.tp      H4   | PF= 3.06 |    1.2% | DD=  1.6% | WF=4/4 PASS
+  [1248/2320] S11_Ichimoku           GBPAUD.tp      H1   | PF= 1.10 |    5.0% | DD= 10.8% | WF=3/4 PASS
+  [1263/2320] S01_StatArb            GBPCAD.tp      D1   | PF= 1.59 |    2.3% | DD=  2.6% | WF=3/4 PASS
+  [1266/2320] S03_SMC                GBPCAD.tp      D1   | PF= 1.71 |    3.3% | DD=  5.8% | WF=3/4 PASS
+  [1277/2320] S07_MeanReversion      GBPCAD.tp      D1   | PF= 2.73 |    2.1% | DD=  2.0% | WF=3/4 PASS
+  [1279/2320] S15_Grid               GBPCAD.tp      D1   | PF= 1.86 |    2.6% | DD=  2.4% | WF=4/4 PASS
+  [1280/2320] S04_MarketProfile      GBPCAD.tp      D1   | PF= 1.26 |    1.3% | DD=  6.5% | WF=3/4 PASS
+  Progress: 1300/2320 | optimized=325 | WF PASS=175 | 11266s elapsed | ETA 8840s (147min)
+  [1311/2320] S14_BBSqueeze          GBPCAD.tp      H4   | PF= 8.93 |    1.6% | DD=  1.0% | WF=4/4 PASS
+  [1312/2320] S07_MeanReversion      GBPCAD.tp      H1   | PF= 1.45 |   33.2% | DD=  9.6% | WF=4/4 PASS
+  [1314/2320] S01_StatArb            GBPCAD.tp      H1   | PF= 1.20 |   14.5% | DD= 10.2% | WF=3/4 PASS
+  [1322/2320] S07_MeanReversion      GBPAUD.tp      M30  | PF= 1.39 |   21.9% | DD=  6.6% | WF=4/4 PASS
+  [1333/2320] S15_Grid               GBPCAD.tp      H1   | PF= 1.22 |   10.4% | DD=  7.7% | WF=3/4 PASS
+  [1341/2320] S15_Grid               GBPAUD.tp      M30  | PF= 1.61 |    4.1% | DD=  4.0% | WF=3/4 PASS
+  [1346/2320] S12_PriceAction        GBPCAD.tp      H4   | PF= 1.25 |   30.6% | DD= 14.7% | WF=3/4 PASS
+  [1355/2320] S01_StatArb            GBPCHF.tp      D1   | PF= 2.19 |    2.8% | DD=  2.0% | WF=4/4 PASS
+  [1360/2320] S15_Grid               GBPCHF.tp      D1   | PF= 1.85 |    3.8% | DD=  3.0% | WF=3/4 PASS
+  [1378/2320] S07_MeanReversion      GBPCAD.tp      M30  | PF= 1.38 |   19.0% | DD=  6.2% | WF=4/4 PASS
+  [1381/2320] S07_MeanReversion      GBPCHF.tp      H1   | PF= 2.70 |   43.5% | DD=  5.0% | WF=4/4 PASS
+  [1389/2320] S13_FibStoch           GBPCHF.tp      H4   | PF= 1.55 |    6.6% | DD=  6.8% | WF=3/4 PASS
+  [1391/2320] S07_MeanReversion      GBPCHF.tp      H4   | PF= 1.60 |    5.0% | DD=  5.7% | WF=3/4 PASS
+  [1398/2320] S15_Grid               GBPCHF.tp      H4   | PF= 1.40 |   13.6% | DD=  6.1% | WF=4/4 PASS
+  Progress: 1400/2320 | optimized=356 | WF PASS=189 | 12819s elapsed | ETA 8424s (140min)
+  [1404/2320] S14_BBSqueeze          GBPCHF.tp      H4   | PF= 1.74 |    2.7% | DD=  3.9% | WF=3/4 PASS
+  [1416/2320] S04_MarketProfile      GBPCHF.tp      H4   | PF= 1.49 |    8.2% | DD=  7.2% | WF=3/4 PASS
+  [1437/2320] S02_MLEnsemble         GBPJPY.tp      D1   | PF= 2.42 |    2.0% | DD=  2.0% | WF=2/2 PASS
+  [1440/2320] S07_MeanReversion      GBPCAD.tp      M15  | PF= 2.86 |   16.8% | DD=  3.9% | WF=4/4 PASS
+  [1442/2320] S15_Grid               GBPJPY.tp      D1   | PF= 1.90 |    2.3% | DD=  3.0% | WF=4/4 PASS
+  [1472/2320] S13_FibStoch           GBPJPY.tp      H4   | PF= 1.33 |    4.4% | DD=  6.0% | WF=3/4 PASS
+  [1477/2320] S07_MeanReversion      GBPJPY.tp      H1   | PF= 1.87 |   31.7% | DD=  7.4% | WF=4/4 PASS
+  [1484/2320] S04_MarketProfile      GBPJPY.tp      H4   | PF= 1.29 |   10.2% | DD= 11.4% | WF=4/4 PASS
+  [1485/2320] S07_MeanReversion      GBPCHF.tp      M30  | PF= 1.75 |   31.3% | DD=  6.3% | WF=3/4 PASS
+  Progress: 1500/2320 | optimized=383 | WF PASS=198 | 13872s elapsed | ETA 7583s (126min)
+  [1504/2320] S01_StatArb            GBPNZD.tp      D1   | PF= 1.75 |    3.1% | DD=  3.8% | WF=4/4 PASS
+  [1515/2320] S13_FibStoch           GBPNZD.tp      D1   | PF= 3.55 |    2.8% | DD=  2.0% | WF=2/3 PASS
+  [1517/2320] S10_Turtle             GBPJPY.tp      M30  | PF=82.22 |  177.3% | DD= 11.4% | WF=3/4 PASS
+  [1531/2320] S04_MarketProfile      GBPCHF.tp      H1   | PF= 1.24 |   30.4% | DD= 15.9% | WF=3/4 PASS
+  [1532/2320] S15_Grid               GBPCAD.tp      M15  | PF= 1.19 |  329.3% | DD= 12.8% | WF=4/4 PASS
+  [1536/2320] S12_PriceAction        GBPJPY.tp      H4   | PF= 1.31 |   34.9% | DD= 12.4% | WF=4/4 PASS
+  [1549/2320] S07_MeanReversion      GBPCHF.tp      M15  | PF= 1.49 |  174.4% | DD=  9.9% | WF=4/4 PASS
+  [1550/2320] S06_KAMA               GBPNZD.tp      H4   | PF= 1.14 |    0.7% | DD=  3.8% | WF=4/4 PASS
+  [1554/2320] S07_MeanReversion      GBPNZD.tp      H1   | PF= 2.29 |   34.7% | DD=  4.1% | WF=4/4 PASS
+  [1555/2320] S04_MarketProfile      GBPNZD.tp      H4   | PF= 1.19 |    7.0% | DD=  8.5% | WF=3/4 PASS
+  [1564/2320] S01_StatArb            GBPCHF.tp      M15  | PF= 1.25 |  138.3% | DD= 10.5% | WF=4/4 PASS
+  [1570/2320] S15_Grid               GBPNZD.tp      H1   | PF= 1.36 |   21.2% | DD=  6.8% | WF=3/4 PASS
+  [1578/2320] S02_MLEnsemble         GBPNZD.tp      H4   | PF= 1.34 |    4.2% | DD=  4.3% | WF=4/4 PASS
+  [1589/2320] S07_MeanReversion      GBPUSD.tp      D1   | PF= 2.43 |    1.4% | DD=  1.1% | WF=2/3 PASS
+  [1593/2320] S11_Ichimoku           GBPUSD.tp      D1   | PF= 2.13 |    1.1% | DD=  1.0% | WF=4/4 PASS
+  Progress: 1600/2320 | optimized=412 | WF PASS=213 | 14865s elapsed | ETA 6689s (111min)
+  [1602/2320] S02_MLEnsemble         GBPUSD.tp      D1   | PF= 1.77 |    1.7% | DD=  2.3% | WF=3/4 PASS
+  [1621/2320] S01_StatArb            GBPUSD.tp      H4   | PF= 1.21 |    5.3% | DD=  5.0% | WF=4/4 PASS
+  [1627/2320] S13_FibStoch           GBPUSD.tp      H4   | PF= 1.79 |    6.7% | DD=  3.9% | WF=4/4 PASS
+  [1632/2320] S07_MeanReversion      GBPUSD.tp      H4   | PF= 1.23 |    9.7% | DD=  8.7% | WF=3/4 PASS
+  [1634/2320] S11_Ichimoku           GBPUSD.tp      H1   | PF= 1.24 |    5.2% | DD=  6.5% | WF=4/4 PASS
+  [1636/2320] S11_Ichimoku           GBPUSD.tp      H4   | PF= 2.41 |    7.5% | DD=  2.0% | WF=4/4 PASS
+  [1646/2320] S07_MeanReversion      GBPNZD.tp      M30  | PF= 1.19 |   42.0% | DD= 13.5% | WF=3/4 PASS
+  [1669/2320] S07_MeanReversion      NZDCAD.tp      D1   | PF= 9.36 |    3.4% | DD=  1.0% | WF=3/3 PASS
+  [1677/2320] S15_Grid               NZDCAD.tp      D1   | PF= 4.59 |    2.9% | DD=  1.0% | WF=3/4 PASS
+  [1685/2320] S15_Grid               GBPNZD.tp      M30  | PF= 1.23 |   37.5% | DD= 10.7% | WF=3/4 PASS
+  Progress: 1700/2320 | optimized=438 | WF PASS=223 | 16156s elapsed | ETA 5892s (98min)
+  [1701/2320] S13_FibStoch           NZDCAD.tp      H1   | PF= 1.26 |   16.1% | DD=  9.5% | WF=4/4 PASS
+  [1709/2320] S01_StatArb            NZDCAD.tp      H4   | PF= 1.31 |    7.5% | DD=  5.1% | WF=4/4 PASS
+  [1711/2320] S07_MeanReversion      NZDCAD.tp      H4   | PF= 1.44 |    4.9% | DD=  3.5% | WF=3/4 PASS
+  [1717/2320] S07_MeanReversion      NZDCAD.tp      H1   | PF= 6.62 |    2.4% | DD=  1.0% | WF=3/3 PASS
+  [1723/2320] S15_Grid               NZDCAD.tp      H4   | PF= 1.38 |   32.4% | DD=  6.7% | WF=4/4 PASS
+  [1743/2320] S01_StatArb            NZDCHF.tp      D1   | PF= 2.22 |    3.1% | DD=  2.0% | WF=3/4 PASS
+  [1744/2320] S15_Grid               NZDCAD.tp      H1   | PF= 1.31 |   22.3% | DD=  7.0% | WF=3/4 PASS
+  [1746/2320] S02_MLEnsemble         NZDCHF.tp      D1   | PF= 3.71 |    1.1% | DD=  1.0% | WF=3/3 PASS
+  [1749/2320] S07_MeanReversion      NZDCHF.tp      D1   | PF= 1.57 |    1.6% | DD=  2.0% | WF=4/4 PASS
+  [1753/2320] S11_Ichimoku           NZDCHF.tp      D1   | PF=10.03 |    1.8% | DD=  1.0% | WF=2/2 PASS
+  [1757/2320] S04_MarketProfile      NZDCHF.tp      D1   | PF= 1.99 |    2.9% | DD=  4.9% | WF=3/3 PASS
+  [1759/2320] S15_Grid               NZDCHF.tp      D1   | PF= 2.58 |    3.3% | DD=  2.1% | WF=3/4 PASS
+  [1763/2320] S15_Grid               GBPNZD.tp      M15  | PF= 1.20 |  430.5% | DD= 18.7% | WF=4/4 PASS
+  [1764/2320] S07_MeanReversion      GBPUSD.tp      M15  | PF= 1.20 |   33.3% | DD= 11.4% | WF=4/4 PASS
+  [1781/2320] S01_StatArb            NZDCHF.tp      H1   | PF= 1.21 |   29.4% | DD=  8.4% | WF=4/4 PASS
+  [1788/2320] S07_MeanReversion      NZDCAD.tp      M30  | PF= 1.54 |   21.9% | DD=  5.0% | WF=4/4 PASS
+  [1791/2320] S07_MeanReversion      NZDCHF.tp      H4   | PF= 1.61 |    9.3% | DD=  4.2% | WF=4/4 PASS
+  [1796/2320] S15_Grid               NZDCHF.tp      H4   | PF= 1.68 |    6.4% | DD=  4.0% | WF=3/4 PASS
+  [1798/2320] S07_MeanReversion      NZDCHF.tp      H1   | PF= 2.11 |   30.6% | DD=  6.4% | WF=4/4 PASS
+  Progress: 1800/2320 | optimized=467 | WF PASS=242 | 17390s elapsed | ETA 5024s (84min)
+  [1808/2320] S14_BBSqueeze          NZDCHF.tp      H4   | PF= 6.77 |    1.2% | DD=  1.0% | WF=3/4 PASS
+  [1811/2320] S06_KAMA               NZDCHF.tp      H1   | PF= 1.68 |  118.3% | DD= 17.4% | WF=3/4 PASS
+  [1829/2320] S07_MeanReversion      NZDJPY.tp      D1   | PF= 5.10 |    2.6% | DD=  1.0% | WF=3/3 PASS
+  [1842/2320] S15_Grid               NZDJPY.tp      D1   | PF= 2.38 |    2.3% | DD=  2.1% | WF=4/4 PASS
+  [1869/2320] S07_MeanReversion      NZDCAD.tp      M15  | PF= 1.25 |  129.4% | DD= 13.4% | WF=4/4 PASS
+  [1871/2320] S13_FibStoch           NZDJPY.tp      H1   | PF= 1.29 |   13.0% | DD=  8.1% | WF=4/4 PASS
+  [1878/2320] S15_Grid               NZDJPY.tp      H4   | PF= 1.29 |    3.9% | DD=  6.6% | WF=4/4 PASS
+  [1887/2320] S07_MeanReversion      NZDJPY.tp      H1   | PF= 2.06 |    2.3% | DD=  3.0% | WF=4/4 PASS
+  Progress: 1900/2320 | optimized=487 | WF PASS=250 | 18171s elapsed | ETA 4017s (67min)
+  [1906/2320] S01_StatArb            NZDUSD.tp      D1   | PF= 3.36 |    1.9% | DD=  1.0% | WF=3/3 PASS
+  [1909/2320] S07_MeanReversion      NZDUSD.tp      D1   | PF= 4.20 |    4.1% | DD=  1.0% | WF=3/4 PASS
+  [1917/2320] S04_MarketProfile      NZDUSD.tp      D1   | PF= 1.85 |    3.3% | DD=  3.0% | WF=4/4 PASS
+  [1949/2320] S01_StatArb            NZDUSD.tp      H4   | PF= 1.38 |    2.9% | DD=  3.0% | WF=3/4 PASS
+  [1965/2320] S04_MarketProfile      NZDUSD.tp      H4   | PF= 1.30 |    9.0% | DD=  9.1% | WF=3/4 PASS
+  [1973/2320] S07_MeanReversion      NZDJPY.tp      M30  | PF= 1.42 |   11.8% | DD=  7.8% | WF=3/4 PASS
+  [1976/2320] S04_MarketProfile      NZDJPY.tp      H1   | PF= 1.15 |   39.5% | DD= 18.6% | WF=3/4 PASS
+  [1978/2320] S07_MeanReversion      NZDCHF.tp      M15  | PF= 1.62 |  337.0% | DD=  9.0% | WF=4/4 PASS
+  [1984/2320] S01_StatArb            USDCAD.tp      D1   | PF= 1.96 |    2.2% | DD=  2.0% | WF=3/4 PASS
+  Progress: 2000/2320 | optimized=515 | WF PASS=259 | 19102s elapsed | ETA 3056s (51min)
+  [2002/2320] S02_MLEnsemble         USDCAD.tp      D1   | PF= 1.58 |    1.5% | DD=  2.4% | WF=2/3 PASS
+  [2018/2320] S12_PriceAction        USDCAD.tp      D1   | PF= 1.53 |    8.3% | DD=  6.8% | WF=4/4 PASS
+  [2021/2320] S01_StatArb            USDCAD.tp      H4   | PF= 1.32 |    7.9% | DD=  5.8% | WF=4/4 PASS
+  [2029/2320] S06_KAMA               USDCAD.tp      H4   | PF= 2.42 |    2.3% | DD=  2.0% | WF=2/3 PASS
+  [2032/2320] S07_MeanReversion      USDCAD.tp      H4   | PF= 1.22 |    7.3% | DD=  7.8% | WF=3/4 PASS
+  [2035/2320] S15_Grid               USDCAD.tp      H4   | PF= 1.09 |    4.9% | DD=  8.9% | WF=3/4 PASS
+  [2042/2320] S04_MarketProfile      USDCAD.tp      H4   | PF= 1.35 |   10.9% | DD= 12.6% | WF=3/4 PASS
+  [2047/2320] S07_MeanReversion      NZDUSD.tp      M30  | PF= 1.21 |   25.8% | DD=  8.5% | WF=4/4 PASS
+  [2065/2320] S03_SMC                USDCHF.tp      D1   | PF= 2.23 |    1.7% | DD=  3.9% | WF=3/3 PASS
+  [2077/2320] S11_Ichimoku           USDCHF.tp      D1   | PF= 2.19 |    1.6% | DD=  3.2% | WF=3/4 PASS
+  [2080/2320] S15_Grid               USDCHF.tp      D1   | PF= 1.14 |    1.6% | DD=  5.3% | WF=3/4 PASS
+  Progress: 2100/2320 | optimized=539 | WF PASS=270 | 20310s elapsed | ETA 2128s (35min)
+  [2101/2320] S08_Intermarket        USDCHF.tp      H1   | PF= 2.91 |    1.5% | DD=  1.3% | WF=3/3 PASS
+  [2107/2320] S01_StatArb            NZDUSD.tp      M15  | PF= 1.18 |   73.2% | DD= 13.9% | WF=4/4 PASS
+  [2108/2320] S07_MeanReversion      USDCHF.tp      H1   | PF= 2.63 |   15.7% | DD=  3.0% | WF=4/4 PASS
+  [2121/2320] S14_BBSqueeze          USDCHF.tp      H4   | PF= 5.80 |    3.2% | DD=  2.0% | WF=2/3 PASS
+  [2153/2320] S11_Ichimoku           USDJPY.tp      D1   | PF= 3.28 |    1.4% | DD=  1.0% | WF=3/4 PASS
+  [2155/2320] S13_FibStoch           USDJPY.tp      D1   | PF= 3.63 |    2.7% | DD=  1.0% | WF=2/3 PASS
+  [2167/2320] S12_PriceAction        USDJPY.tp      D1   | PF= 1.84 |   11.4% | DD=  5.8% | WF=3/4 PASS
+  [2169/2320] S04_MarketProfile      NZDCHF.tp      M30  | PF= 1.31 |   66.1% | DD= 18.0% | WF=3/4 PASS
+  [2170/2320] S15_Grid               USDCAD.tp      M30  | PF= 1.26 |   96.5% | DD= 12.4% | WF=4/4 PASS
+  [2176/2320] S10_Turtle             USDJPY.tp      H1   | PF=84.03 |  196.5% | DD= 12.4% | WF=3/4 PASS
+  [2196/2320] S13_FibStoch           USDJPY.tp      H4   | PF= 1.60 |    5.9% | DD=  4.3% | WF=3/4 PASS
+  Progress: 2200/2320 | optimized=568 | WF PASS=281 | 21271s elapsed | ETA 1160s (19min)
+  [2201/2320] S06_KAMA               USDJPY.tp      H4   | PF= 1.15 |    8.6% | DD=  8.4% | WF=3/4 PASS
+  [2224/2320] S10_Turtle             USDJPY.tp      M30  | PF=111.32 |  240.8% | DD= 11.4% | WF=3/4 PASS
+  [2227/2320] S05_SupplyDemand       XAUUSD.tp      D1   | PF= 1.70 |   14.7% | DD=  9.4% | WF=4/4 PASS
+  [2228/2320] S06_KAMA               XAUUSD.tp      D1   | PF= 1.59 |    4.3% | DD=  3.5% | WF=4/4 PASS
+  [2232/2320] S10_Turtle             XAUUSD.tp      D1   | PF=17.45 |   35.8% | DD= 11.4% | WF=3/4 PASS
+  [2233/2320] S10_Turtle             USDJPY.tp      M15  | PF=126.16 |  273.6% | DD= 11.4% | WF=3/4 PASS
+  [2234/2320] S11_Ichimoku           XAUUSD.tp      D1   | PF= 6.65 |    2.2% | DD=  1.0% | WF=4/4 PASS
+  [2235/2320] S11_Ichimoku           USDJPY.tp      H1   | PF= 1.39 |   14.3% | DD=  5.8% | WF=3/4 PASS
+  [2238/2320] S13_FibStoch           XAUUSD.tp      D1   | PF= 4.48 |    4.2% | DD=  2.0% | WF=3/4 PASS
+  [2242/2320] S02_MLEnsemble         XAUUSD.tp      D1   | PF= 3.44 |    1.5% | DD=  1.2% | WF=2/2 PASS
+  [2250/2320] S07_MeanReversion      USDCHF.tp      M30  | PF= 1.50 |   37.3% | DD=  7.6% | WF=4/4 PASS
+  [2274/2320] S09_SessionBreakout    XAUUSD.tp      H1   | PF= 1.34 |   43.3% | DD= 18.7% | WF=3/4 PASS
+  [2284/2320] S11_Ichimoku           XAUUSD.tp      H4   | PF= 1.70 |    4.7% | DD=  3.9% | WF=3/4 PASS
+  Progress: 2300/2320 | optimized=593 | WF PASS=294 | 21900s elapsed | ETA 190s (3min)
+  [2305/2320] S10_Turtle             XAUUSD.tp      M30  | PF= 0.75 |   -4.5% | DD= 95.8% | WF=3/4 PASS
+  [2307/2320] S06_KAMA               XAUUSD.tp      H1   | PF= 1.13 |   15.9% | DD= 13.0% | WF=3/4 PASS
+  [2309/2320] S07_MeanReversion      USDCHF.tp      M15  | PF= 1.21 |  145.8% | DD= 13.4% | WF=4/4 PASS
+  [2311/2320] S02_MLEnsemble         XAUUSD.tp      H4   | PF= 1.24 |   14.9% | DD=  9.6% | WF=4/4 PASS
+  [2313/2320] S08_Intermarket        XAUUSD.tp      M15  | PF= 1.58 |    1.6% | DD=  3.0% | WF=3/3 PASS
+
+Done! 2320 jobs in 25076s (418min)
+Optimized: 609 | WF PASS: 299
+Saved: C:\Users\drsuk\AppData\Roaming\MetaQuotes\Terminal\B2C22A9C2EA0D03B7096C9AF7E852052\MQL5\Experts\FlashEASuite_V2\output\parallel_20260327_1908.json
+
+TOP 30 (WF PASS):
+   #  Strategy               Symbol         TF   |    PF |      % |   DD% | Trades |    WF
+   1  S01_StatArb            EURGBP.tp      M15  |  1.21 | 2635.9% |  13.5% |   8158 | 4/4
+   2  S15_Grid               EURCHF.tp      M15  |  1.40 | 849.2% |  10.8% |   6095 | 4/4
+   3  S07_MeanReversion      CADCHF.tp      M15  |  1.68 | 617.6% |  13.4% |   1898 | 4/4
+   4  S01_StatArb            EURCHF.tp      M15  |  1.25 | 581.5% |  13.2% |   4927 | 4/4
+   5  S07_MeanReversion      AUDCAD.tp      M15  |  1.25 | 545.9% |  14.9% |   4320 | 4/4
+   6  S15_Grid               GBPNZD.tp      M15  |  1.20 | 430.5% |  18.7% |   8200 | 4/4
+   7  S07_MeanReversion      NZDCHF.tp      M15  |  1.62 | 337.0% |   9.0% |   1832 | 4/4
+   8  S15_Grid               GBPCAD.tp      M15  |  1.19 | 329.3% |  12.8% |   7490 | 4/4
+   9  S10_Turtle             USDJPY.tp      M15  |   126 | 273.6% |  11.4% |     15 | 3/4
+  10  S10_Turtle             USDJPY.tp      M30  |   111 | 240.8% |  11.4% |     15 | 3/4
+  11  S10_Turtle             USDJPY.tp      H1   | 84.03 | 196.5% |  12.4% |     16 | 3/4
+  12  S07_MeanReversion      EURGBP.tp      M15  |  1.50 | 178.4% |   8.8% |   1779 | 4/4
+  13  S10_Turtle             GBPJPY.tp      M30  | 82.22 | 177.3% |  11.4% |     15 | 3/4
+  14  S07_MeanReversion      GBPCHF.tp      M15  |  1.49 | 174.4% |   9.9% |   1765 | 4/4
+  15  S01_StatArb            EURGBP.tp      M30  |  1.21 | 151.9% |  16.0% |   4122 | 4/4
+  16  S07_MeanReversion      USDCHF.tp      M15  |  1.21 | 145.8% |  13.4% |   2245 | 4/4
+  17  S01_StatArb            GBPCHF.tp      M15  |  1.25 | 138.3% |  10.5% |   4171 | 4/4
+  18  S07_MeanReversion      NZDCAD.tp      M15  |  1.25 | 129.4% |  13.4% |   2292 | 4/4
+  19  S10_Turtle             CADJPY.tp      M15  | 59.96 | 128.9% |  11.4% |     15 | 3/4
+  20  S06_KAMA               NZDCHF.tp      H1   |  1.68 | 118.3% |  17.4% |    472 | 3/4
+  21  S07_MeanReversion      AUDCHF.tp      M15  |  1.32 | 115.8% |  13.2% |   1829 | 3/4
+  22  S07_MeanReversion      EURCHF.tp      M15  |  1.53 | 115.8% |   7.4% |   1225 | 4/4
+  23  S01_StatArb            EURCAD.tp      M15  |  1.16 | 114.0% |  18.7% |   4185 | 4/4
+  24  S01_StatArb            AUDNZD.tp      M15  |  1.20 | 112.7% |  11.1% |   3624 | 4/4
+  25  S15_Grid               USDCAD.tp      M30  |  1.26 |  96.5% |  12.4% |   4717 | 4/4
+  26  S07_MeanReversion      EURCAD.tp      M15  |  1.26 |  95.7% |  13.5% |   1985 | 4/4
+  27  S07_MeanReversion      EURCHF.tp      M30  |  1.48 |  91.5% |  10.2% |   1206 | 4/4
+  28  S15_Grid               AUDCAD.tp      M30  |  1.32 |  84.9% |  10.1% |   3185 | 4/4
+  29  S01_StatArb            NZDUSD.tp      M15  |  1.18 |  73.2% |  13.9% |   2874 | 4/4
+  30  S07_MeanReversion      CADCHF.tp      M30  |  1.46 |  67.5% |   9.8% |   1264 | 4/4

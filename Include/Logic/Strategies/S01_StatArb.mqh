@@ -21,10 +21,10 @@
 #include "../IStrategy.mqh"
 
 //--- Input Parameters
-// Re-optimized 2026-03-25 Python Optuna | Best: GBPUSD H4 PF=8.33 $294/yr WF PASS
+// Re-optimized 2026-03-27 Optuna 19-CPU | Best: EURGBP M15 PF=1.21 2636% 8158trades WF 4/4
 input int    StatArb_Period  = 11;        // Z-Score lookback period
-input double StatArb_EntryZ  = 2.92;      // Z-Score threshold for entry
-input double StatArb_StopZ   = 3.88;      // Z-Score threshold for emergency exit
+input double StatArb_EntryZ  = 1.65;      // Z-Score threshold for entry
+input double StatArb_StopZ   = 3.95;      // Z-Score threshold for emergency exit
 input string StatArb_Pair1   = "EURUSD";  // Pair A (standalone fallback)
 input string StatArb_Pair2   = "GBPUSD";  // Pair B (standalone fallback)
 

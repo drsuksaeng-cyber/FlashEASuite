@@ -20,17 +20,17 @@
 #include "../IStrategy.mqh"
 
 //--- Input Parameters (standalone defaults — same pattern as S01)
-// Re-optimized 2026-03-25 Python Optuna | Best: USDJPY H4 PF=4.74 $232/yr WF PASS
-input int    BS_BB_Period      = 49;    // Bollinger Bands period
-input double BS_BB_Deviation   = 1.54;  // BB standard deviation multiplier
-input int    BS_KC_Period      = 40;    // Keltner Channel EMA period
-input double BS_KC_ATR_Mult    = 1.97;  // Keltner Channel ATR multiplier
-input int    BS_Squeeze_Min    = 11;    // Min bars inside squeeze
-input double BS_Breakout_Mom   = 0.28;  // LR slope threshold
-input double BS_SL_ATR_Mult    = 4.4;   // Stop loss: N x ATR
-input double BS_TP_ATR_Mult    = 2.7;   // Take profit: N x ATR
-input int    BS_ATR_Period     = 20;    // ATR period
-input int    BS_LR_Period      = 9;     // Linear regression period
+// Re-optimized 2026-03-27 Optuna 19-CPU | Best: USDCHF H4 PF=5.80 3.2% 16trades WF PASS
+input int    BS_BB_Period      = 29;    // Bollinger Bands period
+input double BS_BB_Deviation   = 1.66;  // BB standard deviation multiplier
+input int    BS_KC_Period      = 36;    // Keltner Channel EMA period
+input double BS_KC_ATR_Mult    = 0.91;  // Keltner Channel ATR multiplier
+input int    BS_Squeeze_Min    = 5;     // Min bars inside squeeze
+input double BS_Breakout_Mom   = 0.07;  // LR slope threshold
+input double BS_SL_ATR_Mult    = 2.23;  // Stop loss: N x ATR
+input double BS_TP_ATR_Mult    = 3.17;  // Take profit: N x ATR
+input int    BS_ATR_Period     = 17;    // ATR period
+input int    BS_LR_Period      = 8;     // Linear regression period
 
 //+------------------------------------------------------------------+
 //| CBBSqueeze - Bollinger Squeeze Breakout Strategy                 |

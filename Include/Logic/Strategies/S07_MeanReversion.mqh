@@ -21,22 +21,22 @@
 #include "../IStrategy.mqh"
 
 //--- Input Parameters
-// Re-optimized 2026-03-25 Python Optuna | Best: XAUUSD H1 PF=2.75 $951/yr WF PASS DD=3.0%
-input int    MR_RSI_Period  = 20;    // RSI period
-input double MR_RSI_Buy     = 28.7;  // RSI oversold threshold
-input double MR_RSI_Sell    = 79.9;  // RSI overbought threshold
-input int    MR_Stoch_K     = 16;    // Stochastic %K period
+// Re-optimized 2026-03-27 Optuna 19-CPU | Best: CADCHF M15 PF=1.68 618% 1898trades WF 4/4
+input int    MR_RSI_Period  = 10;    // RSI period
+input double MR_RSI_Buy     = 20.1;  // RSI oversold threshold
+input double MR_RSI_Sell    = 62.3;  // RSI overbought threshold
+input int    MR_Stoch_K     = 12;    // Stochastic %K period
 input int    MR_Stoch_D     = 3;     // Stochastic %D smoothing
 input int    MR_Stoch_Slow  = 3;     // Stochastic slowing
-input double MR_Stoch_Buy   = 22.0;  // Stochastic oversold threshold
-input double MR_Stoch_Sell  = 80.5;  // Stochastic overbought threshold
-input int    MR_ATR_Period  = 11;    // ATR period
+input double MR_Stoch_Buy   = 20.0;  // Stochastic oversold threshold
+input double MR_Stoch_Sell  = 80.1;  // Stochastic overbought threshold
+input int    MR_ATR_Period  = 12;    // ATR period
 input int    MR_ATR_MA      = 20;    // ATR moving average period
-input double MR_VolFilter   = 1.1;   // Max ATR/MA(ATR) ratio
+input double MR_VolFilter   = 1.0;   // Max ATR/MA(ATR) ratio
 input int    MR_BB_Period   = 20;    // Bollinger Band period (for TP)
 input double MR_BB_Dev      = 2.0;   // Bollinger Band standard deviation
-input double MR_SL_ATRMult  = 2.3;   // Stop loss = N x ATR
-input double MR_TP_ATRMult  = 1.05;  // TP multiplier relative to ATR
+input double MR_SL_ATRMult  = 2.0;   // Stop loss = N x ATR
+input double MR_TP_ATRMult  = 2.06;  // TP multiplier relative to ATR
 
 //+------------------------------------------------------------------+
 //| CMeanReversion — Mean Reversion Strategy                         |

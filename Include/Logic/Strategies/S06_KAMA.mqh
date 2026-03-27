@@ -23,13 +23,13 @@
 #include "..\IStrategy.mqh"
 
 //--- Input Parameters
-// Re-optimized 2026-03-25 Python Optuna | Best: XAUUSD H1 PF=1.22 $1885/yr WF PASS
-input int    KAMA_Period     = 21;   // KAMA lookback period
-input int    KAMA_Fast       = 4;    // Fast EMA period
-input int    KAMA_Slow       = 38;   // Slow EMA period
-input double KAMA_ER_Thresh  = 0.35; // Efficiency Ratio threshold
-input double KAMA_TP_ATR     = 1.7;  // Take Profit multiplier
-input double KAMA_SL_ATR     = 3.8;  // Stop Loss multiplier
+// Re-optimized 2026-03-27 Optuna 19-CPU | Best: NZDCHF H1 PF=1.68 118% 472trades WF 3/4
+input int    KAMA_Period     = 29;   // KAMA lookback period
+input int    KAMA_Fast       = 3;    // Fast EMA period
+input int    KAMA_Slow       = 21;   // Slow EMA period
+input double KAMA_ER_Thresh  = 0.94; // Efficiency Ratio threshold
+input double KAMA_TP_ATR     = 5.73; // Take Profit multiplier
+input double KAMA_SL_ATR     = 1.05; // Stop Loss multiplier
 input int    KAMA_ATR_Period = 17;   // ATR calculation period (was 14)
 
 //+------------------------------------------------------------------+

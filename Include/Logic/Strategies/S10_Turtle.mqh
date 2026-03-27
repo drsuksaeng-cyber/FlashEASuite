@@ -22,14 +22,14 @@
 #include "..\IStrategy.mqh"
 
 //--- Input Parameters
-// Re-optimized 2026-03-25 Python Optuna | Best: XAUUSD H4 PF=12.99 $6444/yr WF PASS (DD=26.9%)
-input int    Turtle_EntryPeriod = 20;   // Entry Donchian channel period
-input int    Turtle_ExitPeriod  = 50;   // Exit Donchian channel period
-input int    Turtle_ATR_Period  = 25;   // ATR period
-input double Turtle_BreakoutBuf = 0.44; // ATR buffer beyond Donchian edge
-input int    Turtle_MaxUnits    = 1;    // Max pyramid units
-input double Turtle_UnitSpacing = 0.53; // ATR spacing between pyramid units
-input double Turtle_RiskPct     = 0.6;  // Risk % per unit
+// Re-optimized 2026-03-27 Optuna 19-CPU | Best: USDJPY M15 PF=126 274% 15trades WF 3/4
+input int    Turtle_EntryPeriod = 19;   // Entry Donchian channel period
+input int    Turtle_ExitPeriod  = 12;   // Exit Donchian channel period
+input int    Turtle_ATR_Period  = 24;   // ATR period
+input double Turtle_BreakoutBuf = 0.14; // ATR buffer beyond Donchian edge
+input int    Turtle_MaxUnits    = 2;    // Max pyramid units
+input double Turtle_UnitSpacing = 0.43; // ATR spacing between pyramid units
+input double Turtle_RiskPct     = 1.0;  // Risk % per unit
 
 //+------------------------------------------------------------------+
 //| CTurtle — Modernized Turtle Trading Strategy                     |
